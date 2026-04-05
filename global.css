@@ -13,12 +13,14 @@
   }
 
   .mobile-content {
+    position: relative;
     width: 100%;
     max-width: 430px;
     min-height: 100vh;
     min-height: 100dvh;
     background: #F8FAFC;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
   }
 
   .mobile-content > div {
