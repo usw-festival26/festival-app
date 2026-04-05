@@ -52,7 +52,7 @@ export default function LostFoundDetailScreen() {
 
   return (
     <ScrollScreenTemplate title="분실물" leftAction="back">
-      <View className="mx-4 mt-4 bg-festival-card rounded-xl p-6">
+      <View className="mx-4 mt-4 bg-festival-card rounded-card-lg p-6">
         {/* 상태 + 카테고리 */}
         <View className="flex-row items-center gap-2 mb-3">
           <Badge

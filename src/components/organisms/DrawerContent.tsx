@@ -1,7 +1,7 @@
 /**
  * DrawerContent - 사이드 드로어 메뉴
  *
- * Figma 78:41 기반: 회색 배경, X 닫기, 메뉴 항목 세로 나열
+ * 회색 배경, X 닫기, 메뉴 항목 세로 나열
  */
 import React from 'react';
 import { View, Pressable } from 'react-native';
@@ -20,6 +20,7 @@ interface DrawerMenuItem {
 const MENU_ITEMS: DrawerMenuItem[] = [
   { label: '홈', route: '/(tabs)/home', matchPath: '/home' },
   { label: '지도', route: '/(tabs)/booth', matchPath: '/booth' },
+  { label: '메뉴', route: '/(tabs)/menu', matchPath: '/menu' },
   { label: '타임테이블', route: '/(tabs)/timetable', matchPath: '/timetable' },
   { label: '공지', route: '/(tabs)/announcements', matchPath: '/announcements' },
   { label: '분실물', route: '/(tabs)/lost-found', matchPath: '/lost-found' },
@@ -38,15 +39,15 @@ export function DrawerContent() {
 
   return (
     <SafeAreaView className="flex-1 bg-festival-primary" edges={['top', 'bottom']}>
-      <View className="flex-1 px-[18px] pt-[18px]">
+      <View className="flex-1 px-[24px] pt-[18px]">
         <Pressable
           onPress={() => navigation.dispatch(DrawerActions.closeDrawer())}
-          className="w-[30px] h-[30px] items-center justify-center mb-8 active:opacity-70"
+          className="w-[30px] h-[30px] items-center justify-center mb-10 active:opacity-70"
         >
           <Ionicons name="close" size={28} color="#000000" />
         </Pressable>
 
-        <View className="gap-[24px]">
+        <View className="gap-[28px]">
           {MENU_ITEMS.map((item) => {
             const isActive = pathname.includes(item.matchPath);
             return (
@@ -56,8 +57,7 @@ export function DrawerContent() {
                 className="active:opacity-70"
               >
                 <AppText
-                  variant="h1"
-                  className={`font-bold ${isActive ? 'text-festival-text' : 'text-festival-muted'}`}
+                  className={`text-2xl font-black ${isActive ? 'text-black' : 'text-festival-muted'}`}
                 >
                   {item.label}
                 </AppText>

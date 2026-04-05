@@ -44,7 +44,7 @@ export default function AnnouncementDetailScreen() {
 
   return (
     <ScrollScreenTemplate title="공지" leftAction="back">
-      <View className="mx-4 mt-4 bg-festival-card rounded-xl p-6">
+      <View className="mx-4 mt-4 bg-festival-card rounded-card-lg p-6">
         {/* 우선순위 + 고정 */}
         <View className="flex-row items-center gap-2 mb-3">
           {announcement.isPinned && (

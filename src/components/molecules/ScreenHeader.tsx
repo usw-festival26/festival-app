@@ -1,7 +1,7 @@
 /**
  * ScreenHeader - 공통 화면 헤더
  *
- * 햄버거 아이콘(좌) 또는 뒤로가기(좌), 제목(중앙), LOGO(우) 레이아웃
+ * Figma: 흰 배경, 하단 둥근 모서리(20px), 햄버거/뒤로가기 + 제목 + LOGO
  */
 import React from 'react';
 import { View, Pressable } from 'react-native';
@@ -12,7 +12,6 @@ import { AppText } from '../atoms/AppText';
 
 export interface ScreenHeaderProps {
   title?: string;
-  /** 'hamburger' = 드로어 열기(기본), 'back' = 뒤로가기, 'none' = 빈 공간 */
   leftAction?: 'hamburger' | 'back' | 'none';
   /** @deprecated showHamburger 대신 leftAction 사용 */
   showHamburger?: boolean;
@@ -29,7 +28,7 @@ export function ScreenHeader({
   const resolvedAction = leftAction ?? (showHamburger ? 'hamburger' : 'none');
 
   return (
-    <View className="bg-festival-card border-b border-gray-200 px-4 pb-3 pt-2">
+    <View className="bg-festival-card rounded-b-card-lg px-4 pb-4 pt-2">
       <View className="flex-row items-center justify-between h-[44px]">
         {resolvedAction === 'hamburger' ? (
           <Pressable

@@ -42,7 +42,7 @@ export function LostFoundList({ items, onPressItem }: LostFoundListProps) {
       renderItem={({ item }) => (
         <Pressable
           onPress={() => onPressItem?.(item)}
-          className="bg-festival-card rounded-xl p-4 shadow-sm active:opacity-70"
+          className="bg-festival-card rounded-card-lg p-4 active:opacity-70"
         >
           <View className="flex-row items-center justify-between mb-2">
             <AppText variant="body" className="font-bold flex-1 mr-2">

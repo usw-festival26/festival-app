@@ -1,7 +1,7 @@
 /**
  * BoothCard - 2열 그리드용 부스 카드
  *
- * Figma 82:62 부스 카드: 이미지 + Title + Time + About
+ * Figma 166:93: Title → 이미지 → Time → About
  */
 import React from 'react';
 import { View, Pressable } from 'react-native';
@@ -16,16 +16,14 @@ export interface BoothCardProps {
 
 export function BoothCard({ title, time, about, onPress }: BoothCardProps) {
   return (
-    <Pressable onPress={onPress} className="flex-1 mx-1 mb-4 bg-festival-card rounded-xl shadow-sm p-3 active:opacity-70">
-      <AppText variant="body" className="font-semibold mb-1">
-        {title}
-      </AppText>
-      <View className="bg-festival-primary rounded-[15px] h-[109px] mb-1" />
+    <Pressable onPress={onPress} className="flex-1 mx-2 mb-5 active:opacity-70">
+      <AppText className="text-[15px] font-semibold text-black mb-1">{title}</AppText>
+      <View className="bg-festival-primary rounded-card h-[109px] mb-1" />
       {time && (
-        <AppText variant="caption">{time}</AppText>
+        <AppText className="text-xs text-black">{time}</AppText>
       )}
       {about && (
-        <AppText variant="caption" numberOfLines={2}>{about}</AppText>
+        <AppText className="text-xs text-black" numberOfLines={1}>{about}</AppText>
       )}
     </Pressable>
   );

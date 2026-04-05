@@ -35,27 +35,21 @@ export function MenuTable({ menuItems }: MenuTableProps) {
   const columns: MenuCategory[] = ['main', 'side', 'set'];
 
   return (
-    <View className="flex-row px-2 py-4">
-      {columns.map((col, idx) => (
-        <React.Fragment key={col}>
-          <View className="flex-1">
-            <AppText variant="h3" className="font-black mb-3">
-              {COLUMN_LABELS[col]}
+    <View className="flex-row px-4 py-4">
+      {columns.map((col) => (
+        <View key={col} className="flex-1">
+          <AppText className="text-[15px] font-black text-black mb-3">
+            {COLUMN_LABELS[col]}
+          </AppText>
+          {grouped[col].map((item) => (
+            <AppText
+              key={item.id}
+              className="text-sm text-black mb-2"
+            >
+              {item.name}
             </AppText>
-            {grouped[col].map((item) => (
-              <AppText
-                key={item.id}
-                variant="body"
-                className="font-semibold mb-2"
-              >
-                {item.name}
-              </AppText>
-            ))}
-          </View>
-          {idx < columns.length - 1 && (
-            <View className="w-[1px] bg-festival-secondary mx-2" />
-          )}
-        </React.Fragment>
+          ))}
+        </View>
       ))}
     </View>
   );

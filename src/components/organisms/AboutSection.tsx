@@ -14,10 +14,10 @@ export interface AboutSectionProps {
 export function AboutSection({ title = 'About Us' }: AboutSectionProps) {
   return (
     <View className="mb-4">
-      <AppText variant="label" className="font-bold mb-2 px-4 text-festival-text">
+      <AppText className="text-[12px] font-bold leading-[45px] px-8 text-black">
         {title}
       </AppText>
-      <View className="mx-4 bg-festival-primary rounded-[20px] h-[200px]" />
+      <View className="mx-4 bg-festival-primary rounded-[12px] h-[200px]" />
     </View>
   );
 }

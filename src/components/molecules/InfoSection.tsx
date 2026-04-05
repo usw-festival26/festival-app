@@ -15,10 +15,10 @@ export interface InfoSectionProps {
 export function InfoSection({ title, body }: InfoSectionProps) {
   return (
     <View className="mb-6">
-      <AppText variant="body" className="font-semibold mb-2">
+      <AppText className="text-[15px] font-semibold text-black mb-2">
         {title}
       </AppText>
-      <AppText variant="caption" className="leading-5">
+      <AppText className="text-xs text-black leading-5">
         {body}
       </AppText>
     </View>

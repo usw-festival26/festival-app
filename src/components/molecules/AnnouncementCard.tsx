@@ -1,7 +1,7 @@
 /**
  * AnnouncementCard - 공지 카드
  *
- * Figma 82:72: 제목 + 인용문 + 아이콘 + 작성자
+ * 깔끔한 인용문 스타일 카드
  */
 import React from 'react';
 import { View, Pressable } from 'react-native';
@@ -18,27 +18,23 @@ export interface AnnouncementCardProps {
 
 export function AnnouncementCard({ title, content, author, date, onPress }: AnnouncementCardProps) {
   return (
-    <Pressable onPress={onPress} className="items-center justify-center py-10 px-6 active:opacity-70">
+    <Pressable onPress={onPress} className="items-center justify-center py-8 px-6 active:opacity-70">
       {title && (
-        <AppText variant="h3" className="font-bold text-center mb-4">
+        <AppText className="text-[15px] font-semibold text-black text-center mb-3">
           {title}
         </AppText>
       )}
-      <AppText variant="body" className="text-center leading-6 mb-8">
+      <AppText className="text-sm text-black text-center leading-6 mb-6">
         {`"${content}"`}
       </AppText>
-      <View className="w-[40px] h-[40px] rounded-full bg-festival-accent items-center justify-center mb-3">
-        <Ionicons name="person" size={24} color="#FFFFFF" />
+      <View className="w-[36px] h-[36px] rounded-full bg-black items-center justify-center mb-2">
+        <Ionicons name="person" size={20} color="#FFFFFF" />
       </View>
       {author && (
-        <AppText variant="caption" className="text-center text-festival-text">
-          {author}
-        </AppText>
+        <AppText className="text-xs text-black text-center">{author}</AppText>
       )}
       {date && (
-        <AppText variant="caption" className="text-center mt-1">
-          {date}
-        </AppText>
+        <AppText className="text-xs text-festival-muted text-center mt-0.5">{date}</AppText>
       )}
     </Pressable>
   );

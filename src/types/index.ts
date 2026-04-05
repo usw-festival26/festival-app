@@ -24,3 +24,10 @@ export type {
 } from './lostFound';
 
 export type { InformationSection } from './information';
+
+export type {
+  MapFilterCategory,
+  Facility,
+  FestivalEvent,
+} from './map';
+export { MAP_FILTER_LABELS } from './map';

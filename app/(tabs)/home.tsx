@@ -1,56 +1,68 @@
 /**
  * 홈 화면 - Figma 74:28
  *
- * 메인 포스터 + About Us 섹션 + Information 버튼 + 푸터
+ * 햄버거+LOGO 헤더 → 메인 포스터 → Events → About Us → Information → Footer
  */
 import React from 'react';
-import { View } from 'react-native';
+import { View, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { AppText } from '../../src/components/atoms/AppText';
 import { ScrollScreenTemplate } from '../../src/components/templates/ScrollScreenTemplate';
 import { HeroSection } from '../../src/components/organisms/HeroSection';
+import { EventsSection } from '../../src/components/organisms/EventsSection';
 import { AboutSection } from '../../src/components/organisms/AboutSection';
-import { AppText } from '../../src/components/atoms/AppText';
-import { AppButton } from '../../src/components/atoms/AppButton';
+import { Footer } from '../../src/components/molecules/Footer';
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
   const router = useRouter();
 
   return (
     <ScrollScreenTemplate showHeader={false}>
-      {/* LOGO 헤더 */}
-      <View className="flex-row items-center justify-center px-4 py-3 bg-festival-card border-b border-gray-200">
-        <AppText variant="h3" className="font-black">LOGO</AppText>
+      {/* 헤더: 햄버거 메뉴 + LOGO */}
+      <View className="flex-row items-center px-4 h-[50px] bg-white">
+        <Pressable
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+          className="w-[30px] h-[30px] items-center justify-center active:opacity-70"
+        >
+          <Ionicons name="menu" size={28} color="#000" />
+        </Pressable>
+        <View className="flex-1 items-center">
+          <AppText className="text-[20px] font-black text-black">LOGO</AppText>
+        </View>
+        {/* 우측 여백 맞추기 */}
+        <View className="w-[30px]" />
       </View>
 
       {/* 메인 포스터 */}
       <HeroSection />
 
-      {/* About Us 섹션 x2 */}
-      <View className="mt-6">
-        <AboutSection title="About Us" />
+      {/* Events 섹션 */}
+      <View className="bg-white pt-2">
+        <EventsSection />
       </View>
-      <View className="mt-2">
-        <AboutSection title="About Us" />
+
+      {/* About Us 섹션 */}
+      <View className="bg-white">
+        <AboutSection />
       </View>
 
       {/* Information 버튼 */}
-      <View className="px-4 mt-4">
-        <AppButton
-          variant="outline"
-          size="md"
+      <View className="bg-white px-4 pb-4">
+        <Pressable
           onPress={() => router.push('/(tabs)/information' as any)}
-          className="rounded-full"
+          className="h-[35px] bg-festival-primary rounded-full items-center justify-center active:opacity-70"
         >
-          Information
-        </AppButton>
+          <AppText className="text-[15px] font-semibold text-black">
+            Information
+          </AppText>
+        </Pressable>
       </View>
 
       {/* 푸터 */}
-      <View className="bg-festival-primary mt-6 px-6 py-6">
-        <AppText variant="caption" className="text-festival-secondary">
-          Copyright . 문의 전화번호 등등...
-        </AppText>
-      </View>
+      <Footer />
     </ScrollScreenTemplate>
   );
 }
