@@ -13,6 +13,7 @@ export default function DrawerLayout() {
       drawerContent={() => <DrawerContent />}
       screenOptions={{
         headerShown: false,
+        drawerType: 'front',
         drawerStyle: {
           width: 250,
         },
