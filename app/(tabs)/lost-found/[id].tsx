@@ -41,7 +41,7 @@ export default function LostFoundDetailScreen() {
 
   if (!item) {
     return (
-      <ScrollScreenTemplate title="분실물">
+      <ScrollScreenTemplate title="분실물" leftAction="back">
         <EmptyState message="분실물을 찾을 수 없습니다." iconName="search-outline" />
         <View className="items-center mt-4">
           <AppButton onPress={() => router.back()}>돌아가기</AppButton>
@@ -51,7 +51,7 @@ export default function LostFoundDetailScreen() {
   }
 
   return (
-    <ScrollScreenTemplate title="분실물">
+    <ScrollScreenTemplate title="분실물" leftAction="back">
       <View className="mx-4 mt-4 bg-festival-card rounded-xl p-6">
         {/* 상태 + 카테고리 */}
         <View className="flex-row items-center gap-2 mb-3">

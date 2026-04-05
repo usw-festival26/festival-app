@@ -33,7 +33,7 @@ export function DrawerContent() {
 
   const handlePress = (route: string) => {
     navigation.dispatch(DrawerActions.closeDrawer());
-    router.push(route as any);
+    router.replace(route as any);
   };
 
   return (

@@ -21,7 +21,7 @@ export default function BoothDetailScreen() {
   if (!booth) {
     return (
       <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
-        <ScreenHeader title="메뉴" />
+        <ScreenHeader title="메뉴" leftAction="back" />
         <EmptyState message="부스를 찾을 수 없습니다." />
         <View className="items-center">
           <AppButton onPress={() => router.back()}>돌아가기</AppButton>
@@ -32,7 +32,7 @@ export default function BoothDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
-      <ScreenHeader title="메뉴" />
+      <ScreenHeader title="메뉴" leftAction="back" />
       <BoothDetail booth={booth} />
     </SafeAreaView>
   );

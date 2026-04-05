@@ -33,7 +33,7 @@ export default function AnnouncementDetailScreen() {
 
   if (!announcement) {
     return (
-      <ScrollScreenTemplate title="공지">
+      <ScrollScreenTemplate title="공지" leftAction="back">
         <EmptyState message="공지사항을 찾을 수 없습니다." iconName="megaphone-outline" />
         <View className="items-center mt-4">
           <AppButton onPress={() => router.back()}>돌아가기</AppButton>
@@ -43,7 +43,7 @@ export default function AnnouncementDetailScreen() {
   }
 
   return (
-    <ScrollScreenTemplate title="공지">
+    <ScrollScreenTemplate title="공지" leftAction="back">
       <View className="mx-4 mt-4 bg-festival-card rounded-xl p-6">
         {/* 우선순위 + 고정 */}
         <View className="flex-row items-center gap-2 mb-3">
