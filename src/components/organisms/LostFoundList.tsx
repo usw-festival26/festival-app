@@ -1,14 +1,13 @@
 /**
- * LostFoundList - 분실물 카드 리스트
+ * LostFoundList - 분실물 테이블 리스트
  *
- * 각 아이템을 카드 형태로 세로 나열
+ * Figma 82:77: 단일 흰색 카드 안에 2열(물품/정보) 테이블 레이아웃 + 하단 문의번호
  */
 import React from 'react';
-import { FlatList, View, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ScrollView, View } from 'react-native';
 import type { LostFoundItem } from '../../types/lostFound';
 import { AppText } from '../atoms/AppText';
-import { Badge, type BadgeVariant } from '../atoms/Badge';
+import { LostFoundTableRow } from '../molecules/LostFoundTableRow';
 import { EmptyState } from '../molecules/EmptyState';
 import { formatDate } from '../../utils/date';
 
@@ -18,11 +17,15 @@ const STATUS_LABEL: Record<string, string> = {
   claimed: '수령완료',
 };
 
-const STATUS_VARIANT: Record<string, BadgeVariant> = {
-  lost: 'danger',
-  found: 'warning',
-  claimed: 'success',
+const CATEGORY_LABEL: Record<string, string> = {
+  electronics: '전자기기',
+  clothing: '의류',
+  accessories: '액세서리',
+  bags: '가방',
+  other: '기타',
 };
+
+const CONTACT_NUMBERS = ['010-1234-5678', '010-1234-5678'];
 
 export interface LostFoundListProps {
   items: LostFoundItem[];
@@ -35,34 +38,42 @@ export function LostFoundList({ items, onPressItem }: LostFoundListProps) {
   }
 
   return (
-    <FlatList
-      data={items}
-      keyExtractor={(item) => item.id}
-      contentContainerClassName="px-4 py-4 gap-3"
-      renderItem={({ item }) => (
-        <Pressable
-          onPress={() => onPressItem?.(item)}
-          className="bg-festival-card rounded-card-lg p-4 active:opacity-70"
-        >
-          <View className="flex-row items-center justify-between mb-2">
-            <AppText variant="body" className="font-bold flex-1 mr-2">
-              {item.title}
+    <ScrollView contentContainerClassName="px-4 py-4 gap-4">
+      {/* 메인 카드: 2열 테이블 */}
+      <View className="bg-festival-card rounded-card-lg px-2 py-4">
+        {items.map((item) => (
+          <LostFoundTableRow
+            key={item.id}
+            productTitle={item.title}
+            productItems={[
+              CATEGORY_LABEL[item.category] ?? item.category,
+              item.description,
+              STATUS_LABEL[item.status] ?? item.status,
+            ]}
+            infoTitle={item.location}
+            infoItems={[
+              formatDate(item.reportedAt),
+              STATUS_LABEL[item.status] ?? item.status,
+              CATEGORY_LABEL[item.category] ?? item.category,
+            ]}
+          />
+        ))}
+      </View>
+
+      {/* 하단 문의번호 */}
+      <View className="bg-festival-card rounded-card-lg px-4 py-3 items-center gap-1">
+        {CONTACT_NUMBERS.map((number, idx) => (
+          <View key={idx} className="flex-row items-center gap-3">
+            <AppText variant="caption" className="text-festival-text">
+              문의번호
             </AppText>
-            <Badge
-              text={STATUS_LABEL[item.status] ?? item.status}
-              variant={STATUS_VARIANT[item.status] ?? 'default'}
-            />
+            <View className="w-[3px] h-[3px] rounded-full bg-festival-text" />
+            <AppText variant="caption" className="text-festival-text">
+              {number}
+            </AppText>
           </View>
-          <View className="flex-row items-center mb-1">
-            <Ionicons name="location-outline" size={14} color="#7D7D7D" />
-            <AppText variant="caption" className="ml-1">{item.location}</AppText>
-          </View>
-          <AppText variant="caption" numberOfLines={2}>{item.description}</AppText>
-          <AppText variant="caption" className="mt-2 text-festival-secondary">
-            {formatDate(item.reportedAt)}
-          </AppText>
-        </Pressable>
-      )}
-    />
+        ))}
+      </View>
+    </ScrollView>
   );
 }
