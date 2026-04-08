@@ -8,6 +8,11 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Roboto', 'Pretendard Variable', 'Pretendard', 'sans-serif'],
+        roboto: ['Roboto', 'sans-serif'],
+        pretendard: ['Pretendard Variable', 'Pretendard', 'sans-serif'],
+      },
       colors: {
         festival: {
           primary: '#D9D9D9',

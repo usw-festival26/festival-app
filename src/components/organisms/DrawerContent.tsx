@@ -6,7 +6,8 @@
 import React from 'react';
 import { View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, DrawerActions } from '@react-navigation/native';
+import { DrawerActions } from '@react-navigation/native';
+import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import { useRouter, usePathname } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '../atoms/AppText';
@@ -27,8 +28,7 @@ const MENU_ITEMS: DrawerMenuItem[] = [
   { label: '추가정보', route: '/(tabs)/information', matchPath: '/information' },
 ];
 
-export function DrawerContent() {
-  const navigation = useNavigation();
+export function DrawerContent({ navigation }: DrawerContentComponentProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -38,16 +38,16 @@ export function DrawerContent() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-primary" edges={['top', 'bottom']}>
-      <View className="flex-1 px-[24px] pt-[18px]">
+    <SafeAreaView className="flex-1 bg-[#d9d9d9]" edges={['top', 'bottom']}>
+      <View className="flex-1 px-[18px] pt-[18px]">
         <Pressable
           onPress={() => navigation.dispatch(DrawerActions.closeDrawer())}
-          className="w-[30px] h-[30px] items-center justify-center mb-10 active:opacity-70"
+          className="w-[30px] h-[30px] items-center justify-center mb-[30px] active:opacity-70"
         >
           <Ionicons name="close" size={28} color="#000000" />
         </Pressable>
 
-        <View className="gap-[28px]">
+        <View className="gap-[32px]">
           {MENU_ITEMS.map((item) => {
             const isActive = pathname.includes(item.matchPath);
             return (
@@ -57,7 +57,7 @@ export function DrawerContent() {
                 className="active:opacity-70"
               >
                 <AppText
-                  className={`text-2xl font-black ${isActive ? 'text-black' : 'text-festival-muted'}`}
+                  className={`text-[26px] font-bold ${isActive ? 'text-black' : 'text-festival-muted'}`}
                 >
                   {item.label}
                 </AppText>
