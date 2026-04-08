@@ -3,6 +3,8 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main, develop]
 
 jobs:
   deploy:
@@ -33,4 +35,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=uswfestival26
+          command: pages deploy dist --project-name=uswfestival26 --branch=${{ github.head_ref || 'main' }}
