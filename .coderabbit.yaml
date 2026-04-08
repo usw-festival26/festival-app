@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  path_filters:
+    - "!package-lock.json"
+    - "!node_modules/**"
+  path_instructions:
+    - path: "app/**"
+      instructions: |
+        이 디렉토리는 Expo Router 기반 라우트 파일만 포함합니다.
+        비즈니스 로직이 라우트 파일에 포함되어 있으면 지적해주세요.
+        organisms/templates와 hooks만 import해야 합니다.
+    - path: "src/components/atoms/**"
+      instructions: |
+        Atom 컴포넌트는 프로젝트 의존성 없이 props만 받아야 합니다.
+        다른 컴포넌트를 import하면 안 됩니다.
+    - path: "src/components/molecules/**"
+      instructions: |
+        Molecule 컴포넌트는 2개 이상의 atom을 조합합니다.
+    - path: "src/components/organisms/**"
+      instructions: |
+        Organism 컴포넌트는 화면 단위 기능 섹션입니다.
+    - path: "src/data/**"
+      instructions: |
+        하드코딩된 축제 데이터 파일입니다. 타임스탬프는 ISO 8601 KST(+09:00)를 사용해야 합니다.
+    - path: "src/hooks/**"
+      instructions: |
+        모든 hook은 { data, isLoading } 형태를 반환해야 합니다.
+        백엔드 마이그레이션 seam 패턴을 유지하세요.
+  auto_review:
+    enabled: true
+    drafts: false
+chat:
+  auto_reply: true
