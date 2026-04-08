@@ -1,8 +1,8 @@
-import type { Booth } from '@types/booth';
-import type { TimetableData } from '@types/timetable';
-import type { Announcement } from '@types/announcement';
-import type { LostFoundItem } from '@types/lostFound';
-import type { InformationSection } from '@types/information';
+import type { Booth } from '../types/booth';
+import type { TimetableData } from '../types/timetable';
+import type { Announcement } from '../types/announcement';
+import type { LostFoundItem } from '../types/lostFound';
+import type { InformationSection } from '../types/information';
 import { apiClient } from './client';
 
 export function fetchBooths(): Promise<Booth[]> {
