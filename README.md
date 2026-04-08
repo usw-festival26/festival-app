@@ -81,3 +81,34 @@ src/
 | `facilities.ts` | 편의시설 |
 
 모든 시간은 ISO 8601 + KST (`+09:00`) 형식을 사용합니다.
+
+## Convention
+
+### Branch Strategy
+
+- `main` — 프로덕션 배포 브랜치
+- `develop` — 개발 통합 브랜치
+- 기능 브랜치는 `develop`에서 분기하여 PR로 병합
+
+### Commit Message
+
+[type]: [description] 형식을 따릅니다.
+
+| Type | 용도 |
+|------|------|
+| `feat` | 새로운 기능 추가 |
+| `fix` | 버그 수정 |
+| `chore` | 빌드, 설정, 의존성 등 코드 외 변경 |
+| `refactor` | 기능 변경 없는 코드 개선 |
+| `style` | UI/스타일 변경 |
+| `docs` | 문서 변경 |
+
+### Code Convention
+
+- **스타일링**: NativeWind `className` 전용. 인라인 `style` 지양
+- **컴포넌트 구조**: Atomic Design (atoms → molecules → organisms → templates)
+- **라우트 파일**: `app/` 내 라우트에는 비즈니스 로직 금지, organisms/templates/hooks만 import
+- **타입**: 모든 인터페이스는 `src/types/`에 정의, `id: string` 필수
+- **Import**: barrel export(`index.ts`) 경로 사용, path alias(`@components/*` 등) 활용
+- **언어**: 코드는 영어, UI 라벨과 주석은 한국어
+- **폰트**: Roboto (영문) + Pretendard (한글)

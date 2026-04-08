@@ -10,12 +10,15 @@ import { DrawerContent } from '../../src/components/organisms/DrawerContent';
 export default function DrawerLayout() {
   return (
     <Drawer
-      drawerContent={() => <DrawerContent />}
+      drawerContent={(props) => <DrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
         drawerType: 'front',
         drawerStyle: {
           width: 250,
+          borderTopRightRadius: 20,
+          borderBottomRightRadius: 20,
+          overflow: 'hidden',
         },
       }}
     >
