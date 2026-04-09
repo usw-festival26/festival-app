@@ -4,9 +4,11 @@
  * 현재는 하드코딩 데이터를 반환합니다.
  * 백엔드 연동 시 이 훅 내부만 수정하면 됩니다.
  */
-import { useMemo } from 'react';
-import { TIMETABLE_DATA } from '../data/timetable';
-import type { Performance, PerformanceCategory, Stage, TimetableDay } from '../types/timetable';
+import { useMemo, useState, useEffect } from 'react';
+import { config } from '@config/env';
+import { fetchTimetable } from '@api/endpoints';
+import { TIMETABLE_DATA } from '@data/timetable';
+import type { Performance, PerformanceCategory, Stage, TimetableDay, TimetableData } from '../types/timetable';
 
 export interface UseTimetableOptions {
   /** 특정 날짜로 필터 (ISO date) */
@@ -24,13 +26,28 @@ export interface UseTimetableResult {
   days: TimetableDay[];
   performances: Performance[];
   isLoading: boolean;
+  error: string | null;
 }
 
 export function useTimetable(options?: UseTimetableOptions): UseTimetableResult {
   const { date, stageId, category, searchQuery } = options ?? {};
+  const [apiData, setApiData] = useState<TimetableData | null>(null);
+  const [isLoading, setIsLoading] = useState(config.isApiEnabled);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!config.isApiEnabled) return;
+    setIsLoading(true);
+    fetchTimetable()
+      .then(setApiData)
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const source = apiData ?? TIMETABLE_DATA;
 
   const filteredDays = useMemo(() => {
-    let days = TIMETABLE_DATA.days;
+    let days = source.days;
 
     if (date) {
       days = days.filter((d) => d.date === date);
@@ -51,7 +68,7 @@ export function useTimetable(options?: UseTimetableOptions): UseTimetableResult 
         return true;
       }),
     }));
-  }, [date, stageId, category, searchQuery]);
+  }, [source, date, stageId, category, searchQuery]);
 
   const allPerformances = useMemo(
     () => filteredDays.flatMap((d) => d.performances),
@@ -59,9 +76,10 @@ export function useTimetable(options?: UseTimetableOptions): UseTimetableResult 
   );
 
   return {
-    stages: TIMETABLE_DATA.stages,
+    stages: source.stages,
     days: filteredDays,
     performances: allPerformances,
-    isLoading: false,
+    isLoading,
+    error,
   };
 }

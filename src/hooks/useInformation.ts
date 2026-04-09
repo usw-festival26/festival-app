@@ -1,12 +1,27 @@
 /**
  * useInformation - 추가정보 데이터 접근 훅
  */
-import { useMemo } from 'react';
-import { INFORMATION_DATA } from '../data/information';
+import { useMemo, useState, useEffect } from 'react';
+import { config } from '@config/env';
+import { fetchInformation } from '@api/endpoints';
+import { INFORMATION_DATA } from '@data/information';
 import type { InformationSection } from '../types/information';
 
 export function useInformation() {
-  const sections = useMemo<InformationSection[]>(() => INFORMATION_DATA, []);
+  const [apiData, setApiData] = useState<InformationSection[] | null>(null);
+  const [isLoading, setIsLoading] = useState(config.isApiEnabled);
+  const [error, setError] = useState<string | null>(null);
 
-  return { sections, isLoading: false };
+  useEffect(() => {
+    if (!config.isApiEnabled) return;
+    setIsLoading(true);
+    fetchInformation()
+      .then(setApiData)
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const sections = useMemo<InformationSection[]>(() => apiData ?? INFORMATION_DATA, [apiData]);
+
+  return { data: sections, sections, isLoading, error };
 }
