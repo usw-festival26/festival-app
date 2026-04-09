@@ -1,5 +1,6 @@
 import { config } from '@config/env';
 import { ApiError } from './errors';
+import { apiLogger } from './logger';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -7,6 +8,11 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (!config.apiBaseUrl) {
     throw new ApiError(0, 'API base URL이 설정되지 않았습니다.');
   }
+
+  const method = options?.method ?? 'GET';
+  const startTime = Date.now();
+
+  apiLogger.request(method, path);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
@@ -28,13 +34,22 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
     if (!res.ok) {
       const body = await res.json().catch(() => null);
-      throw new ApiError(res.status, `API 요청 실패: ${res.status}`, body);
+      const error = new ApiError(res.status, `API 요청 실패: ${res.status}`, body);
+      apiLogger.error(method, path, error);
+      throw error;
     }
 
-    return res.json() as Promise<T>;
+    const data = await res.json() as T;
+    apiLogger.response(method, path, res.status, Date.now() - startTime);
+    return data;
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') {
-      throw new ApiError(0, 'API 요청 시간 초과', null);
+      const error = new ApiError(0, 'API 요청 시간 초과', null);
+      apiLogger.error(method, path, error);
+      throw error;
+    }
+    if (!(e instanceof ApiError)) {
+      apiLogger.error(method, path, e);
     }
     throw e;
   } finally {
