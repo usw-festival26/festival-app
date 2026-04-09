@@ -34,20 +34,27 @@ export function MenuTable({ menuItems }: MenuTableProps) {
 
   const columns: MenuCategory[] = ['main', 'side', 'set'];
 
+  const activeColumns = columns.filter((col) => grouped[col].length > 0);
+
   return (
-    <View className="flex-row px-4 py-4">
-      {columns.map((col) => (
-        <View key={col} className="flex-1">
-          <AppText className="text-[15px] font-black text-black mb-3">
+    <View className="px-4 py-4">
+      {activeColumns.map((col, colIndex) => (
+        <View key={col}>
+          {colIndex > 0 && (
+            <View className="h-px bg-festival-secondary/30 my-4" />
+          )}
+          <AppText className="text-[20px] font-black text-black mb-3">
             {COLUMN_LABELS[col]}
           </AppText>
           {grouped[col].map((item) => (
-            <AppText
-              key={item.id}
-              className="text-sm text-black mb-2"
-            >
-              {item.name}
-            </AppText>
+            <View key={item.id} className="flex-row justify-between items-center mb-2">
+              <AppText className="text-[15px] font-semibold text-black">
+                {item.name}
+              </AppText>
+              <AppText className="text-[15px] font-semibold text-black">
+                {item.price.toLocaleString()}
+              </AppText>
+            </View>
           ))}
         </View>
       ))}
