@@ -4,7 +4,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { config } from '@config/env';
 import { fetchLostFoundItems, fetchLostFoundItem } from '@api/endpoints';
-import { LOST_FOUND_DATA } from '../data/lostFound';
+import { LOST_FOUND_DATA } from '@data/lostFound';
 import type { LostFoundItem, LostFoundStatus } from '../types/lostFound';
 
 export interface UseLostFoundOptions {
@@ -46,10 +46,11 @@ export function useLostFound(options?: UseLostFoundOptions) {
     );
   }, [source, status, searchQuery]);
 
-  return { items, isLoading, error };
+  return { data: items, items, isLoading, error };
 }
 
 export function useLostFoundById(id: string): {
+  data: LostFoundItem | undefined;
   item: LostFoundItem | undefined;
   isLoading: boolean;
   error: string | null;
@@ -60,11 +61,15 @@ export function useLostFoundById(id: string): {
 
   useEffect(() => {
     if (!config.isApiEnabled) return;
+    let isCurrent = true;
+    setApiData(null);
+    setError(null);
     setIsLoading(true);
     fetchLostFoundItem(id)
-      .then(setApiData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setIsLoading(false));
+      .then((data) => { if (isCurrent) setApiData(data); })
+      .catch((e: Error) => { if (isCurrent) setError(e.message); })
+      .finally(() => { if (isCurrent) setIsLoading(false); });
+    return () => { isCurrent = false; };
   }, [id]);
 
   const item = useMemo(() => {
@@ -72,5 +77,5 @@ export function useLostFoundById(id: string): {
     return LOST_FOUND_DATA.find((i) => i.id === id);
   }, [apiData, id]);
 
-  return { item, isLoading, error };
+  return { data: item, item, isLoading, error };
 }

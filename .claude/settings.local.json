@@ -8,7 +8,9 @@
       "Bash(npm ls:*)",
       "Bash(npx expo:*)",
       "mcp__figma-remote-mcp__get_screenshot",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(gh pr create --base develop --head feat/cf-pages-deploy --title 'feat: Cloudflare Pages 배포 파이프라인' --body ':*)"
     ]
   },
   "enabledPlugins": {

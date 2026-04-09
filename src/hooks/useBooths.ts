@@ -4,7 +4,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { config } from '@config/env';
 import { fetchBooths, fetchBooth } from '@api/endpoints';
-import { BOOTHS_DATA } from '../data/booths';
+import { BOOTHS_DATA } from '@data/booths';
 import type { Booth, BoothCategory } from '../types/booth';
 
 export interface UseBoothsOptions {
@@ -44,21 +44,25 @@ export function useBooths(options?: UseBoothsOptions) {
     });
   }, [source, category, searchQuery]);
 
-  return { booths, isLoading, error };
+  return { data: booths, booths, isLoading, error };
 }
 
-export function useBoothById(id: string): { booth: Booth | undefined; isLoading: boolean; error: string | null } {
+export function useBoothById(id: string): { data: Booth | undefined; booth: Booth | undefined; isLoading: boolean; error: string | null } {
   const [apiData, setApiData] = useState<Booth | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!config.isApiEnabled) return;
+    let isCurrent = true;
+    setApiData(null);
+    setError(null);
     setIsLoading(true);
     fetchBooth(id)
-      .then(setApiData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setIsLoading(false));
+      .then((data) => { if (isCurrent) setApiData(data); })
+      .catch((e: Error) => { if (isCurrent) setError(e.message); })
+      .finally(() => { if (isCurrent) setIsLoading(false); });
+    return () => { isCurrent = false; };
   }, [id]);
 
   const booth = useMemo(() => {
@@ -66,5 +70,5 @@ export function useBoothById(id: string): { booth: Booth | undefined; isLoading:
     return BOOTHS_DATA.find((b) => b.id === id);
   }, [apiData, id]);
 
-  return { booth, isLoading, error };
+  return { data: booth, booth, isLoading, error };
 }

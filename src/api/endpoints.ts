@@ -10,7 +10,7 @@ export function fetchBooths(): Promise<Booth[]> {
 }
 
 export function fetchBooth(id: string): Promise<Booth> {
-  return apiClient.get<Booth>(`/booths/${id}`);
+  return apiClient.get<Booth>(`/booths/${encodeURIComponent(id)}`);
 }
 
 export function fetchTimetable(): Promise<TimetableData> {
@@ -22,7 +22,7 @@ export function fetchAnnouncements(): Promise<Announcement[]> {
 }
 
 export function fetchAnnouncement(id: string): Promise<Announcement> {
-  return apiClient.get<Announcement>(`/announcements/${id}`);
+  return apiClient.get<Announcement>(`/announcements/${encodeURIComponent(id)}`);
 }
 
 export function fetchLostFoundItems(): Promise<LostFoundItem[]> {
@@ -30,7 +30,7 @@ export function fetchLostFoundItems(): Promise<LostFoundItem[]> {
 }
 
 export function fetchLostFoundItem(id: string): Promise<LostFoundItem> {
-  return apiClient.get<LostFoundItem>(`/lost-found/${id}`);
+  return apiClient.get<LostFoundItem>(`/lost-found/${encodeURIComponent(id)}`);
 }
 
 export function fetchInformation(): Promise<InformationSection[]> {

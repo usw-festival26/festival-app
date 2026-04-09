@@ -7,7 +7,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { config } from '@config/env';
 import { fetchTimetable } from '@api/endpoints';
-import { TIMETABLE_DATA } from '../data/timetable';
+import { TIMETABLE_DATA } from '@data/timetable';
 import type { Performance, PerformanceCategory, Stage, TimetableDay, TimetableData } from '../types/timetable';
 
 export interface UseTimetableOptions {

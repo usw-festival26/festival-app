@@ -4,7 +4,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { config } from '@config/env';
 import { fetchAnnouncements, fetchAnnouncement } from '@api/endpoints';
-import { ANNOUNCEMENTS_DATA } from '../data/announcements';
+import { ANNOUNCEMENTS_DATA } from '@data/announcements';
 import type { Announcement } from '../types/announcement';
 
 export function useAnnouncements() {
@@ -31,10 +31,11 @@ export function useAnnouncements() {
     });
   }, [source]);
 
-  return { announcements, isLoading, error };
+  return { data: announcements, announcements, isLoading, error };
 }
 
 export function useAnnouncementById(id: string): {
+  data: Announcement | undefined;
   announcement: Announcement | undefined;
   isLoading: boolean;
   error: string | null;
@@ -45,11 +46,15 @@ export function useAnnouncementById(id: string): {
 
   useEffect(() => {
     if (!config.isApiEnabled) return;
+    let isCurrent = true;
+    setApiData(null);
+    setError(null);
     setIsLoading(true);
     fetchAnnouncement(id)
-      .then(setApiData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setIsLoading(false));
+      .then((data) => { if (isCurrent) setApiData(data); })
+      .catch((e: Error) => { if (isCurrent) setError(e.message); })
+      .finally(() => { if (isCurrent) setIsLoading(false); });
+    return () => { isCurrent = false; };
   }, [id]);
 
   const announcement = useMemo(() => {
@@ -57,5 +62,5 @@ export function useAnnouncementById(id: string): {
     return ANNOUNCEMENTS_DATA.find((a) => a.id === id);
   }, [apiData, id]);
 
-  return { announcement, isLoading, error };
+  return { data: announcement, announcement, isLoading, error };
 }

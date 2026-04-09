@@ -4,7 +4,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { config } from '@config/env';
 import { fetchInformation } from '@api/endpoints';
-import { INFORMATION_DATA } from '../data/information';
+import { INFORMATION_DATA } from '@data/information';
 import type { InformationSection } from '../types/information';
 
 export function useInformation() {
@@ -23,5 +23,5 @@ export function useInformation() {
 
   const sections = useMemo<InformationSection[]>(() => apiData ?? INFORMATION_DATA, [apiData]);
 
-  return { sections, isLoading, error };
+  return { data: sections, sections, isLoading, error };
 }
