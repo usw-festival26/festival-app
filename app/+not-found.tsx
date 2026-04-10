@@ -17,7 +17,7 @@ import Svg, { Path } from 'react-native-svg';
 export default function NotFoundScreen() {
   const router = useRouter();
 
-  const goHome = () => router.replace('/(tabs)/home' as any);
+const goHome = () => router.replace('/(tabs)/home');
 
   return (
     <>
