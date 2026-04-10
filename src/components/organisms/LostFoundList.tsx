@@ -6,9 +6,9 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 import type { LostFoundItem } from '../../types/lostFound';
-import { AppText } from '../atoms/AppText';
-import { LostFoundTableRow } from '../molecules/LostFoundTableRow';
-import { EmptyState } from '../molecules/EmptyState';
+import { AppText } from '@atoms/AppText';
+import { LostFoundTableRow } from '@molecules/LostFoundTableRow';
+import { EmptyState } from '@molecules/EmptyState';
 import { formatDate } from '../../utils/date';
 
 const STATUS_LABEL: Record<string, string> = {

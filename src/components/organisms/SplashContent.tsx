@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { Pressable } from 'react-native';
-import { AppText } from '../atoms/AppText';
+import { AppText } from '@atoms/AppText';
 
 export interface SplashContentProps {
   onPress: () => void;
@@ -15,7 +15,7 @@ export function SplashContent({ onPress }: SplashContentProps) {
   return (
     <Pressable
       onPress={onPress}
-      className="flex-1 bg-[#d9d9d9] items-center justify-center"
+      className="flex-1 bg-festival-bg items-center justify-center"
     >
       <AppText className="text-[48px] font-black text-black text-center leading-[40px]">
         MAIN{'\n'}LOGO

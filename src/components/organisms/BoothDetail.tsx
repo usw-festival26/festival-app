@@ -8,8 +8,8 @@ import { ScrollView, View, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { Booth } from '../../types/booth';
-import { AppText } from '../atoms/AppText';
-import { MenuTable } from '../molecules/MenuTable';
+import { AppText } from '@atoms/AppText';
+import { MenuTable } from '@molecules/MenuTable';
 
 export interface BoothDetailProps {
   booth: Booth;

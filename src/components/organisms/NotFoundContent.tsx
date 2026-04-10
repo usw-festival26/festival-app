@@ -20,6 +20,8 @@ export function NotFoundContent({ onGoHome }: NotFoundContentProps) {
       <View className="items-end pr-4 pt-2">
         <Pressable
           onPress={onGoHome}
+          accessibilityLabel="닫기"
+          accessibilityRole="button"
           className="w-[30px] h-[30px] items-center justify-center active:opacity-70"
         >
           <Ionicons name="close" size={28} color="#000" />
@@ -47,6 +49,8 @@ export function NotFoundContent({ onGoHome }: NotFoundContentProps) {
       {/* node 382:858 — 하단 우측 메인으로 가기 + 선 화살표 */}
       <Pressable
         onPress={onGoHome}
+        accessibilityLabel="메인으로 가기"
+        accessibilityRole="button"
         className="flex-row items-center self-end pb-10 pr-8 gap-2 active:opacity-70"
       >
         <Text className="text-[12px] text-black font-pretendard">

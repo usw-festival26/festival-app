@@ -6,8 +6,8 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { AppText } from '../atoms/AppText';
-import { BoothCard } from '../molecules/BoothCard';
+import { AppText } from '@atoms/AppText';
+import { BoothCard } from '@molecules/BoothCard';
 import type { Booth } from '../../types/booth';
 
 export interface BoothSheetContentProps {

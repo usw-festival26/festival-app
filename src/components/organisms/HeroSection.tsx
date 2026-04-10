@@ -6,8 +6,8 @@
 import React, { useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppText } from '../atoms/AppText';
-import { DotPagination } from '../atoms/DotPagination';
+import { AppText } from '@atoms/AppText';
+import { DotPagination } from '@atoms/DotPagination';
 
 const POSTER_COUNT = 4;
 

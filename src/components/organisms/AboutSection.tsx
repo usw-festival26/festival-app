@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { View } from 'react-native';
-import { AppText } from '../atoms/AppText';
+import { AppText } from '@atoms/AppText';
 
 export interface AboutSectionProps {
   title?: string;

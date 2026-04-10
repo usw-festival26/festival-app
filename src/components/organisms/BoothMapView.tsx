@@ -15,8 +15,8 @@ import {
   LayoutChangeEvent,
   GestureResponderEvent,
 } from 'react-native';
-import { AppText } from '../atoms/AppText';
-import { DragHandle } from '../atoms/DragHandle';
+import { AppText } from '@atoms/AppText';
+import { DragHandle } from '@atoms/DragHandle';
 import { BoothSheetContent } from './BoothSheetContent';
 import { FoodSheetContent } from './FoodSheetContent';
 import { FacilitySheetContent } from './FacilitySheetContent';
