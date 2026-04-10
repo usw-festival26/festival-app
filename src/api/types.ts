@@ -26,6 +26,7 @@ export interface ApiLostItem {
   storageLocation: string;
   status: string;
   imageUrl: string;
+  createdAt?: string;
 }
 
 export interface ApiLostItemDetail extends ApiLostItem {
