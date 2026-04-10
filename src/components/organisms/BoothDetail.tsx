@@ -38,14 +38,14 @@ export function BoothDetail({ booth }: BoothDetailProps) {
           {/* 이미지/포스터 플레이스홀더 */}
           <View className="bg-festival-primary rounded-card-lg w-[165px] h-[181px] items-center justify-center">
             <AppText className="text-[15px] font-semibold text-black text-center">
-              Location In Map{'\n'}or{'\n'}Poster
+              위치(지도) 또는 포스터
             </AppText>
           </View>
 
           {/* 부스 설명 */}
           <View className="flex-1 flex-shrink">
             <AppText className="text-[15px] font-semibold text-black mb-2">
-              학과별 부스 안내??
+              부스 안내
             </AppText>
             <AppText className="text-xs text-black leading-5">
               {booth.description}

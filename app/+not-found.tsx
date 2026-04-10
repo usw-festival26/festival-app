@@ -22,7 +22,7 @@ export default function NotFoundScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+      <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
         {/* node 382:859 — X 닫기 버튼, 우측 상단 */}
         <View className="items-end pr-4 pt-2">
           <Pressable

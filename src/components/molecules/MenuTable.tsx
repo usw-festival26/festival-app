@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { View } from 'react-native';
-import { AppText } from '../atoms/AppText';
+import { AppText } from '@atoms/AppText';
 import type { BoothMenuItem } from '../../types/booth';
 
 export interface MenuTableProps {
@@ -52,7 +52,7 @@ export function MenuTable({ menuItems }: MenuTableProps) {
                 {item.name}
               </AppText>
               <AppText className="text-[15px] font-semibold text-black">
-                {item.price.toLocaleString()}
+                {item.price.toLocaleString()}원
               </AppText>
             </View>
           ))}

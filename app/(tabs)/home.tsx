@@ -29,8 +29,10 @@ export default function HomeScreen() {
         >
           <Ionicons name="menu" size={28} color="#000" />
         </Pressable>
-        <View className="flex-1" />
-        <AppText className="text-[20px] font-black text-black">LOGO</AppText>
+        <View className="flex-1 items-center justify-center">
+          <AppText className="text-[20px] font-black text-black">LOGO</AppText>
+        </View>
+        <View className="w-[30px]" />
       </View>
 
       {/* 메인 포스터 */}
