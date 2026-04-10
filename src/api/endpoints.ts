@@ -44,65 +44,65 @@ function assertObject(data: unknown, endpoint: string, requiredKeys: string[]): 
 // ── 부스 ────────────────────────────────────────────────────
 
 export async function fetchBooths(): Promise<Booth[]> {
-  const data = await apiClient.get<ApiBooth[]>('/booths');
-  assertArray(data, '/booths');
+  const data = await apiClient.get<ApiBooth[]>('/api/booth');
+  assertArray(data, '/api/booth');
   return (data as ApiBooth[]).map(mapBooth);
 }
 
 export async function fetchBooth(id: string): Promise<Booth> {
-  const data = await apiClient.get<ApiBoothDetail>(`/booths/${encodeURIComponent(id)}`);
-  assertObject(data, '/booths/:id', ['boothId', 'name']);
+  const data = await apiClient.get<ApiBoothDetail>(`/api/booth/${encodeURIComponent(id)}`);
+  assertObject(data, '/api/booth/:id', ['boothId', 'name']);
   return mapBoothDetail(data as ApiBoothDetail);
 }
 
 // ── 메뉴 (부스별) ──────────────────────────────────────────
 
 export async function fetchMenusByBooth(boothId: string): Promise<BoothMenuItem[]> {
-  const data = await apiClient.get<ApiMenu[]>(`/booths/${encodeURIComponent(boothId)}/menus`);
-  assertArray(data, '/booths/:id/menus');
+  const data = await apiClient.get<ApiMenu[]>(`/api/booth/${encodeURIComponent(boothId)}/menu`);
+  assertArray(data, '/api/booth/:id/menu');
   return (data as ApiMenu[]).map(mapMenu);
 }
 
 // ── 타임테이블 ──────────────────────────────────────────────
 
 export async function fetchTimetable(): Promise<TimetableData> {
-  const data = await apiClient.get<TimetableData>('/timetable');
-  assertObject(data, '/timetable', ['stages', 'days']);
+  const data = await apiClient.get<TimetableData>('/api/timetable');
+  assertObject(data, '/api/timetable', ['stages', 'days']);
   return data as TimetableData;
 }
 
 // ── 공지 ────────────────────────────────────────────────────
 
 export async function fetchAnnouncements(): Promise<Announcement[]> {
-  const data = await apiClient.get<ApiNotice[]>('/notices');
-  assertArray(data, '/notices');
+  const data = await apiClient.get<ApiNotice[]>('/api/notices');
+  assertArray(data, '/api/notices');
   return (data as ApiNotice[]).map(mapNotice);
 }
 
 export async function fetchAnnouncement(id: string): Promise<Announcement> {
-  const data = await apiClient.get<ApiNoticeDetail>(`/notices/${encodeURIComponent(id)}`);
-  assertObject(data, '/notices/:id', ['noticeId', 'title', 'content']);
+  const data = await apiClient.get<ApiNoticeDetail>(`/api/notices/${encodeURIComponent(id)}`);
+  assertObject(data, '/api/notices/:id', ['noticeId', 'title', 'content']);
   return mapNoticeDetail(data as ApiNoticeDetail);
 }
 
 // ── 분실물 ──────────────────────────────────────────────────
 
 export async function fetchLostFoundItems(): Promise<LostFoundItem[]> {
-  const data = await apiClient.get<ApiLostItem[]>('/lost-items');
-  assertArray(data, '/lost-items');
+  const data = await apiClient.get<ApiLostItem[]>('/api/lost-items');
+  assertArray(data, '/api/lost-items');
   return (data as ApiLostItem[]).map(mapLostItem);
 }
 
 export async function fetchLostFoundItem(id: string): Promise<LostFoundItem> {
-  const data = await apiClient.get<ApiLostItemDetail>(`/lost-items/${encodeURIComponent(id)}`);
-  assertObject(data, '/lost-items/:id', ['lostItemId', 'name', 'status']);
+  const data = await apiClient.get<ApiLostItemDetail>(`/api/lost-items/${encodeURIComponent(id)}`);
+  assertObject(data, '/api/lost-items/:id', ['lostItemId', 'name', 'status']);
   return mapLostItemDetail(data as ApiLostItemDetail);
 }
 
 // ── 기타 정보 ───────────────────────────────────────────────
 
 export async function fetchInformation(): Promise<InformationSection[]> {
-  const data = await apiClient.get<InformationSection[]>('/information');
-  assertArray(data, '/information');
+  const data = await apiClient.get<InformationSection[]>('/api/information');
+  assertArray(data, '/api/information');
   return data;
 }
