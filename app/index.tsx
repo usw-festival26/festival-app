@@ -13,7 +13,7 @@ export default function SplashScreen() {
 
   return (
     <Pressable
-      onPress={() => router.replace('/(tabs)/home' as any)}
+onPress={() => router.replace('/(tabs)/home')}
       className="flex-1 bg-[#d9d9d9] items-center justify-center"
     >
       <AppText className="text-[48px] font-black text-black text-center leading-[40px]">
