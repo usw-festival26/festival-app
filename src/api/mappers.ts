@@ -60,7 +60,7 @@ export function mapLostItem(raw: ApiLostItem): LostFoundItem {
     description: '',
     location: raw.storageLocation,
     status: mapLostStatus(raw.status),
-    reportedAt: new Date().toISOString(),
+    reportedAt: (raw as unknown as Record<string, unknown>).createdAt as string ?? '',
     imageUri: raw.imageUrl,
     category: 'other',
   };
@@ -73,7 +73,7 @@ export function mapLostItemDetail(raw: ApiLostItemDetail): LostFoundItem {
     description: raw.description,
     location: raw.storageLocation,
     status: mapLostStatus(raw.status),
-    reportedAt: new Date().toISOString(),
+    reportedAt: (raw as unknown as Record<string, unknown>).createdAt as string ?? '',
     imageUri: raw.imageUrl,
     category: 'other',
   };

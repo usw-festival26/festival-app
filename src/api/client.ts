@@ -39,8 +39,15 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       throw error;
     }
 
+    const elapsed = Date.now() - startTime;
+
+    if (res.status === 204 || res.headers.get('content-length') === '0') {
+      apiLogger.response(method, path, res.status, elapsed);
+      return null as T;
+    }
+
     const data = await res.json() as T;
-    apiLogger.response(method, path, res.status, Date.now() - startTime);
+    apiLogger.response(method, path, res.status, elapsed);
     return data;
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') {
