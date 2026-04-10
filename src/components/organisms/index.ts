@@ -13,3 +13,5 @@ export { BoothSheetContent, type BoothSheetContentProps } from './BoothSheetCont
 export { FoodSheetContent, type FoodSheetContentProps } from './FoodSheetContent';
 export { FacilitySheetContent, type FacilitySheetContentProps } from './FacilitySheetContent';
 export { EventSheetContent, type EventSheetContentProps } from './EventSheetContent';
+export { NotFoundContent, type NotFoundContentProps } from './NotFoundContent';
+export { SplashContent, type SplashContentProps } from './SplashContent';
