@@ -12,7 +12,7 @@ import { DragHandle } from '@atoms/DragHandle';
 import { TimeSlot } from '@molecules/TimeSlot';
 import { StageVisualization } from '@molecules/StageVisualization';
 import { EmptyState } from '@molecules/EmptyState';
-import { formatTimeRange } from '../../utils/date';
+import { formatTimeRange } from '@utils/date';
 
 export interface TimetableGridProps {
   days: TimetableDay[];
