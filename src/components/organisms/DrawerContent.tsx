@@ -4,13 +4,12 @@
  * 회색 배경, X 닫기, 메뉴 항목 세로 나열
  */
 import React from 'react';
-import { View, Pressable } from 'react-native';
+import { View, Pressable, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import { useRouter, usePathname } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppText } from '../atoms/AppText';
 
 interface DrawerMenuItem {
   label: string;
@@ -25,7 +24,6 @@ const MENU_ITEMS: DrawerMenuItem[] = [
   { label: '타임테이블', route: '/(tabs)/timetable', matchPath: '/timetable' },
   { label: '공지', route: '/(tabs)/announcements', matchPath: '/announcements' },
   { label: '분실물', route: '/(tabs)/lost-found', matchPath: '/lost-found' },
-  { label: '추가정보', route: '/(tabs)/information', matchPath: '/information' },
 ];
 
 export function DrawerContent({ navigation }: DrawerContentComponentProps) {
@@ -56,11 +54,11 @@ export function DrawerContent({ navigation }: DrawerContentComponentProps) {
                 onPress={() => handlePress(item.route)}
                 className="active:opacity-70"
               >
-                <AppText
-                  className={`text-[26px] font-bold ${isActive ? 'text-black' : 'text-festival-muted'}`}
+                <Text
+                  className={`text-[26px] font-bold font-pretendard ${isActive ? 'text-black' : 'text-festival-muted'}`}
                 >
                   {item.label}
-                </AppText>
+                </Text>
               </Pressable>
             );
           })}

@@ -5,8 +5,8 @@
  */
 import React from 'react';
 import { View } from 'react-native';
-import { AppText } from '../atoms/AppText';
-import { EventCard } from '../molecules/EventCard';
+import { AppText } from '@atoms/AppText';
+import { EventCard } from '@molecules/EventCard';
 import type { FestivalEvent } from '../../types/map';
 
 export interface EventSheetContentProps {

@@ -4,8 +4,8 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import type { Booth } from '../../types/booth';
-import { InfoCard } from '../molecules/InfoCard';
-import { EmptyState } from '../molecules/EmptyState';
+import { InfoCard } from '@molecules/InfoCard';
+import { EmptyState } from '@molecules/EmptyState';
 
 /** 카테고리 한글 매핑 */
 const CATEGORY_LABEL: Record<string, string> = {

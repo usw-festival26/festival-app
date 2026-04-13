@@ -5,8 +5,8 @@
  */
 import React from 'react';
 import { View } from 'react-native';
-import { AppText } from '../atoms/AppText';
-import { Divider } from '../atoms/Divider';
+import { AppText } from '@atoms/AppText';
+import { Divider } from '@atoms/Divider';
 import type { InformationSection } from '../../types/information';
 
 export interface InformationContentProps {

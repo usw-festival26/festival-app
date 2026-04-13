@@ -6,8 +6,8 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
 import type { Announcement } from '../../types/announcement';
-import { AnnouncementCard } from '../molecules/AnnouncementCard';
-import { EmptyState } from '../molecules/EmptyState';
+import { AnnouncementCard } from '@molecules/AnnouncementCard';
+import { EmptyState } from '@molecules/EmptyState';
 import { formatDate } from '../../utils/date';
 
 export interface AnnouncementListProps {

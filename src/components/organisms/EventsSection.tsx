@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { View, ScrollView } from 'react-native';
-import { AppText } from '../atoms/AppText';
+import { AppText } from '@atoms/AppText';
 
 interface EventItem {
   id: string;

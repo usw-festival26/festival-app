@@ -22,17 +22,16 @@ export default function HomeScreen() {
   return (
     <ScrollScreenTemplate showHeader={false}>
       {/* 헤더: 햄버거 메뉴 + LOGO */}
-      <View className="flex-row items-center px-4 h-[50px] bg-white">
+      <View className="flex-row items-center px-4 h-[50px] bg-festival-primary">
         <Pressable
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
           className="w-[30px] h-[30px] items-center justify-center active:opacity-70"
         >
           <Ionicons name="menu" size={28} color="#000" />
         </Pressable>
-        <View className="flex-1 items-center">
+        <View className="flex-1 items-center justify-center">
           <AppText className="text-[20px] font-black text-black">LOGO</AppText>
         </View>
-        {/* 우측 여백 맞추기 */}
         <View className="w-[30px]" />
       </View>
 

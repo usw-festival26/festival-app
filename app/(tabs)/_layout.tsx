@@ -16,8 +16,7 @@ export default function DrawerLayout() {
         drawerType: 'front',
         drawerStyle: {
           width: 250,
-          borderTopRightRadius: 20,
-          borderBottomRightRadius: 20,
+          borderTopRightRadius: 100,
           overflow: 'hidden',
         },
       }}

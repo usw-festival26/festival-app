@@ -5,8 +5,8 @@
  */
 import React from 'react';
 import { View } from 'react-native';
-import { AppText } from '../atoms/AppText';
-import { FacilityCard } from '../molecules/FacilityCard';
+import { AppText } from '@atoms/AppText';
+import { FacilityCard } from '@molecules/FacilityCard';
 import type { Facility } from '../../types/map';
 
 export interface FacilitySheetContentProps {

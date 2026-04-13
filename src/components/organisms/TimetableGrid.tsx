@@ -6,13 +6,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, ScrollView, Animated, LayoutChangeEvent, GestureResponderEvent } from 'react-native';
 import type { Stage, TimetableDay } from '../../types/timetable';
-import { AppText } from '../atoms/AppText';
-import { Chip } from '../atoms/Chip';
-import { DragHandle } from '../atoms/DragHandle';
-import { TimeSlot } from '../molecules/TimeSlot';
-import { StageVisualization } from '../molecules/StageVisualization';
-import { EmptyState } from '../molecules/EmptyState';
-import { formatTimeRange } from '../../utils/date';
+import { AppText } from '@atoms/AppText';
+import { Chip } from '@atoms/Chip';
+import { DragHandle } from '@atoms/DragHandle';
+import { TimeSlot } from '@molecules/TimeSlot';
+import { StageVisualization } from '@molecules/StageVisualization';
+import { EmptyState } from '@molecules/EmptyState';
+import { formatTimeRange } from '@utils/date';
 
 export interface TimetableGridProps {
   days: TimetableDay[];
