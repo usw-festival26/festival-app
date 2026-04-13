@@ -47,4 +47,6 @@ export interface Booth {
   menuItems: BoothMenuItem[];
   /** 부스 이미지 URI (선택) */
   imageUri?: string;
+  /** 부스 공지 (선택) */
+  notice?: string;
 }
