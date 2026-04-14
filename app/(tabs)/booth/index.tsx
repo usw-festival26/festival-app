@@ -8,7 +8,7 @@ import { View, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
-import { AppText } from '../../../src/components/atoms/AppText';
+import { RobotoBlackText } from '../../../src/components/atoms/RobotoBlackText';
 import { Chip } from '../../../src/components/atoms/Chip';
 import { BoothMapView } from '../../../src/components/organisms/BoothMapView';
 import { useBooths } from '../../../src/hooks/useBooths';
@@ -50,25 +50,49 @@ export default function BoothListScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
-      {/* 헤더: 제목 + 필터 칩 */}
-      <View className="bg-festival-card rounded-b-card-lg px-4 pb-3 pt-2">
-        <View className="flex-row items-center justify-between h-[44px]">
-          <Pressable
-            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            className="w-[30px] h-[30px] items-center justify-center active:opacity-70"
-          >
-            <Ionicons name="menu" size={26} color="#000000" />
-          </Pressable>
-          <AppText className="text-xl font-black text-festival-text text-center">지도</AppText>
-          <AppText className="text-xl font-black text-festival-text">LOGO</AppText>
+    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
+      {/* 헤더 (Figma 920:3931) — 흰색 h:155 rounded-b-20, 햄버거/지도/LOGO + 필터칩 */}
+      <View
+        style={{
+          height: 155,
+          backgroundColor: '#FFFFFF',
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
+        }}
+      >
+        {/* 햄버거 (16, 61) */}
+        <Pressable
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+          style={{ position: 'absolute', left: 16, top: 61, width: 30, height: 30 }}
+          className="items-center justify-center active:opacity-70"
+        >
+          <Ionicons name="menu" size={28} color="#000000" />
+        </Pressable>
+
+        {/* "지도" 중앙 (top:67) */}
+        <View style={{ position: 'absolute', left: 0, right: 0, top: 67 }}>
+          <RobotoBlackText size={20} lineHeight={23} color="#000000">
+            지도
+          </RobotoBlackText>
         </View>
 
-        {/* 필터 칩 */}
+        {/* LOGO 우측 (left ~334, top:67) */}
+        <View style={{ position: 'absolute', right: 24, top: 67 }}>
+          <RobotoBlackText size={20} lineHeight={23} color="#000000">
+            LOGO
+          </RobotoBlackText>
+        </View>
+
+        {/* 필터칩 가로 스크롤 (top:111) */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName="gap-4 pt-2 pb-1 justify-center flex-1"
+          style={{ position: 'absolute', left: 0, right: 0, top: 111 }}
+          contentContainerStyle={{
+            gap: 12,
+            paddingHorizontal: 16,
+            alignItems: 'center',
+          }}
         >
           {FILTER_LABELS.map((label) => (
             <Chip

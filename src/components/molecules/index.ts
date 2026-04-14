@@ -15,3 +15,4 @@ export { MenuBoothCard, type MenuBoothCardProps } from './MenuBoothCard';
 export { StageVisualization } from './StageVisualization';
 export { Footer } from './Footer';
 export { FeatureCard, type FeatureCardProps } from './FeatureCard';
+export { ArtistCard, type ArtistCardProps } from './ArtistCard';

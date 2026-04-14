@@ -27,7 +27,7 @@ export function ScrollScreenTemplate({
   leftAction,
 }: ScrollScreenTemplateProps) {
   return (
-    <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
       {showHeader && <ScreenHeader title={title} leftAction={leftAction} />}
       <ScrollView className={`flex-1 ${className}`}>{children}</ScrollView>
     </SafeAreaView>

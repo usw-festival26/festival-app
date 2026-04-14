@@ -189,8 +189,8 @@ export function BoothMapView({
   return (
     <View className="flex-1" onLayout={onContainerLayout}>
       {/* 맵 */}
-      <View className="flex-1 bg-festival-primary items-center justify-center">
-        <AppText className="text-xl font-black text-center">Main Map</AppText>
+      <View className="flex-1 bg-festival-primary-dark items-center justify-center">
+        <AppText className="text-xl font-black text-white text-center">Main Map</AppText>
       </View>
 
       {/* 바텀시트 */}

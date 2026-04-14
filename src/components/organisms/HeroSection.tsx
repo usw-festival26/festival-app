@@ -1,56 +1,88 @@
 /**
- * HeroSection - 홈 화면 메인 포스터 영역
+ * HeroSection - 홈 흰색 포스터 패널 (Figma 920:3828)
  *
- * Figma 74:28: 포스터 플레이스홀더 + 좌우 화살표 + dot 인디케이터
+ * 프레임 402×615. 햄버거(16,61)만 헤더. Main/Poster 중앙(top:285).
+ * 좌/우 화살표 (14,294)/(360,294). Dot pagination (183,596), 4개.
  */
 import React, { useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AppText } from '@atoms/AppText';
-import { DotPagination } from '@atoms/DotPagination';
+import { useNavigation, DrawerActions } from '@react-navigation/native';
+import { RobotoBlackText } from '@atoms/RobotoBlackText';
 
 const POSTER_COUNT = 4;
+const PANEL_HEIGHT = 615;
 
 export function HeroSection() {
+  const navigation = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const goPrev = () => {
-    setCurrentIndex((i) => (i > 0 ? i - 1 : POSTER_COUNT - 1));
-  };
-
-  const goNext = () => {
-    setCurrentIndex((i) => (i < POSTER_COUNT - 1 ? i + 1 : 0));
-  };
+  const goPrev = () => setCurrentIndex((i) => (i > 0 ? i - 1 : POSTER_COUNT - 1));
+  const goNext = () => setCurrentIndex((i) => (i < POSTER_COUNT - 1 ? i + 1 : 0));
 
   return (
-    <View className="bg-festival-primary">
-      {/* 포스터 영역 */}
-      <View className="h-[560px] items-center justify-center relative">
-        {/* 좌측 화살표 */}
-        <Pressable
-          onPress={goPrev}
-          className="absolute left-3 z-10 w-[28px] h-[28px] items-center justify-center active:opacity-70"
-        >
-          <Ionicons name="chevron-back" size={28} color="#000" />
-        </Pressable>
+    <View className="bg-festival-card w-full" style={{ height: PANEL_HEIGHT }}>
+      {/* 햄버거 (16, 61) */}
+      <Pressable
+        onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        style={{ position: 'absolute', left: 16, top: 61, width: 30, height: 30 }}
+        className="items-center justify-center active:opacity-70"
+      >
+        <Ionicons name="menu" size={28} color="#000" />
+      </Pressable>
 
-        {/* 포스터 텍스트 */}
-        <AppText className="text-[20px] font-black text-black text-center leading-[23px]">
-          Main{'\n'}Poster
-        </AppText>
-
-        {/* 우측 화살표 */}
-        <Pressable
-          onPress={goNext}
-          className="absolute right-3 z-10 w-[28px] h-[28px] items-center justify-center active:opacity-70"
-        >
-          <Ionicons name="chevron-forward" size={28} color="#000" />
-        </Pressable>
+      {/* Main / Poster 텍스트 — 수직 중앙 (top:285) */}
+      <View style={{ position: 'absolute', left: 0, right: 0, top: 285 }}>
+        <RobotoBlackText size={20} lineHeight={23} color="#000000">
+          Main
+        </RobotoBlackText>
+        <RobotoBlackText size={20} lineHeight={23} color="#000000">
+          Poster
+        </RobotoBlackText>
       </View>
 
-      {/* Dot 인디케이터 */}
-      <View className="pb-5">
-        <DotPagination total={POSTER_COUNT} current={currentIndex} />
+      {/* 좌측 화살표 (14, 294) */}
+      <Pressable
+        onPress={goPrev}
+        style={{ position: 'absolute', left: 14, top: 294, width: 28, height: 28 }}
+        className="items-center justify-center active:opacity-70"
+      >
+        <Ionicons name="chevron-back" size={28} color="#000" />
+      </Pressable>
+
+      {/* 우측 화살표 (360, 294) */}
+      <Pressable
+        onPress={goNext}
+        style={{ position: 'absolute', left: 360, top: 294, width: 28, height: 28 }}
+        className="items-center justify-center active:opacity-70"
+      >
+        <Ionicons name="chevron-forward" size={28} color="#000" />
+      </Pressable>
+
+      {/* Dot pagination (183, 596) w:36 h:6 */}
+      <View
+        style={{
+          position: 'absolute',
+          left: 183,
+          top: 596,
+          width: 36,
+          height: 6,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        {Array.from({ length: POSTER_COUNT }).map((_, i) => (
+          <View
+            key={i}
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: 3,
+              backgroundColor: i === currentIndex ? '#010070' : '#D9D9D9',
+            }}
+          />
+        ))}
       </View>
     </View>
   );

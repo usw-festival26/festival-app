@@ -24,7 +24,7 @@ export function AnnouncementList({ announcements, onPressAnnouncement }: Announc
     <FlatList
       data={announcements}
       keyExtractor={(item) => item.id}
-      contentContainerClassName="bg-[#f2f2f2]"
+      contentContainerClassName="bg-festival-primary-dark"
       renderItem={({ item }) => (
         <AnnouncementCard
           title={item.title}
@@ -34,7 +34,7 @@ export function AnnouncementList({ announcements, onPressAnnouncement }: Announc
           onPress={() => onPressAnnouncement?.(item)}
         />
       )}
-      ItemSeparatorComponent={() => <View className="h-[1px] bg-festival-primary mx-6" />}
+      ItemSeparatorComponent={() => <View className="h-[1px] bg-festival-lavender/30 mx-6" />}
     />
   );
 }

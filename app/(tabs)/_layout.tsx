@@ -25,6 +25,7 @@ export default function DrawerLayout() {
       <Drawer.Screen name="booth" options={{ drawerLabel: '지도' }} />
       <Drawer.Screen name="menu" options={{ drawerLabel: '메뉴' }} />
       <Drawer.Screen name="timetable" options={{ drawerLabel: '타임테이블' }} />
+      <Drawer.Screen name="lineup" options={{ drawerLabel: '라인업' }} />
       <Drawer.Screen name="announcements" options={{ drawerLabel: '공지' }} />
       <Drawer.Screen name="lost-found" options={{ drawerLabel: '분실물' }} />
       <Drawer.Screen name="information" options={{ drawerLabel: '추가정보' }} />

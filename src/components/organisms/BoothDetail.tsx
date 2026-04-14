@@ -19,7 +19,7 @@ export function BoothDetail({ booth }: BoothDetailProps) {
   const router = useRouter();
 
   return (
-    <ScrollView className="flex-1 bg-festival-bg">
+    <ScrollView className="flex-1 bg-festival-primary-dark">
       {/* 메인 카드 */}
       <View className="mx-4 mt-4 bg-festival-card rounded-card-lg p-6">
         {/* 뒤로가기 + 학과/부스 이름 */}
@@ -36,7 +36,7 @@ export function BoothDetail({ booth }: BoothDetailProps) {
         {/* 이미지 + 설명 가로 배치 */}
         <View className="flex-row mb-6 gap-4">
           {/* 이미지/포스터 플레이스홀더 */}
-          <View className="bg-festival-primary rounded-card-lg w-[165px] h-[181px] items-center justify-center">
+          <View className="bg-festival-lavender rounded-card-lg w-[165px] h-[181px] items-center justify-center">
             <AppText className="text-[15px] font-semibold text-black text-center">
               위치(지도) 또는 포스터
             </AppText>

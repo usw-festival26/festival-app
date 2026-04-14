@@ -15,3 +15,4 @@ export { FacilitySheetContent, type FacilitySheetContentProps } from './Facility
 export { EventSheetContent, type EventSheetContentProps } from './EventSheetContent';
 export { NotFoundContent, type NotFoundContentProps } from './NotFoundContent';
 export { SplashContent, type SplashContentProps } from './SplashContent';
+export { LineupList, type LineupListProps } from './LineupList';
