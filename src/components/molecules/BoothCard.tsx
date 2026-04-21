@@ -18,7 +18,7 @@ export function BoothCard({ title, time, about, onPress }: BoothCardProps) {
   return (
     <Pressable onPress={onPress} className="flex-1 mx-2 mb-5 active:opacity-70">
       <AppText className="text-[15px] font-semibold text-black mb-1">{title}</AppText>
-      <View className="bg-festival-primary rounded-card h-[109px] mb-1" />
+      <View className="bg-festival-lavender rounded-card h-[109px] mb-1" />
       {time && (
         <AppText className="text-xs text-black">{time}</AppText>
       )}

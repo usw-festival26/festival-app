@@ -4,6 +4,7 @@ import {
   Roboto_500Medium,
   Roboto_600SemiBold,
   Roboto_700Bold,
+  Roboto_900Black,
 } from '@expo-google-fonts/roboto';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -41,10 +42,12 @@ export default function RootLayout() {
     Roboto_500Medium,
     Roboto_600SemiBold,
     Roboto_700Bold,
+    Roboto_900Black,
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.otf'),
     'Pretendard-Medium': require('../assets/fonts/Pretendard-Medium.otf'),
     'Pretendard-SemiBold': require('../assets/fonts/Pretendard-SemiBold.otf'),
     'Pretendard-Bold': require('../assets/fonts/Pretendard-Bold.otf'),
+    'Pretendard-Black': require('../assets/fonts/Pretendard-Black.otf'),
     ...FontAwesome.font,
   });
 

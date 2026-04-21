@@ -20,7 +20,7 @@ export default function MenuDetailScreen() {
 
   if (!booth) {
     return (
-      <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
+      <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
         <ScreenHeader title="메뉴" leftAction="back" />
         <EmptyState message="부스를 찾을 수 없습니다." />
         <View className="items-center">
@@ -31,7 +31,7 @@ export default function MenuDetailScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
       <ScreenHeader title="메뉴" leftAction="back" />
       <BoothDetail booth={booth} />
     </SafeAreaView>

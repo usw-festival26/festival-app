@@ -1,40 +1,78 @@
 /**
- * AnnouncementList - 공지사항 카드 스크롤
+ * AnnouncementList - 공지 pill + FAQ (Figma 920:4490)
  *
- * Figma 82:72: 세로 스크롤 인용문 카드 목록
+ * Notification 배지 → pill 리스트 (핀 공지는 상단) → FAQ 배지 → 말풍선 2개(좌/우 교차)
  */
-import React from 'react';
-import { FlatList, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View } from 'react-native';
 import type { Announcement } from '../../types/announcement';
-import { AnnouncementCard } from '@molecules/AnnouncementCard';
+import { NotificationBadge } from '@atoms/NotificationBadge';
+import { NotificationPill } from '@molecules/NotificationPill';
+import { FaqBubble } from '@molecules/FaqBubble';
 import { EmptyState } from '@molecules/EmptyState';
-import { formatDate } from '../../utils/date';
 
 export interface AnnouncementListProps {
   announcements: Announcement[];
-  onPressAnnouncement?: (item: Announcement) => void;
 }
 
-export function AnnouncementList({ announcements, onPressAnnouncement }: AnnouncementListProps) {
-  if (announcements.length === 0) {
-    return <EmptyState message="등록된 공지가 없습니다." iconName="megaphone-outline" />;
-  }
+const FAQ_ITEMS: { q: string; a: string }[] = [
+  { q: '축제는 언제 열리나요?', a: '5월 20일(수)~21일(목) 이틀간 진행됩니다.' },
+  { q: '주차는 가능한가요?', a: '교내 주차 제한, 대중교통·셔틀버스 이용을 권장합니다.' },
+];
+
+export function AnnouncementList({ announcements }: AnnouncementListProps) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const sorted = useMemo(
+    () =>
+      [...announcements].sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      }),
+    [announcements],
+  );
 
   return (
-    <FlatList
-      data={announcements}
-      keyExtractor={(item) => item.id}
-      contentContainerClassName="bg-[#f2f2f2]"
-      renderItem={({ item }) => (
-        <AnnouncementCard
-          title={item.title}
-          content={item.content}
-          author={item.author}
-          date={formatDate(item.publishedAt)}
-          onPress={() => onPressAnnouncement?.(item)}
-        />
+    <View style={{ paddingVertical: 24, paddingHorizontal: 16, gap: 18 }}>
+      <View style={{ alignItems: 'center' }}>
+        <NotificationBadge label="Notification" variant="notification" />
+      </View>
+
+      {sorted.length === 0 ? (
+        <EmptyState message="등록된 공지가 없습니다." iconName="megaphone-outline" />
+      ) : (
+        <View style={{ gap: 10 }}>
+          {sorted.map((item) => {
+            const isExpanded = expandedId === item.id;
+            return (
+              <NotificationPill
+                key={item.id}
+                title={item.title}
+                pinned={item.isPinned}
+                expanded={isExpanded}
+                content={isExpanded ? item.content : undefined}
+                onPress={() => setExpandedId(isExpanded ? null : item.id)}
+              />
+            );
+          })}
+        </View>
       )}
-      ItemSeparatorComponent={() => <View className="h-[1px] bg-festival-primary mx-6" />}
-    />
+
+      <View style={{ alignItems: 'center', marginTop: 12 }}>
+        <NotificationBadge label="FAQ" variant="faq" />
+      </View>
+
+      <View style={{ gap: 14, alignItems: 'center' }}>
+        {FAQ_ITEMS.map((f, idx) => (
+          <FaqBubble
+            key={f.q}
+            question={f.q}
+            answer={f.a}
+            tail={idx % 2 === 0 ? 'left' : 'right'}
+          />
+        ))}
+      </View>
+    </View>
   );
 }

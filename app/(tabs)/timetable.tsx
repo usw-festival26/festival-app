@@ -13,7 +13,7 @@ export default function TimetableScreen() {
   const { days, stages } = useTimetable();
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
       <ScreenHeader title="타임테이블" />
       <TimetableGrid days={days} stages={stages} />
     </SafeAreaView>

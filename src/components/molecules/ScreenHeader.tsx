@@ -15,12 +15,15 @@ export interface ScreenHeaderProps {
   leftAction?: 'hamburger' | 'back' | 'none';
   /** @deprecated showHamburger 대신 leftAction 사용 */
   showHamburger?: boolean;
+  /** 배경색 오버라이드 NativeWind 클래스 (예: 'bg-[#F0F0F0]') */
+  bgClassName?: string;
 }
 
 export function ScreenHeader({
   title,
   leftAction,
   showHamburger = true,
+  bgClassName = 'bg-festival-card',
 }: ScreenHeaderProps) {
   const navigation = useNavigation();
   const router = useRouter();
@@ -28,7 +31,7 @@ export function ScreenHeader({
   const resolvedAction = leftAction ?? (showHamburger ? 'hamburger' : 'none');
 
   return (
-    <View className="bg-festival-card rounded-b-card-lg px-4 pb-4 pt-2">
+    <View className={`${bgClassName} rounded-b-card-lg px-4 pb-4 pt-2`}>
       <View className="flex-row items-center justify-between h-[44px]">
         {resolvedAction === 'hamburger' ? (
           <Pressable

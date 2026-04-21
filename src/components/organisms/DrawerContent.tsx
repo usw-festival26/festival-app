@@ -22,6 +22,7 @@ const MENU_ITEMS: DrawerMenuItem[] = [
   { label: '지도', route: '/(tabs)/booth', matchPath: '/booth' },
   { label: '메뉴', route: '/(tabs)/menu', matchPath: '/menu' },
   { label: '타임테이블', route: '/(tabs)/timetable', matchPath: '/timetable' },
+  { label: '라인업', route: '/(tabs)/lineup', matchPath: '/lineup' },
   { label: '공지', route: '/(tabs)/announcements', matchPath: '/announcements' },
   { label: '분실물', route: '/(tabs)/lost-found', matchPath: '/lost-found' },
 ];
@@ -36,7 +37,7 @@ export function DrawerContent({ navigation }: DrawerContentComponentProps) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#d9d9d9]" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-festival-lavender" edges={['top', 'bottom']}>
       <View className="flex-1 px-[18px] pt-[18px]">
         <Pressable
           onPress={() => navigation.dispatch(DrawerActions.closeDrawer())}

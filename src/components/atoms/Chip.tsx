@@ -1,42 +1,51 @@
 /**
- * Chip - 선택 가능한 필터 칩
+ * Chip - 선택 가능한 필터 칩 (Figma 920:3931)
  *
- * Figma 와이어프레임: 선택됨=회색 채움, 미선택=검정 테두리
+ * filter: 50×29, active=네이비 채움 + 흰 글자, inactive=흰 배경 + 검정 보더 + 검정 글자
+ * dayPill: 95×30, 날짜 선택용
+ * 라벨은 Pretendard SemiBold 15
  */
 import React from 'react';
-import { Pressable } from 'react-native';
-import { AppText } from './AppText';
+import { Pressable, Text } from 'react-native';
 
 export interface ChipProps {
   label: string;
   selected?: boolean;
   onPress?: () => void;
-  /** 'filter' = 작은 필터칩(50x29), 'dayPill' = 날짜 선택(95x30) */
   variant?: 'filter' | 'dayPill';
   className?: string;
 }
 
 export function Chip({ label, selected = false, onPress, variant = 'filter', className = '' }: ChipProps) {
   const isDay = variant === 'dayPill';
+  const activeBg = '#010070';
 
   return (
     <Pressable
       onPress={onPress}
-      className={`items-center justify-center active:opacity-80 ${
-        isDay ? 'w-[95px] h-[30px] rounded-pill' : 'min-w-[50px] h-[29px] rounded-chip px-3'
-      } ${
-        selected
-          ? 'bg-festival-primary'
-          : 'border border-black bg-transparent'
-      } ${className}`}
+      style={{
+        minWidth: isDay ? 95 : 50,
+        height: isDay ? 30 : 29,
+        borderRadius: isDay ? 9999 : 14.5,
+        paddingHorizontal: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: selected ? activeBg : '#FFFFFF',
+        borderWidth: selected ? 0 : 1,
+        borderColor: '#000000',
+      }}
+      className={`active:opacity-80 ${className}`}
     >
-      <AppText
-        className={`text-center text-black ${
-          isDay ? 'text-xs' : 'text-xs font-medium'
-        }`}
+      <Text
+        style={{
+          fontFamily: 'Pretendard-SemiBold',
+          fontSize: 15,
+          color: selected ? '#FFFFFF' : '#000000',
+          textAlign: 'center',
+        }}
       >
         {label}
-      </AppText>
+      </Text>
     </Pressable>
   );
 }

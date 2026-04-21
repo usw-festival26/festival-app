@@ -41,7 +41,7 @@ export function MenuTable({ menuItems }: MenuTableProps) {
       {activeColumns.map((col, colIndex) => (
         <View key={col}>
           {colIndex > 0 && (
-            <View className="h-px bg-festival-secondary/30 my-4" />
+            <View className="h-px bg-festival-muted/30 my-4" />
           )}
           <AppText className="text-[20px] font-black text-black mb-3">
             {COLUMN_LABELS[col]}

@@ -22,7 +22,7 @@ export default function MenuListScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
       <ScreenHeader title="메뉴" />
       <ScrollView contentContainerClassName="px-[10px] pt-4 pb-8">
         {rows.map((row, i) => (

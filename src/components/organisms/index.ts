@@ -7,7 +7,9 @@ export { HeroSection } from './HeroSection';
 export { DrawerContent } from './DrawerContent';
 export { AboutSection, type AboutSectionProps } from './AboutSection';
 export { EventsSection } from './EventsSection';
+export { LineupSection } from './LineupSection';
 export { BoothMapView, type BoothMapViewProps } from './BoothMapView';
+export { BoothGrid, type BoothGridProps } from './BoothGrid';
 export { InformationContent, type InformationContentProps } from './InformationContent';
 export { BoothSheetContent, type BoothSheetContentProps } from './BoothSheetContent';
 export { FoodSheetContent, type FoodSheetContentProps } from './FoodSheetContent';
@@ -15,3 +17,4 @@ export { FacilitySheetContent, type FacilitySheetContentProps } from './Facility
 export { EventSheetContent, type EventSheetContentProps } from './EventSheetContent';
 export { NotFoundContent, type NotFoundContentProps } from './NotFoundContent';
 export { SplashContent, type SplashContentProps } from './SplashContent';
+export { LineupList, type LineupListProps } from './LineupList';

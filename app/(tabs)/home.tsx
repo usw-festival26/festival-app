@@ -1,63 +1,35 @@
 /**
- * 홈 화면 - Figma 74:28
+ * 홈 화면 - Figma 1334:802
  *
- * 햄버거+LOGO 헤더 → 메인 포스터 → Events → About Us → Information → Footer
+ * 흰색 포스터 패널(HeroSection) → 네이비 영역(ScreenBackdrop + Events → Line up → About Us) → 회색 푸터
+ * Information 버튼은 About Us 카드 내부에 흡수.
  */
 import React from 'react';
-import { View, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, DrawerActions } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import { AppText } from '../../src/components/atoms/AppText';
+import { View } from 'react-native';
 import { ScrollScreenTemplate } from '../../src/components/templates/ScrollScreenTemplate';
 import { HeroSection } from '../../src/components/organisms/HeroSection';
 import { EventsSection } from '../../src/components/organisms/EventsSection';
+import { LineupSection } from '../../src/components/organisms/LineupSection';
 import { AboutSection } from '../../src/components/organisms/AboutSection';
+import { ScreenBackdrop } from '../../src/components/atoms/ScreenBackdrop';
 import { Footer } from '../../src/components/molecules/Footer';
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
-  const router = useRouter();
-
   return (
     <ScrollScreenTemplate showHeader={false}>
-      {/* 헤더: 햄버거 메뉴 + LOGO */}
-      <View className="flex-row items-center px-4 h-[50px] bg-festival-primary">
-        <Pressable
-          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          className="w-[30px] h-[30px] items-center justify-center active:opacity-70"
-        >
-          <Ionicons name="menu" size={28} color="#000" />
-        </Pressable>
-        <View className="flex-1 items-center justify-center">
-          <AppText className="text-[20px] font-black text-black">LOGO</AppText>
-        </View>
-        <View className="w-[30px]" />
-      </View>
-
-      {/* 메인 포스터 */}
+      {/* 흰색 포스터 패널 (헤더 포함) */}
       <HeroSection />
 
-      {/* Events 섹션 */}
-      <View className="bg-white pt-2">
+      {/* 네이비 영역 — ScreenBackdrop(home) blob 2개 + Events/Line up/About Us */}
+      <View
+        className="bg-festival-primary-dark"
+        style={{ position: 'relative', overflow: 'hidden' }}
+      >
+        <ScreenBackdrop variant="home" />
+
         <EventsSection />
-      </View>
-
-      {/* About Us 섹션 */}
-      <View className="bg-white">
+        <LineupSection />
         <AboutSection />
-      </View>
-
-      {/* Information 버튼 */}
-      <View className="bg-white px-4 pb-4">
-        <Pressable
-          onPress={() => router.push('/(tabs)/information' as any)}
-          className="h-[35px] bg-festival-primary rounded-full items-center justify-center active:opacity-70"
-        >
-          <AppText className="text-[15px] font-semibold text-black">
-            Information
-          </AppText>
-        </Pressable>
       </View>
 
       {/* 푸터 */}
