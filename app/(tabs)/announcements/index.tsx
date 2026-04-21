@@ -1,22 +1,22 @@
 /**
- * 공지사항 목록 화면 - Figma 82:72
+ * 공지사항 목록 화면 - Figma 920:4490
+ *
+ * BackdropScreenTemplate로 래핑. pill 탭은 expand 전용.
  */
 import React from 'react';
-import { useRouter } from 'expo-router';
-import { ListScreenTemplate } from '../../../src/components/templates/ListScreenTemplate';
+import { ScrollView } from 'react-native';
+import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
 import { AnnouncementList } from '../../../src/components/organisms/AnnouncementList';
 import { useAnnouncements } from '../../../src/hooks/useAnnouncements';
 
 export default function AnnouncementsListScreen() {
-  const router = useRouter();
   const { announcements } = useAnnouncements();
 
   return (
-    <ListScreenTemplate title="공지">
-      <AnnouncementList
-        announcements={announcements}
-        onPressAnnouncement={(item) => router.push(`/(tabs)/announcements/${item.id}`)}
-      />
-    </ListScreenTemplate>
+    <BackdropScreenTemplate title="공지" backdropVariant="announcement">
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        <AnnouncementList announcements={announcements} />
+      </ScrollView>
+    </BackdropScreenTemplate>
   );
 }

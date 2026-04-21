@@ -1,79 +1,155 @@
 /**
- * LostFoundList - 분실물 테이블 리스트
+ * LostFoundList - 분실물 카드 리스트 (Figma 1228:1018)
  *
- * Figma 82:77: 단일 흰색 카드 안에 2열(물품/정보) 테이블 레이아웃 + 하단 문의번호
+ * 반투명 흰 그라디언트 패널 위에 필터칩 + LostFoundCard 스택.
+ * 하단: 1/3 페이지 인디케이터 + "다음페이지" 링크.
  */
-import React from 'react';
-import { ScrollView, View } from 'react-native';
-import type { LostFoundItem } from '../../types/lostFound';
-import { AppText } from '@atoms/AppText';
-import { LostFoundTableRow } from '@molecules/LostFoundTableRow';
+import React, { useMemo, useState } from 'react';
+import { ScrollView, View, Text, Pressable, Platform, StyleSheet, ActivityIndicator } from 'react-native';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import type { LostFoundItem, LostFoundCategory } from '../../types/lostFound';
+import { Chip } from '@atoms/Chip';
+import { LostFoundCard } from '@molecules/LostFoundCard';
 import { EmptyState } from '@molecules/EmptyState';
-import { formatDate } from '../../utils/date';
 
-const STATUS_LABEL: Record<string, string> = {
-  lost: '분실',
-  found: '발견',
-  claimed: '수령완료',
-};
+type FilterKey = 'all' | LostFoundCategory;
 
-const CATEGORY_LABEL: Record<string, string> = {
-  electronics: '전자기기',
-  clothing: '의류',
-  accessories: '액세서리',
-  bags: '가방',
-  other: '기타',
-};
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: 'all', label: '전체' },
+  { key: 'electronics', label: '전자기기' },
+  { key: 'clothing', label: '의류' },
+  { key: 'accessories', label: '액세서리' },
+  { key: 'bags', label: '가방' },
+  { key: 'other', label: '기타' },
+];
 
-const CONTACT_NUMBERS = ['010-1234-5678', '010-1234-5678'];
+const PAGE_SIZE = 5;
 
 export interface LostFoundListProps {
   items: LostFoundItem[];
+  isLoading?: boolean;
+  error?: string | null;
   onPressItem?: (item: LostFoundItem) => void;
 }
 
-export function LostFoundList({ items, onPressItem }: LostFoundListProps) {
-  if (items.length === 0) {
-    return <EmptyState message="등록된 분실물이 없습니다." iconName="search-outline" />;
-  }
+export function LostFoundList({ items, isLoading, error, onPressItem }: LostFoundListProps) {
+  const [filter, setFilter] = useState<FilterKey>('all');
+  const [page, setPage] = useState(0);
+
+  const filtered = useMemo(
+    () => (filter === 'all' ? items : items.filter((i) => i.category === filter)),
+    [items, filter]
+  );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageItems = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
-    <ScrollView contentContainerClassName="px-4 py-4 gap-4">
-      {/* 메인 카드: 2열 테이블 */}
-      <View className="bg-festival-card rounded-card-lg px-2 py-4">
-        {items.map((item) => (
-          <LostFoundTableRow
-            key={item.id}
-            productTitle={item.title}
-            productItems={[
-              CATEGORY_LABEL[item.category] ?? item.category,
-              item.description,
-              STATUS_LABEL[item.status] ?? item.status,
-            ]}
-            infoTitle={item.location}
-            infoItems={[
-              formatDate(item.reportedAt),
-              STATUS_LABEL[item.status] ?? item.status,
-              CATEGORY_LABEL[item.category] ?? item.category,
-            ]}
-          />
-        ))}
-      </View>
+    <View style={{ flex: 1, position: 'relative' }}>
+      <Svg
+        width="100%"
+        height="100%"
+        style={{ position: 'absolute', top: 0, left: 0 }}
+        preserveAspectRatio="none"
+      >
+        <Defs>
+          <LinearGradient id="lost-found-panel" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.5" />
+            <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.95" />
+          </LinearGradient>
+        </Defs>
+        <Rect x={0} y={0} width="100%" height="100%" fill="url(#lost-found-panel)" />
+      </Svg>
 
-      {/* 하단 문의번호 */}
-      <View className="bg-festival-card rounded-card-lg px-4 py-3 items-center gap-1">
-        {CONTACT_NUMBERS.map((number, idx) => (
-          <View key={idx} className="flex-row items-center gap-3">
-            <AppText variant="caption" className="text-festival-text">
-              문의번호
-            </AppText>
-            <View className="w-[3px] h-[3px] rounded-full bg-festival-text" />
-            <AppText variant="caption" className="text-festival-text">
-              {number}
-            </AppText>
+      <ScrollView
+        contentContainerStyle={{ paddingTop: 16, paddingBottom: 24, alignItems: 'stretch' }}
+      >
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 14 }}
+        >
+          {FILTERS.map((f) => (
+            <Chip
+              key={f.key}
+              label={f.label}
+              selected={filter === f.key}
+              onPress={() => {
+                setFilter(f.key);
+                setPage(0);
+              }}
+            />
+          ))}
+        </ScrollView>
+
+        {isLoading ? (
+          <View style={{ paddingTop: 48, alignItems: 'center' }}>
+            <ActivityIndicator size="small" color="#02015B" />
           </View>
-        ))}
-      </View>
-    </ScrollView>
+        ) : error ? (
+          <View style={{ paddingTop: 48 }}>
+            <EmptyState
+              message={`분실물을 불러오지 못했습니다.\n${error}`}
+              iconName="alert-circle-outline"
+            />
+          </View>
+        ) : pageItems.length === 0 ? (
+          <View style={{ paddingTop: 48 }}>
+            <EmptyState message="등록된 분실물이 없습니다." iconName="search-outline" />
+          </View>
+        ) : (
+          <View style={{ gap: 12, paddingHorizontal: 16, width: '100%' }}>
+            {pageItems.map((item) => (
+              <LostFoundCard
+                key={item.id}
+                item={item}
+                onPress={() => onPressItem?.(item)}
+              />
+            ))}
+          </View>
+        )}
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 16,
+            marginTop: 20,
+          }}
+        >
+          <Text style={styles.pageIndicator}>
+            {page + 1}/{totalPages}
+          </Text>
+          <Pressable
+            onPress={() => setPage((p) => (p + 1) % totalPages)}
+            accessibilityRole="button"
+            accessibilityLabel="다음 페이지"
+            disabled={totalPages <= 1}
+            style={({ pressed }) => ({
+              opacity: totalPages <= 1 ? 0.4 : pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={styles.nextLink}>다음페이지</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  pageIndicator: {
+    fontFamily: Platform.select({ web: 'Pretendard', default: 'Pretendard-SemiBold' }),
+    fontWeight: '600',
+    fontSize: 13,
+    color: '#02015B',
+  },
+  nextLink: {
+    fontFamily: Platform.select({ web: 'Pretendard', default: 'Pretendard-SemiBold' }),
+    fontWeight: '600',
+    fontSize: 13,
+    color: '#0D00FF',
+    textDecorationLine: 'underline',
+  },
+});

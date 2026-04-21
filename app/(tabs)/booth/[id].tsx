@@ -1,13 +1,12 @@
 /**
- * 부스 상세 화면 - Figma 135:134
+ * 부스 상세 화면 - Figma 1272:1632
  *
- * 학과명 + 이미지 + 메뉴 테이블 + 부스 공지
+ * BackdropScreenTemplate 헤더(햄버거) + BoothDetail(카드 안에 자체 뒤로가기 존재)
  */
 import React from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScreenHeader } from '../../../src/components/molecules/ScreenHeader';
+import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
 import { BoothDetail } from '../../../src/components/organisms/BoothDetail';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
 import { useBoothById } from '../../../src/hooks/useBooths';
@@ -20,20 +19,18 @@ export default function BoothDetailScreen() {
 
   if (!booth) {
     return (
-      <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
-        <ScreenHeader title="메뉴" leftAction="back" />
+      <BackdropScreenTemplate title="부스/메뉴" backdropVariant="booth-detail">
         <EmptyState message="부스를 찾을 수 없습니다." />
         <View className="items-center">
           <AppButton onPress={() => router.back()}>돌아가기</AppButton>
         </View>
-      </SafeAreaView>
+      </BackdropScreenTemplate>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
-      <ScreenHeader title="메뉴" leftAction="back" />
+    <BackdropScreenTemplate title="부스/메뉴" backdropVariant="booth-detail">
       <BoothDetail booth={booth} />
-    </SafeAreaView>
+    </BackdropScreenTemplate>
   );
 }

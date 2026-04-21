@@ -22,11 +22,13 @@ export function HeroSection() {
 
   return (
     <View className="bg-festival-card w-full" style={{ height: PANEL_HEIGHT }}>
-      {/* 햄버거 (16, 61) */}
+      {/* 햄버거 — Figma (16, 61)은 상태바 포함 좌표. SafeAreaView가 상태바를 이미 처리하므로 44px 뺀 top:17 사용 */}
       <Pressable
         onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-        style={{ position: 'absolute', left: 16, top: 61, width: 30, height: 30 }}
+        style={{ position: 'absolute', left: 16, top: 17, width: 30, height: 30 }}
         className="items-center justify-center active:opacity-70"
+        accessibilityRole="button"
+        accessibilityLabel="메뉴 열기"
       >
         <Ionicons name="menu" size={28} color="#000" />
       </Pressable>

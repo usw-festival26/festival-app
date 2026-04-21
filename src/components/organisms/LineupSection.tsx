@@ -1,34 +1,36 @@
 /**
- * EventsSection - 홈 Events 가로 스크롤 (Figma 920:3828)
+ * LineupSection - 홈 Line up 가로 스크롤 (Figma 1334:802)
  *
- * "Events" 라벨 Roboto Black 20 white, left:61 (좌측 정렬).
- * 카드 140×180 rounded-12, 텍스트 (left:14, top:133) Pretendard Medium 11.
+ * "Line up" 라벨 좌측(paddingLeft:61) + 우측 "더보기" 링크, 카드 140×180.
+ * 카드 내부 "아티스트 이름" placeholder는 top:147 (Events의 top:133과 다름).
  */
 import React from 'react';
-import { View, ScrollView, Text, Pressable, Platform, Alert } from 'react-native';
+import { View, ScrollView, Text, Pressable, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
-interface EventItem {
+interface LineupItem {
   id: string;
-  line1: string;
-  line2: string;
+  name: string;
 }
 
-const EVENTS: EventItem[] = [
-  { id: '1', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '2', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '3', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '4', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '5', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '6', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
+const LINEUP: LineupItem[] = [
+  { id: '1', name: '아티스트 이름' },
+  { id: '2', name: '아티스트 이름' },
+  { id: '3', name: '아티스트 이름' },
+  { id: '4', name: '아티스트 이름' },
+  { id: '5', name: '아티스트 이름' },
+  { id: '6', name: '아티스트 이름' },
 ];
 
 const ROBOTO_BLACK = Platform.select({ web: 'Roboto', default: 'Roboto_900Black' });
 
-export function EventsSection() {
+export function LineupSection() {
+  const router = useRouter();
+
   return (
-    <View style={{ paddingTop: 41, paddingBottom: 27 }}>
-      {/* 라벨 행: 좌측 "Events" + 우측 "더보기" */}
+    <View style={{ paddingTop: 41, paddingBottom: 0 }}>
+      {/* 라벨 행: 좌측 "Line up" + 우측 "더보기" */}
       <View
         style={{
           flexDirection: 'row',
@@ -36,7 +38,7 @@ export function EventsSection() {
           justifyContent: 'space-between',
           paddingLeft: 20,
           paddingRight: 17,
-          marginBottom: 14,
+          marginBottom: 19,
         }}
       >
         <Text
@@ -49,14 +51,14 @@ export function EventsSection() {
             letterSpacing: 0,
           }}
         >
-          Events
+          Line up
         </Text>
         <Pressable
-          onPress={() => Alert.alert('준비 중', '이벤트 상세는 추후 공개됩니다.')}
+          onPress={() => router.push('/(tabs)/lineup' as any)}
           hitSlop={8}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-          accessibilityRole="button"
-          accessibilityLabel="이벤트 더보기"
+          accessibilityRole="link"
+          accessibilityLabel="라인업 더보기"
         >
           <Text
             style={{
@@ -78,7 +80,7 @@ export function EventsSection() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingLeft: 17, paddingRight: 48, gap: 10 }}
       >
-        {EVENTS.map((item) => (
+        {LINEUP.map((item) => (
           <View
             key={item.id}
             style={{
@@ -89,7 +91,7 @@ export function EventsSection() {
               position: 'relative',
             }}
           >
-            <View style={{ position: 'absolute', left: 14, top: 133 }}>
+            <View style={{ position: 'absolute', left: 17, top: 147 }}>
               <Text
                 style={{
                   fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Medium' }),
@@ -100,19 +102,7 @@ export function EventsSection() {
                   color: '#000',
                 }}
               >
-                {item.line1}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Medium' }),
-                  fontWeight: '500',
-                  fontSize: 11,
-                  lineHeight: 20,
-                  letterSpacing: -0.5,
-                  color: '#000',
-                }}
-              >
-                {item.line2}
+                {item.name}
               </Text>
             </View>
           </View>

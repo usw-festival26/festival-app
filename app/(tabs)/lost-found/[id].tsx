@@ -13,25 +13,15 @@ import { AppButton } from '../../../src/components/atoms/AppButton';
 import { useLostFoundById } from '../../../src/hooks/useLostFound';
 import { formatDate } from '../../../src/utils/date';
 import type { BadgeVariant } from '../../../src/components/atoms/Badge';
-
-const STATUS_LABEL: Record<string, string> = {
-  lost: '분실',
-  found: '발견',
-  claimed: '수령완료',
-};
+import {
+  LOST_FOUND_STATUS_LABEL,
+  LOST_FOUND_CATEGORY_LABEL,
+} from '../../../src/constants/lostFound';
 
 const STATUS_VARIANT: Record<string, BadgeVariant> = {
   lost: 'danger',
   found: 'warning',
   claimed: 'success',
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  electronics: '전자기기',
-  clothing: '의류',
-  accessories: '악세서리',
-  bags: '가방',
-  other: '기타',
 };
 
 export default function LostFoundDetailScreen() {
@@ -56,10 +46,10 @@ export default function LostFoundDetailScreen() {
         {/* 상태 + 카테고리 */}
         <View className="flex-row items-center gap-2 mb-3">
           <Badge
-            text={STATUS_LABEL[item.status] ?? item.status}
+            text={LOST_FOUND_STATUS_LABEL[item.status] ?? item.status}
             variant={STATUS_VARIANT[item.status] ?? 'default'}
           />
-          <Badge text={CATEGORY_LABEL[item.category] ?? item.category} />
+          <Badge text={LOST_FOUND_CATEGORY_LABEL[item.category] ?? item.category} />
         </View>
 
         {/* 제목 */}
