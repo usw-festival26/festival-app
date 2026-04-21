@@ -8,8 +8,8 @@ import React from 'react';
 import { View, Text, Pressable, Image, Platform, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { LostFoundItem, LostFoundStatus } from '../../types/lostFound';
-import { formatDate } from '../../utils/date';
-import { LOST_FOUND_STATUS_LABEL, LOST_FOUND_CATEGORY_LABEL } from '../../constants/lostFound';
+import { formatDate } from '@utils/date';
+import { LOST_FOUND_STATUS_LABEL, LOST_FOUND_CATEGORY_LABEL } from '@constants/lostFound';
 
 const STATUS_COLOR: Record<LostFoundStatus, { bg: string; fg: string }> = {
   lost: { bg: '#FFBEBF', fg: '#7A001F' },

@@ -8,25 +8,13 @@ import React from 'react';
 import { View, ScrollView, Text, Pressable, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
-interface LineupItem {
-  id: string;
-  name: string;
-}
-
-const LINEUP: LineupItem[] = [
-  { id: '1', name: '아티스트 이름' },
-  { id: '2', name: '아티스트 이름' },
-  { id: '3', name: '아티스트 이름' },
-  { id: '4', name: '아티스트 이름' },
-  { id: '5', name: '아티스트 이름' },
-  { id: '6', name: '아티스트 이름' },
-];
+import { useLineup } from '@hooks/index';
 
 const ROBOTO_BLACK = Platform.select({ web: 'Roboto', default: 'Roboto_900Black' });
 
 export function LineupSection() {
   const router = useRouter();
+  const { data } = useLineup();
 
   return (
     <View style={{ paddingTop: 41, paddingBottom: 0 }}>
@@ -80,7 +68,7 @@ export function LineupSection() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingLeft: 17, paddingRight: 48, gap: 10 }}
       >
-        {LINEUP.map((item) => (
+        {data.slice(0, 6).map((item) => (
           <View
             key={item.id}
             style={{

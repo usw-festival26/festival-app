@@ -183,7 +183,7 @@ export interface ScreenBackdropProps {
  */
 export function ScreenBackdrop({ variant }: ScreenBackdropProps) {
   const blobs = PRESETS[variant];
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(true);
 
   useEffect(() => {
     let mounted = true;

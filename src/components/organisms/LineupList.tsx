@@ -8,7 +8,7 @@
 import React from 'react';
 import { View, Platform } from 'react-native';
 import { AppText } from '@atoms/AppText';
-import { ArtistCard } from '../molecules/ArtistCard';
+import { ArtistCard } from '@molecules/ArtistCard';
 import type { Artist } from '../../types/lineup';
 
 export interface LineupListProps {

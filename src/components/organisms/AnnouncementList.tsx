@@ -1,9 +1,9 @@
 /**
  * AnnouncementList - 공지 pill + FAQ (Figma 920:4490)
  *
- * Noffication 배지 → pill 리스트 (핀 공지는 상단) → FAQ 배지 → 말풍선 2개(좌/우 교차)
+ * Notification 배지 → pill 리스트 (핀 공지는 상단) → FAQ 배지 → 말풍선 2개(좌/우 교차)
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import type { Announcement } from '../../types/announcement';
 import { NotificationBadge } from '@atoms/NotificationBadge';
@@ -23,37 +23,41 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
 export function AnnouncementList({ announcements }: AnnouncementListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  if (announcements.length === 0) {
-    return <EmptyState message="등록된 공지가 없습니다." iconName="megaphone-outline" />;
-  }
-
-  const sorted = [...announcements].sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
-    return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-  });
+  const sorted = useMemo(
+    () =>
+      [...announcements].sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      }),
+    [announcements],
+  );
 
   return (
     <View style={{ paddingVertical: 24, paddingHorizontal: 16, gap: 18 }}>
       <View style={{ alignItems: 'center' }}>
-        <NotificationBadge label="Noffication" variant="notification" />
+        <NotificationBadge label="Notification" variant="notification" />
       </View>
 
-      <View style={{ gap: 10 }}>
-        {sorted.map((item) => {
-          const isExpanded = expandedId === item.id;
-          return (
-            <NotificationPill
-              key={item.id}
-              title={item.title}
-              pinned={item.isPinned}
-              expanded={isExpanded}
-              content={isExpanded ? item.content : undefined}
-              onPress={() => setExpandedId(isExpanded ? null : item.id)}
-            />
-          );
-        })}
-      </View>
+      {sorted.length === 0 ? (
+        <EmptyState message="등록된 공지가 없습니다." iconName="megaphone-outline" />
+      ) : (
+        <View style={{ gap: 10 }}>
+          {sorted.map((item) => {
+            const isExpanded = expandedId === item.id;
+            return (
+              <NotificationPill
+                key={item.id}
+                title={item.title}
+                pinned={item.isPinned}
+                expanded={isExpanded}
+                content={isExpanded ? item.content : undefined}
+                onPress={() => setExpandedId(isExpanded ? null : item.id)}
+              />
+            );
+          })}
+        </View>
+      )}
 
       <View style={{ alignItems: 'center', marginTop: 12 }}>
         <NotificationBadge label="FAQ" variant="faq" />

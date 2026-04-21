@@ -45,11 +45,7 @@ export function FaqBubble({ question, answer, tail = 'left' }: FaqBubbleProps) {
         }}
       >
         <Polygon
-          points={
-            tail === 'left'
-              ? `0,0 ${TAIL_W},0 ${TAIL_W / 2},${TAIL_H}`
-              : `0,0 ${TAIL_W},0 ${TAIL_W / 2},${TAIL_H}`
-          }
+          points={`0,0 ${TAIL_W},0 ${TAIL_W / 2},${TAIL_H}`}
           fill="#FFFFFF"
         />
       </Svg>
