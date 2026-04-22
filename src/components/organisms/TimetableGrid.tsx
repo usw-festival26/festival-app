@@ -150,7 +150,7 @@ export function TimetableGrid({ days }: TimetableGridProps) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: 'rgba(255,255,255,0.9)',
     borderRadius: 20,
     overflow: 'hidden',
   },

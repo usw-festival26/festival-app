@@ -50,23 +50,32 @@ export function LostFoundCard({ item, onPress }: LostFoundCardProps) {
   const statusLabel = STATUS_LABEL[item.status];
   const hasPill = item.status !== 'lost';
 
+  const cardStyle = {
+    width: '100%' as const,
+    backgroundColor: 'rgba(224,220,255,0.5)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    paddingBottom: 10,
+  };
+
+  const Container: any = onPress ? Pressable : View;
+  const containerProps = onPress
+    ? {
+        onPress,
+        accessibilityRole: 'button' as const,
+        accessibilityLabel: `${item.title} - ${statusLabel}`,
+        style: ({ pressed }: { pressed: boolean }) => ({
+          ...cardStyle,
+          opacity: pressed ? 0.85 : 1,
+        }),
+      }
+    : { style: cardStyle };
+
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${item.title} - ${statusLabel}`}
-      style={({ pressed }) => ({
-        width: '100%',
-        backgroundColor: 'rgba(224,220,255,0.5)',
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: '#FFFFFF',
-        paddingHorizontal: 14,
-        paddingTop: 14,
-        paddingBottom: 10,
-        opacity: pressed ? 0.85 : 1,
-      })}
-    >
+    <Container {...containerProps}>
       {/* 상단: 썸네일 + 제목/위치 */}
       <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center', paddingBottom: 12 }}>
         <View
@@ -129,7 +138,7 @@ export function LostFoundCard({ item, onPress }: LostFoundCardProps) {
           <Text style={styles.statusText}>{statusLabel}</Text>
         )}
       </View>
-    </Pressable>
+    </Container>
   );
 }
 

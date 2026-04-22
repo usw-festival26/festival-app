@@ -19,7 +19,7 @@ export default function BoothDetailScreen() {
 
   if (!booth) {
     return (
-      <BackdropScreenTemplate title="부스/메뉴" backdropVariant="booth-detail">
+      <BackdropScreenTemplate title="메뉴" backdropVariant="booth-detail">
         <EmptyState message="부스를 찾을 수 없습니다." />
         <View className="items-center">
           <AppButton onPress={() => router.back()}>돌아가기</AppButton>
@@ -29,7 +29,7 @@ export default function BoothDetailScreen() {
   }
 
   return (
-    <BackdropScreenTemplate title="부스/메뉴" backdropVariant="booth-detail">
+    <BackdropScreenTemplate title="메뉴" backdropVariant="booth-detail">
       <BoothDetail booth={booth} />
     </BackdropScreenTemplate>
   );

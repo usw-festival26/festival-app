@@ -215,76 +215,83 @@ export function BoothMapView({
         </View>
       </View>
 
-      {/* 바텀시트 */}
+      {/* 바텀시트 — 외곽 래퍼는 navy 로 채워 둥근 모서리 exclusion zone 으로 backdrop blob이 비치지 않게 한다. */}
       <Animated.View
         style={{
           height: sheetAnim,
-          backgroundColor: '#FFFFFF',
-          borderTopLeftRadius: 36,
-          borderTopRightRadius: 36,
-          overflow: 'hidden',
+          backgroundColor: '#010070',
         }}
         onLayout={onSheetLayout}
       >
         <View
-          onStartShouldSetResponder={() => true}
-          onMoveShouldSetResponder={() => true}
-          onResponderStart={onHandleTouchStart}
-          onResponderMove={onHandleTouchMove}
-          onResponderRelease={onHandleTouchEnd}
-          style={{ cursor: 'grab' } as any}
+          style={{
+            flex: 1,
+            backgroundColor: '#FFFFFF',
+            borderTopLeftRadius: 36,
+            borderTopRightRadius: 36,
+            overflow: 'hidden',
+          }}
         >
-          <DragHandle />
-        </View>
-
-        {sheetWidth > 0 && (
           <View
-            className="flex-1"
-            style={{ overflow: 'hidden' }}
             onStartShouldSetResponder={() => true}
             onMoveShouldSetResponder={() => true}
-            onResponderStart={onContentTouchStart}
-            onResponderMove={onContentTouchMove}
-            onResponderRelease={onContentTouchEnd}
+            onResponderStart={onHandleTouchStart}
+            onResponderMove={onHandleTouchMove}
+            onResponderRelease={onHandleTouchEnd}
+            style={{ cursor: 'grab' } as any}
           >
-            <Animated.View
-              style={{
-                flexDirection: 'row',
-                width: sheetWidth * CATEGORIES.length,
-                flex: 1,
-                transform: [{ translateX }],
-              }}
-            >
-              <View style={{ width: sheetWidth, flex: 1 }}>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  <BoothSheetContent booths={booths} />
-                  <View className="h-6" />
-                </ScrollView>
-              </View>
-
-              <View style={{ width: sheetWidth, flex: 1 }}>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  <FoodSheetContent booths={foodBooths} />
-                  <View className="h-6" />
-                </ScrollView>
-              </View>
-
-              <View style={{ width: sheetWidth, flex: 1 }}>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  <FacilitySheetContent facilities={facilities} />
-                  <View className="h-6" />
-                </ScrollView>
-              </View>
-
-              <View style={{ width: sheetWidth, flex: 1 }}>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  <EventSheetContent events={events} />
-                  <View className="h-6" />
-                </ScrollView>
-              </View>
-            </Animated.View>
+            <DragHandle />
           </View>
-        )}
+
+          {sheetWidth > 0 && (
+            <View
+              className="flex-1"
+              style={{ overflow: 'hidden' }}
+              onStartShouldSetResponder={() => true}
+              onMoveShouldSetResponder={() => true}
+              onResponderStart={onContentTouchStart}
+              onResponderMove={onContentTouchMove}
+              onResponderRelease={onContentTouchEnd}
+            >
+              <Animated.View
+                style={{
+                  flexDirection: 'row',
+                  width: sheetWidth * CATEGORIES.length,
+                  flex: 1,
+                  transform: [{ translateX }],
+                }}
+              >
+                <View style={{ width: sheetWidth, flex: 1 }}>
+                  <ScrollView showsVerticalScrollIndicator={false}>
+                    <BoothSheetContent booths={booths} />
+                    <View className="h-6" />
+                  </ScrollView>
+                </View>
+
+                <View style={{ width: sheetWidth, flex: 1 }}>
+                  <ScrollView showsVerticalScrollIndicator={false}>
+                    <FoodSheetContent booths={foodBooths} />
+                    <View className="h-6" />
+                  </ScrollView>
+                </View>
+
+                <View style={{ width: sheetWidth, flex: 1 }}>
+                  <ScrollView showsVerticalScrollIndicator={false}>
+                    <FacilitySheetContent facilities={facilities} />
+                    <View className="h-6" />
+                  </ScrollView>
+                </View>
+
+                <View style={{ width: sheetWidth, flex: 1 }}>
+                  <ScrollView showsVerticalScrollIndicator={false}>
+                    <EventSheetContent events={events} />
+                    <View className="h-6" />
+                  </ScrollView>
+                </View>
+              </Animated.View>
+            </View>
+          )}
+        </View>
       </Animated.View>
     </View>
   );
