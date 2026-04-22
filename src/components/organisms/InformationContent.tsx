@@ -142,7 +142,7 @@ export function InformationContent({ sections }: InformationContentProps) {
   const whoBody = sections[2]?.body ?? '';
 
   return (
-    <View style={{ paddingTop: 32, paddingBottom: 40 }}>
+    <View style={{ paddingTop: 24, paddingBottom: 40 }}>
       <BlobCard
         title="About"
         width={368}

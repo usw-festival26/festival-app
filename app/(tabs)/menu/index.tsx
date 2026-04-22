@@ -1,13 +1,12 @@
 /**
  * 메뉴 목록 화면 - Figma 135:310
  *
- * 2열 부스 메뉴 카드 그리드
+ * 2열 부스 메뉴 카드 그리드. 공용 BackdropScreenTemplate 로 헤더/배경을 통일.
  */
 import React from 'react';
 import { View, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ScreenHeader } from '../../../src/components/molecules/ScreenHeader';
+import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
 import { MenuBoothCard } from '../../../src/components/molecules/MenuBoothCard';
 import { useBooths } from '../../../src/hooks/useBooths';
 
@@ -15,16 +14,14 @@ export default function MenuListScreen() {
   const router = useRouter();
   const { booths } = useBooths();
 
-  // 2열 그리드
   const rows: (typeof booths[0])[][] = [];
   for (let i = 0; i < booths.length; i += 2) {
     rows.push(booths.slice(i, i + 2));
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
-      <ScreenHeader title="메뉴" />
-      <ScrollView contentContainerClassName="px-[10px] pt-4 pb-8">
+    <BackdropScreenTemplate title="메뉴" backdropVariant="menu">
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 10, paddingTop: 24, paddingBottom: 32 }}>
         {rows.map((row, i) => (
           <View key={i} className="flex-row">
             {row.map((item) => {
@@ -46,6 +43,6 @@ export default function MenuListScreen() {
           </View>
         ))}
       </ScrollView>
-    </SafeAreaView>
+    </BackdropScreenTemplate>
   );
 }

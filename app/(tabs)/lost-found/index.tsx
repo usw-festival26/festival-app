@@ -12,7 +12,11 @@ export default function LostFoundListScreen() {
   const { items, isLoading, error } = useLostFound();
 
   return (
-    <BackdropScreenTemplate title="분실물" backdropVariant="lost-found">
+    <BackdropScreenTemplate
+      title="분실물"
+      backdropVariant="lost-found"
+      headerTextColor="#000000"
+    >
       <LostFoundList
         items={items}
         isLoading={isLoading}

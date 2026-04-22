@@ -1,13 +1,20 @@
 /**
- * GradientBlob - 장식용 보케 그라디언트 원 (+ 웹 그레인 오버레이)
+ * GradientBlob - 장식용 보케 그라디언트 원 (Figma 충실 재현 + 웹 그레인)
  *
- * RadialGradient로 중심이 밝고 가장자리가 투명에 가깝게 감쇠해 "광원" 느낌을 만든다.
- * 웹에서는 feTurbulence SVG 데이터 URI를 배경 이미지로 깔아 필름 그레인 질감을 더한다.
- * (네이티브는 SVG 필터 지원이 제한적이라 그레인을 스킵 — 모바일 웹이 주 타겟)
+ * Figma 스펙 (Ellipse 68/69/70 공통):
+ *   linearGradient (SE→NW) #0D00FF → #FFBEBF, feGaussianBlur stdDeviation=50.
+ *   viewBox = size + 200 (100px 패딩으로 블러 halo 수용).
+ *   gradient vector: start (+0.68r, +0.77r) / end (-0.68r, -0.70r) — 3개 blob 모두 동일 비율.
+ *
+ * 외부 컨테이너는 size x size 로 유지해 기존 배치 좌표와 호환.
+ * 실제 SVG 는 size+200 로 그려 블러 halo 가 컨테이너 밖으로 100px 오버플로 — RN `overflow:'visible'` 기본값에 의존.
+ *
+ * 웹: 추가로 feTurbulence 기반 grain 오버레이를 circle 영역 안에만 얹는다.
+ * 네이티브: feGaussianBlur 가 네이티브에서도 렌더된다 (react-native-svg 15.x 지원).
  */
 import React from 'react';
 import { View, Platform, StyleSheet } from 'react-native';
-import Svg, { Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Stop, Circle, Filter, FeGaussianBlur } from 'react-native-svg';
 
 export type GrainIntensity = 'off' | 'soft' | 'strong';
 
@@ -17,6 +24,9 @@ export interface GradientBlobProps {
   reversed?: boolean;
   grainIntensity?: GrainIntensity;
 }
+
+const BLUR_PADDING = 100;
+const BLUR_STD_DEVIATION = 50;
 
 function buildGrainDataUri(baseFrequency: number, opacity: number, size: number): string {
   const svg =
@@ -29,7 +39,19 @@ function buildGrainDataUri(baseFrequency: number, opacity: number, size: number)
 }
 
 export function GradientBlob({ size, gradientId, reversed, grainIntensity = 'soft' }: GradientBlobProps) {
-  const [centerColor, edgeColor] = reversed ? ['#0D00FF', '#FFBEBF'] : ['#FFBEBF', '#0D00FF'];
+  const outer = size + BLUR_PADDING * 2;
+  const center = outer / 2;
+  const r = size / 2;
+
+  // Figma 공통 벡터: SE(+0.68r, +0.77r) → NW(-0.68r, -0.70r)
+  const sx = center + 0.68 * r;
+  const sy = center + 0.77 * r;
+  const ex = center - 0.68 * r;
+  const ey = center - 0.70 * r;
+  // start 에 #0D00FF(blue), end 에 #FFBEBF(pink) — reversed 는 스톱 스왑.
+  const [startColor, endColor] = reversed ? ['#FFBEBF', '#0D00FF'] : ['#0D00FF', '#FFBEBF'];
+
+  const filterId = `${gradientId}-blur`;
 
   const showGrain = Platform.OS === 'web' && grainIntensity !== 'off';
   const grainFreq = grainIntensity === 'strong' ? 1.6 : 1.0;
@@ -37,17 +59,42 @@ export function GradientBlob({ size, gradientId, reversed, grainIntensity = 'sof
 
   return (
     <View style={{ width: size, height: size, position: 'relative' }}>
-      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-        <Defs>
-          {/* 중심(0.4, 0.38)에서 살짝 어긋난 포커스로 "빛 맞는 쪽" 연출 */}
-          <RadialGradient id={gradientId} cx="0.4" cy="0.38" rx="0.55" ry="0.55" fx="0.4" fy="0.38">
-            <Stop offset="0%" stopColor={centerColor} stopOpacity={0.95} />
-            <Stop offset="55%" stopColor={centerColor} stopOpacity={0.5} />
-            <Stop offset="100%" stopColor={edgeColor} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Circle cx={size / 2} cy={size / 2} r={size / 2} fill={`url(#${gradientId})`} />
-      </Svg>
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          left: -BLUR_PADDING,
+          top: -BLUR_PADDING,
+          width: outer,
+          height: outer,
+        }}
+      >
+        <Svg width={outer} height={outer} viewBox={`0 0 ${outer} ${outer}`}>
+          <Defs>
+            <LinearGradient
+              id={gradientId}
+              x1={sx}
+              y1={sy}
+              x2={ex}
+              y2={ey}
+              gradientUnits="userSpaceOnUse"
+            >
+              <Stop offset="0" stopColor={startColor} />
+              <Stop offset="1" stopColor={endColor} />
+            </LinearGradient>
+            <Filter id={filterId} x="0" y="0" width={outer} height={outer} filterUnits="userSpaceOnUse">
+              <FeGaussianBlur stdDeviation={BLUR_STD_DEVIATION} />
+            </Filter>
+          </Defs>
+          <Circle
+            cx={center}
+            cy={center}
+            r={r}
+            fill={`url(#${gradientId})`}
+            filter={`url(#${filterId})`}
+          />
+        </Svg>
+      </View>
       {showGrain ? (
         <View
           pointerEvents="none"
@@ -60,6 +107,7 @@ export function GradientBlob({ size, gradientId, reversed, grainIntensity = 'sof
               mixBlendMode: 'overlay',
               borderRadius: size / 2,
               overflow: 'hidden',
+              opacity: 0.6,
             } as any,
           ]}
         />

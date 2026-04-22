@@ -45,7 +45,7 @@ export function BoothDetail({ booth }: BoothDetailProps) {
   ].filter((s) => s.items.length > 0);
 
   return (
-    <ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 20, paddingBottom: 40 }}>
+    <ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 24, paddingBottom: 40 }}>
       <View style={{ width: CARD_WIDTH, borderRadius: 20, overflow: 'hidden', position: 'relative' }}>
         {/* 흰 세로 그라디언트 배경 */}
         <Svg

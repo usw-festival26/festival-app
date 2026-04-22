@@ -19,7 +19,7 @@ const ROBOTO_BLACK = Platform.select({ web: 'Roboto', default: 'Roboto_900Black'
 
 export function LineupList({ artists }: LineupListProps) {
   return (
-    <View style={{ paddingTop: 40, paddingBottom: 40, alignItems: 'center' }}>
+    <View style={{ paddingTop: 24, paddingBottom: 40, alignItems: 'center' }}>
       <AppText
         style={{
           fontFamily: ROBOTO_BLACK,

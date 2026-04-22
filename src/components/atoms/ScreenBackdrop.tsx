@@ -27,7 +27,10 @@ export type ScreenBackdropVariant =
   | 'booth-detail'
   | 'announcement'
   | 'lost-found'
-  | 'information';
+  | 'information'
+  | 'menu'
+  | 'timetable'
+  | 'plain';
 
 interface BlobSpec {
   size: number;
@@ -38,10 +41,11 @@ interface BlobSpec {
 }
 
 const PRESETS: Record<ScreenBackdropVariant, BlobSpec[]> = {
-  // Figma 1334:802 — 홈 네이비 영역
+  // Figma 1334:802 — 홈 네이비 영역 (home.tsx 에서 HeroSection(PANEL_HEIGHT=615) 다음에 오는
+  // overflow:hidden 래퍼 안에 배치되므로, 래퍼 로컬 origin 기준 좌표(=Figma y - 615) 사용).
   home: [
-    { size: 92, top: 594, left: -3, rotate: 90, reversed: true },
-    { size: 289, top: 748, left: 283 },
+    { size: 92, top: -21, left: -3, rotate: 90, reversed: true },
+    { size: 289, top: 133, left: 283 },
   ],
   // Figma 1014:465 — 라인업
   lineup: [
@@ -81,6 +85,10 @@ const PRESETS: Record<ScreenBackdropVariant, BlobSpec[]> = {
     { size: 92, top: 526, left: -3, rotate: 90, reversed: true },
     { size: 289, top: 955, left: 283 },
   ],
+  // 메뉴/타임테이블/일반 — 네이비 단색 (blob 없음)
+  menu: [],
+  timetable: [],
+  plain: [],
 };
 
 /**

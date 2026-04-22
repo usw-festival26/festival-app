@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
 import { BoothMapView } from '../../../src/components/organisms/BoothMapView';
+import { MapCategoryChips } from '../../../src/components/molecules/MapCategoryChips';
 import { useBooths } from '../../../src/hooks/useBooths';
 import { FACILITIES_DATA } from '../../../src/data/facilities';
 import { EVENTS_DATA } from '../../../src/data/events';
@@ -20,7 +21,18 @@ export default function BoothMapScreen() {
   const [activeCategory, setActiveCategory] = useState<SheetCategory>('booth');
 
   return (
-    <BackdropScreenTemplate title="지도" backdropVariant="booth">
+    <BackdropScreenTemplate
+      title="지도"
+      backdropVariant="booth"
+      headerSubHeader={
+        <MapCategoryChips
+          expanded={expanded}
+          activeCategory={activeCategory}
+          onExpandedChange={setExpanded}
+          onCategoryChange={setActiveCategory}
+        />
+      }
+    >
       <BoothMapView
         expanded={expanded}
         activeCategory={activeCategory}
