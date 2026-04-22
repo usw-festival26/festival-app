@@ -1,63 +1,32 @@
 /**
- * InformationContent - Information 화면 본문 (Figma 1228:1182)
+ * InformationContent - Information 화면 본문 (Figma 920:4712)
  *
- * 3개 organic blob 카드:
- * - About (368×215): TL/TR/BR 107.5, BL 10
- * - History (368×269): TL/TR/BL 134.5, BR 10
- * - Who We Are? (368×578): TL/TR/BR 184, BL 10 + 다크 네이비 pill 2개(163×107, r53.5) placeholder
+ * 3개 organic blob 카드(흰 배경) + 카드 위에 덮이는 장식 blob 3개.
+ * - About (368×215): TL/TR/BR 107.5, BL 10 — title + body
+ * - History (368×269): TL/TR/BL 134.5, BR 10 — title + body
+ * - Who We Are? (368×578): TL/TR/BR 184, BL 10 — title + body + navy pill + body + navy pill
  *
- * 배경은 반투명 linear-gradient(navy 40% → pink 40%), 흰색 1px 50% 보더.
+ * 타이틀: Pretendard-Black 22, #010070 (네이비). 본문: Pretendard-Regular 12, #000000.
+ *
+ * 장식 blob 3개는 JSX 상 카드보다 뒤에 렌더되어(absolute) 카드 위에 덮인다.
+ * 좌표(top/left/size)는 Figma 920:4712 의 Ellipse68/69/70 을 그대로 옮긴 값이다.
+ * 헤더(105px) 아래 content 시작점 offset(-99px) 을 적용해 Figma Y 를 contentY 로 변환.
  */
 import React from 'react';
 import { View, Text, Platform } from 'react-native';
-import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import type { InformationSection } from '../../types/information';
-
-/**
- * CSS linear-gradient angle을 SVG x1/y1/x2/y2 비율로 변환.
- * CSS 기준: 0° = 위(N), 시계 방향으로 증가 → (dx, dy) = (sinθ, -cosθ).
- */
-function angleToLine(angleDeg: number) {
-  const rad = (angleDeg * Math.PI) / 180;
-  const dx = Math.sin(rad);
-  const dy = -Math.cos(rad);
-  return {
-    x1: `${((0.5 - dx / 2) * 100).toFixed(2)}%`,
-    y1: `${((0.5 - dy / 2) * 100).toFixed(2)}%`,
-    x2: `${((0.5 + dx / 2) * 100).toFixed(2)}%`,
-    y2: `${((0.5 + dy / 2) * 100).toFixed(2)}%`,
-  };
-}
+import { GradientBlob } from '../atoms/GradientBlob';
 
 interface BlobCardProps {
-  title: string;
-  titleTop: number;
-  bodyTop: number;
-  body?: string;
-  bodyWidth?: number;
   width: number;
   height: number;
   radii: [number, number, number, number]; // [tl, tr, br, bl]
-  gradientAngle: number;
-  gradientId: string;
+  marginBottom?: number;
   children?: React.ReactNode;
 }
 
-function BlobCard({
-  title,
-  titleTop,
-  bodyTop,
-  body,
-  bodyWidth = 270,
-  width,
-  height,
-  radii,
-  gradientAngle,
-  gradientId,
-  children,
-}: BlobCardProps) {
+function BlobCard({ width, height, radii, marginBottom = 20, children }: BlobCardProps) {
   const [tl, tr, br, bl] = radii;
-  const line = angleToLine(gradientAngle);
 
   return (
     <View
@@ -68,66 +37,53 @@ function BlobCard({
         borderTopRightRadius: tr,
         borderBottomRightRadius: br,
         borderBottomLeftRadius: bl,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.5)',
+        backgroundColor: '#FFFFFF',
         overflow: 'hidden',
         alignSelf: 'center',
-        marginBottom: 20,
+        marginBottom,
         position: 'relative',
       }}
     >
-      <Svg
-        width="100%"
-        height="100%"
-        style={{ position: 'absolute', top: 0, left: 0 }}
-        preserveAspectRatio="none"
-      >
-        <Defs>
-          <LinearGradient id={gradientId} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2}>
-            <Stop offset="13.548%" stopColor="#0D00FF" stopOpacity={0.4} />
-            <Stop offset="84.597%" stopColor="#FFBEBF" stopOpacity={0.4} />
-          </LinearGradient>
-        </Defs>
-        <Rect x={0} y={0} width="100%" height="100%" fill={`url(#${gradientId})`} />
-      </Svg>
-
-      <View style={{ position: 'absolute', top: titleTop, left: 0, right: 0, alignItems: 'center' }}>
-        <Text
-          style={{
-            fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Black' }),
-            fontWeight: '900',
-            fontSize: 22,
-            lineHeight: 26,
-            color: '#FFFFFF',
-            letterSpacing: -0.5,
-          }}
-        >
-          {title}
-        </Text>
-      </View>
-
-      {body ? (
-        <View
-          style={{ position: 'absolute', top: bodyTop, left: 0, right: 0, alignItems: 'center' }}
-          pointerEvents="none"
-        >
-          <Text
-            style={{
-              fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' }),
-              fontSize: 12,
-              lineHeight: 20,
-              color: '#FFFFFF',
-              width: bodyWidth,
-              textAlign: 'center',
-              letterSpacing: -0.3,
-            }}
-          >
-            {body}
-          </Text>
-        </View>
-      ) : null}
-
       {children}
+    </View>
+  );
+}
+
+const titleStyle = {
+  fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Black' }),
+  fontWeight: '900' as const,
+  fontSize: 22,
+  lineHeight: 26,
+  color: '#010070',
+  letterSpacing: -0.5,
+  textAlign: 'center' as const,
+};
+
+const bodyStyle = {
+  fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' }),
+  fontSize: 12,
+  lineHeight: 20,
+  color: '#000000',
+  width: 270,
+  textAlign: 'center' as const,
+  letterSpacing: -0.3,
+};
+
+function CenteredTitle({ top, children }: { top: number; children: React.ReactNode }) {
+  return (
+    <View style={{ position: 'absolute', top, left: 0, right: 0, alignItems: 'center' }}>
+      <Text style={titleStyle}>{children}</Text>
+    </View>
+  );
+}
+
+function CenteredBody({ top, children }: { top: number; children: React.ReactNode }) {
+  return (
+    <View
+      style={{ position: 'absolute', top, left: 0, right: 0, alignItems: 'center' }}
+      pointerEvents="none"
+    >
+      <Text style={bodyStyle}>{children}</Text>
     </View>
   );
 }
@@ -142,58 +98,70 @@ export function InformationContent({ sections }: InformationContentProps) {
   const whoBody = sections[2]?.body ?? '';
 
   return (
-    <View style={{ paddingTop: 32, paddingBottom: 40 }}>
-      <BlobCard
-        title="About"
-        width={368}
-        height={215}
-        radii={[107.5, 107.5, 107.5, 10]}
-        gradientAngle={-28.39}
-        gradientId="info-grad-about"
-        titleTop={58}
-        bodyTop={100}
-        body={aboutBody}
-      />
+    <View style={{ paddingTop: 24, paddingBottom: 40, position: 'relative' }}>
+      {/* About */}
+      <BlobCard width={368} height={215} radii={[107.5, 107.5, 107.5, 10]} marginBottom={18}>
+        <CenteredTitle top={58}>About</CenteredTitle>
+        <CenteredBody top={102}>{aboutBody}</CenteredBody>
+      </BlobCard>
 
-      <BlobCard
-        title="History"
-        width={368}
-        height={269}
-        radii={[134.5, 134.5, 10, 134.5]}
-        gradientAngle={-34.07}
-        gradientId="info-grad-history"
-        titleTop={58}
-        bodyTop={100}
-        body={historyBody}
-      />
+      {/* History */}
+      <BlobCard width={368} height={269} radii={[134.5, 134.5, 10, 134.5]} marginBottom={15}>
+        <CenteredTitle top={58}>History</CenteredTitle>
+        <CenteredBody top={102}>{historyBody}</CenteredBody>
+      </BlobCard>
 
-      <BlobCard
-        title="Who We Are?"
-        width={368}
-        height={578}
-        radii={[184, 184, 184, 10]}
-        gradientAngle={-55.46}
-        gradientId="info-grad-who"
-        titleTop={82}
-        bodyTop={140}
-        body={whoBody}
-      >
-        {/* 팀 카드 placeholder — 다크 네이비 pill 2개 (추후 팀 소개 카드로 교체) */}
+      {/* Who We Are? — body 는 1개만 렌더. Figma 는 placeholder lorem 을 2번 겹쳐놨지만
+          실제 데이터 구조(섹션 1개)에서는 동일 문단 반복이 어색함. 팀 소개가 확정되기 전까진 body 1개 + pill 2개. */}
+      <BlobCard width={368} height={578} radii={[184, 184, 184, 10]} marginBottom={40}>
+        <CenteredTitle top={82}>Who We Are?</CenteredTitle>
+        <CenteredBody top={138.57}>{whoBody}</CenteredBody>
         <View
           style={{
             position: 'absolute',
-            top: 290,
+            top: 194.57,
             left: 0,
             right: 0,
             alignItems: 'center',
-            gap: 20,
           }}
           pointerEvents="none"
         >
           <View style={{ width: 163, height: 107, borderRadius: 53.5, backgroundColor: '#010070' }} />
+        </View>
+        <View
+          style={{
+            position: 'absolute',
+            top: 376,
+            left: 0,
+            right: 0,
+            alignItems: 'center',
+          }}
+          pointerEvents="none"
+        >
           <View style={{ width: 163, height: 107, borderRadius: 53.5, backgroundColor: '#010070' }} />
         </View>
       </BlobCard>
+
+      {/* 장식 blob — 카드 위에 덮이는 foreground. Figma 920:4712 Ellipse68/69/70.
+          contentY = figmaY - 99 (header 105 + About 시작 Figma 123 → 우리 contentY 24). */}
+      <View
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 176, left: 272 }}
+      >
+        <GradientBlob size={154} />
+      </View>
+      <View
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 464, left: -3 }}
+      >
+        <GradientBlob size={92} rotate={90} reversed />
+      </View>
+      <View
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 917, left: 283 }}
+      >
+        <GradientBlob size={289} />
+      </View>
     </View>
   );
 }

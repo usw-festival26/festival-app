@@ -15,6 +15,8 @@ export interface RobotoBlackTextProps {
   color?: string;
   lineHeight?: number;
   style?: StyleProp<TextStyle>;
+  numberOfLines?: number;
+  ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
 }
 
 export function RobotoBlackText({
@@ -23,9 +25,13 @@ export function RobotoBlackText({
   color = '#000000',
   lineHeight,
   style,
+  numberOfLines,
+  ellipsizeMode,
 }: RobotoBlackTextProps) {
   return (
     <Text
+      numberOfLines={numberOfLines}
+      ellipsizeMode={ellipsizeMode}
       style={[
         styles.base,
         { fontSize: size, color, lineHeight: lineHeight ?? size * 1.15 },

@@ -1,4 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import {
   Roboto_400Regular,
   Roboto_500Medium,
@@ -49,6 +50,7 @@ export default function RootLayout() {
     'Pretendard-Bold': require('../assets/fonts/Pretendard-Bold.otf'),
     'Pretendard-Black': require('../assets/fonts/Pretendard-Black.otf'),
     ...FontAwesome.font,
+    ...Ionicons.font,
   });
 
   useEffect(() => {

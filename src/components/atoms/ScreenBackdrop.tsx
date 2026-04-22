@@ -27,7 +27,10 @@ export type ScreenBackdropVariant =
   | 'booth-detail'
   | 'announcement'
   | 'lost-found'
-  | 'information';
+  | 'information'
+  | 'menu'
+  | 'timetable'
+  | 'plain';
 
 interface BlobSpec {
   size: number;
@@ -37,50 +40,30 @@ interface BlobSpec {
   reversed?: boolean;
 }
 
+/**
+ * Figma 1629:1165 — "배경 그라디언트 원 1500 사이즈" 공용 backdrop.
+ * 스플래시 / Information 을 제외한 모든 화면이 공유한다.
+ * 4번째 blob(top 1353)은 일반 viewport 아래에 배치되므로, 스크롤이 긴 화면(홈 네이비 영역 등)에서만 노출된다.
+ */
+const UNIFIED_BLOBS: BlobSpec[] = [
+  { size: 154, top: 160, left: 275 },
+  { size: 92, top: 448, left: -17, reversed: true },
+  { size: 289, top: 745, left: 257 },
+  { size: 175, top: 1353, left: -68, rotate: 77.39, reversed: true },
+];
+
 const PRESETS: Record<ScreenBackdropVariant, BlobSpec[]> = {
-  // Figma 1334:802 — 홈 네이비 영역
-  home: [
-    { size: 92, top: 594, left: -3, rotate: 90, reversed: true },
-    { size: 289, top: 748, left: 283 },
-  ],
-  // Figma 1014:465 — 라인업
-  lineup: [
-    { size: 154, top: 160, left: 275 },
-    { size: 92, top: 448, left: -17, reversed: true },
-    { size: 289, top: 985, left: 260 },
-  ],
-  // Figma 1272:1566 — 부스 리스트
-  booth: [
-    { size: 155, top: 61, left: -297, rotate: 75.84, reversed: true },
-    { size: 91, top: 184, left: -21, rotate: 83.97, reversed: true },
-    { size: 347, top: 371, left: 186, rotate: -5.14 },
-    { size: 248, top: 429, left: -399, rotate: 49.2 },
-    { size: 283, top: 679, left: -730, rotate: 39.55 },
-    { size: 202, top: 782, left: -72, rotate: -68.17 },
-  ],
-  // Figma 1272:1632 — 부스 상세
-  'booth-detail': [
-    { size: 118, top: 67, left: -60, rotate: 71.04, reversed: true },
-    { size: 270, top: 385, left: 192 },
-    { size: 209, top: 692, left: -96, rotate: -10.5 },
-  ],
-  // Figma 920:4490 — 공지
-  announcement: [
-    { size: 154, top: 172, left: 272 },
-    { size: 92, top: 467, left: -3, rotate: 90, reversed: true },
-    { size: 289, top: 896, left: 283 },
-  ],
-  // Figma 1228:1018 — 분실물
-  'lost-found': [
-    { size: 289, top: 128, left: 204 },
-    { size: 92, top: 146, left: -35, rotate: 88.7, reversed: true },
-  ],
-  // Figma 1228:1182 — Information
-  information: [
-    { size: 154, top: 231, left: 272 },
-    { size: 92, top: 526, left: -3, rotate: 90, reversed: true },
-    { size: 289, top: 955, left: 283 },
-  ],
+  home: UNIFIED_BLOBS,
+  lineup: UNIFIED_BLOBS,
+  booth: UNIFIED_BLOBS,
+  'booth-detail': UNIFIED_BLOBS,
+  announcement: UNIFIED_BLOBS,
+  'lost-found': UNIFIED_BLOBS,
+  menu: UNIFIED_BLOBS,
+  timetable: UNIFIED_BLOBS,
+  plain: UNIFIED_BLOBS,
+  // Figma 920:4712 — Information 은 blob 을 카드 foreground 로 렌더(InformationContent 내부에서 처리)
+  information: [],
 };
 
 /**

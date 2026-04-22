@@ -6,7 +6,7 @@
  * - days: 날짜별 공연 목록
  *
  * 시간은 반드시 ISO 8601 + KST(+09:00) 형식으로 작성합니다.
- * 예: "2026-05-20T17:00:00+09:00"
+ * 예: "2026-05-14T17:00:00+09:00"
  */
 import type { TimetableData } from '../types/timetable';
 
@@ -34,16 +34,16 @@ export const TIMETABLE_DATA: TimetableData = {
 
   days: [
     {
-      date: '2026-05-20',
-      label: 'Day 1 - 수요일',
+      date: '2026-05-14',
+      label: 'Day 1 - 목요일',
       performances: [
         {
           id: 'perf-001',
           artistName: '오프닝 세레모니',
           description: '2026 USW 축제 개막식',
           stageId: 'main-stage',
-          startTime: '2026-05-20T17:00:00+09:00',
-          endTime: '2026-05-20T17:30:00+09:00',
+          startTime: '2026-05-14T17:00:00+09:00',
+          endTime: '2026-05-14T17:30:00+09:00',
           category: 'ceremony',
         },
         {
@@ -51,8 +51,8 @@ export const TIMETABLE_DATA: TimetableData = {
           artistName: '밴드 A',
           description: '컴퓨터공학과 밴드 동아리 공연',
           stageId: 'main-stage',
-          startTime: '2026-05-20T17:30:00+09:00',
-          endTime: '2026-05-20T18:30:00+09:00',
+          startTime: '2026-05-14T17:30:00+09:00',
+          endTime: '2026-05-14T18:30:00+09:00',
           category: 'band',
         },
         {
@@ -60,8 +60,8 @@ export const TIMETABLE_DATA: TimetableData = {
           artistName: '댄스 크루 B',
           description: '중앙 댄스 동아리 공연',
           stageId: 'sub-stage',
-          startTime: '2026-05-20T17:00:00+09:00',
-          endTime: '2026-05-20T18:00:00+09:00',
+          startTime: '2026-05-14T17:00:00+09:00',
+          endTime: '2026-05-14T18:00:00+09:00',
           category: 'dance',
         },
         {
@@ -69,8 +69,8 @@ export const TIMETABLE_DATA: TimetableData = {
           artistName: '어쿠스틱 듀오 C',
           description: '감성 어쿠스틱 버스킹',
           stageId: 'busking-zone',
-          startTime: '2026-05-20T18:00:00+09:00',
-          endTime: '2026-05-20T19:00:00+09:00',
+          startTime: '2026-05-14T18:00:00+09:00',
+          endTime: '2026-05-14T19:00:00+09:00',
           category: 'solo',
         },
         {
@@ -78,23 +78,23 @@ export const TIMETABLE_DATA: TimetableData = {
           artistName: 'DJ Night',
           description: '첫날 밤 DJ 파티',
           stageId: 'main-stage',
-          startTime: '2026-05-20T20:00:00+09:00',
-          endTime: '2026-05-20T22:00:00+09:00',
+          startTime: '2026-05-14T20:00:00+09:00',
+          endTime: '2026-05-14T22:00:00+09:00',
           category: 'dj',
         },
       ],
     },
     {
-      date: '2026-05-21',
-      label: 'Day 2 - 목요일',
+      date: '2026-05-15',
+      label: 'Day 2 - 금요일',
       performances: [
         {
           id: 'perf-006',
           artistName: '코미디 쇼',
           description: '연극영화과 코미디 공연',
           stageId: 'sub-stage',
-          startTime: '2026-05-21T16:00:00+09:00',
-          endTime: '2026-05-21T17:00:00+09:00',
+          startTime: '2026-05-15T16:00:00+09:00',
+          endTime: '2026-05-15T17:00:00+09:00',
           category: 'comedy',
         },
         {
@@ -102,8 +102,8 @@ export const TIMETABLE_DATA: TimetableData = {
           artistName: '밴드 D',
           description: '경영학과 밴드 동아리',
           stageId: 'main-stage',
-          startTime: '2026-05-21T17:00:00+09:00',
-          endTime: '2026-05-21T18:00:00+09:00',
+          startTime: '2026-05-15T17:00:00+09:00',
+          endTime: '2026-05-15T18:00:00+09:00',
           category: 'band',
         },
         {
@@ -111,8 +111,8 @@ export const TIMETABLE_DATA: TimetableData = {
           artistName: '헤드라이너 가수',
           description: '초청 가수 공연',
           stageId: 'main-stage',
-          startTime: '2026-05-21T20:00:00+09:00',
-          endTime: '2026-05-21T21:30:00+09:00',
+          startTime: '2026-05-15T20:00:00+09:00',
+          endTime: '2026-05-15T21:30:00+09:00',
           category: 'solo',
         },
         {
@@ -120,59 +120,8 @@ export const TIMETABLE_DATA: TimetableData = {
           artistName: '클로징 세레모니',
           description: '2026 USW 축제 폐막식',
           stageId: 'main-stage',
-          startTime: '2026-05-21T21:30:00+09:00',
-          endTime: '2026-05-21T22:00:00+09:00',
-          category: 'ceremony',
-        },
-      ],
-    },
-    {
-      date: '2026-05-22',
-      label: 'Day 3 - 금요일',
-      performances: [
-        {
-          id: 'perf-010',
-          artistName: '댄스 크루 E',
-          description: '외부 초청 댄스팀 공연',
-          stageId: 'main-stage',
-          startTime: '2026-05-22T16:00:00+09:00',
-          endTime: '2026-05-22T17:00:00+09:00',
-          category: 'dance',
-        },
-        {
-          id: 'perf-011',
-          artistName: '밴드 F',
-          description: '음악학과 졸업 밴드',
-          stageId: 'main-stage',
-          startTime: '2026-05-22T17:00:00+09:00',
-          endTime: '2026-05-22T18:00:00+09:00',
-          category: 'band',
-        },
-        {
-          id: 'perf-012',
-          artistName: '어쿠스틱 듀오 G',
-          description: '감성 버스킹 공연',
-          stageId: 'busking-zone',
-          startTime: '2026-05-22T18:00:00+09:00',
-          endTime: '2026-05-22T19:00:00+09:00',
-          category: 'solo',
-        },
-        {
-          id: 'perf-013',
-          artistName: '헤드라이너 DJ',
-          description: '마지막 밤 DJ 파티',
-          stageId: 'main-stage',
-          startTime: '2026-05-22T20:00:00+09:00',
-          endTime: '2026-05-22T22:00:00+09:00',
-          category: 'dj',
-        },
-        {
-          id: 'perf-014',
-          artistName: '피날레 세레모니',
-          description: '2026 USW 축제 대미를 장식하는 피날레',
-          stageId: 'main-stage',
-          startTime: '2026-05-22T22:00:00+09:00',
-          endTime: '2026-05-22T22:30:00+09:00',
+          startTime: '2026-05-15T21:30:00+09:00',
+          endTime: '2026-05-15T22:00:00+09:00',
           category: 'ceremony',
         },
       ],

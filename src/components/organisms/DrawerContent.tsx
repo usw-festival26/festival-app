@@ -17,14 +17,17 @@ interface DrawerMenuItem {
   matchPath: string;
 }
 
+// app/(tabs)/_layout.tsx 의 Drawer.Screen 선언 순서와 동기화.
 const MENU_ITEMS: DrawerMenuItem[] = [
   { label: '홈', route: '/(tabs)/home', matchPath: '/home' },
   { label: '지도', route: '/(tabs)/booth', matchPath: '/booth' },
   { label: '메뉴', route: '/(tabs)/menu', matchPath: '/menu' },
   { label: '타임테이블', route: '/(tabs)/timetable', matchPath: '/timetable' },
   { label: '라인업', route: '/(tabs)/lineup', matchPath: '/lineup' },
+  { label: '이벤트', route: '/(tabs)/events', matchPath: '/events' },
   { label: '공지', route: '/(tabs)/announcements', matchPath: '/announcements' },
   { label: '분실물', route: '/(tabs)/lost-found', matchPath: '/lost-found' },
+  { label: '추가정보', route: '/(tabs)/information', matchPath: '/information' },
 ];
 
 export function DrawerContent({ navigation }: DrawerContentComponentProps) {

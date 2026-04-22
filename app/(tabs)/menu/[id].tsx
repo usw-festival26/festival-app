@@ -6,8 +6,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScreenHeader } from '../../../src/components/molecules/ScreenHeader';
+import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
 import { BoothDetail } from '../../../src/components/organisms/BoothDetail';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
 import { useBoothById } from '../../../src/hooks/useBooths';
@@ -20,20 +19,18 @@ export default function MenuDetailScreen() {
 
   if (!booth) {
     return (
-      <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
-        <ScreenHeader title="메뉴" leftAction="back" />
+      <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
         <EmptyState message="부스를 찾을 수 없습니다." />
         <View className="items-center">
           <AppButton onPress={() => router.back()}>돌아가기</AppButton>
         </View>
-      </SafeAreaView>
+      </BackdropScreenTemplate>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
-      <ScreenHeader title="메뉴" leftAction="back" />
+    <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
       <BoothDetail booth={booth} />
-    </SafeAreaView>
+    </BackdropScreenTemplate>
   );
 }

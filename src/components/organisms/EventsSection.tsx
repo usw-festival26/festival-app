@@ -3,32 +3,25 @@
  *
  * "Events" 라벨 Roboto Black 20 white, left:61 (좌측 정렬).
  * 카드 140×180 rounded-12, 텍스트 (left:14, top:133) Pretendard Medium 11.
+ * "더보기" → /events 전용 페이지로 이동.
  */
 import React from 'react';
-import { View, ScrollView, Text, Pressable, Platform, Alert } from 'react-native';
+import { View, ScrollView, Text, Pressable, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-interface EventItem {
-  id: string;
-  line1: string;
-  line2: string;
-}
-
-const EVENTS: EventItem[] = [
-  { id: '1', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '2', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '3', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '4', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '5', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-  { id: '6', line1: '내용 뭐쓰지', line2: '흠냐냐~' },
-];
+import { useRouter } from 'expo-router';
+import { useHorizontalDrag, useEvents } from '@hooks/index';
 
 const ROBOTO_BLACK = Platform.select({ web: 'Roboto', default: 'Roboto_900Black' });
+const PRETENDARD_MEDIUM = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Medium' });
+const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
 
 export function EventsSection() {
+  const router = useRouter();
+  const dragRef = useHorizontalDrag();
+  const { data } = useEvents();
+
   return (
     <View style={{ paddingTop: 41, paddingBottom: 27 }}>
-      {/* 라벨 행: 좌측 "Events" + 우측 "더보기" */}
       <View
         style={{
           flexDirection: 'row',
@@ -52,15 +45,15 @@ export function EventsSection() {
           Events
         </Text>
         <Pressable
-          onPress={() => Alert.alert('준비 중', '이벤트 상세는 추후 공개됩니다.')}
+          onPress={() => router.push('/(tabs)/events' as any)}
           hitSlop={8}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-          accessibilityRole="button"
+          accessibilityRole="link"
           accessibilityLabel="이벤트 더보기"
         >
           <Text
             style={{
-              fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' }),
+              fontFamily: PRETENDARD_REGULAR,
               fontWeight: '400',
               fontSize: 12,
               color: '#FFFFFF',
@@ -74,11 +67,12 @@ export function EventsSection() {
       </View>
 
       <ScrollView
+        ref={dragRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingLeft: 17, paddingRight: 48, gap: 10 }}
       >
-        {EVENTS.map((item) => (
+        {data.slice(0, 6).map((item) => (
           <View
             key={item.id}
             style={{
@@ -89,10 +83,11 @@ export function EventsSection() {
               position: 'relative',
             }}
           >
-            <View style={{ position: 'absolute', left: 14, top: 133 }}>
+            <View style={{ position: 'absolute', left: 14, top: 133, right: 14 }}>
               <Text
+                numberOfLines={1}
                 style={{
-                  fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Medium' }),
+                  fontFamily: PRETENDARD_MEDIUM,
                   fontWeight: '500',
                   fontSize: 11,
                   lineHeight: 20,
@@ -100,19 +95,20 @@ export function EventsSection() {
                   color: '#000',
                 }}
               >
-                {item.line1}
+                {item.title}
               </Text>
               <Text
+                numberOfLines={1}
                 style={{
-                  fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Medium' }),
+                  fontFamily: PRETENDARD_MEDIUM,
                   fontWeight: '500',
                   fontSize: 11,
                   lineHeight: 20,
                   letterSpacing: -0.5,
-                  color: '#000',
+                  color: '#666',
                 }}
               >
-                {item.line2}
+                {item.description}
               </Text>
             </View>
           </View>

@@ -7,6 +7,7 @@ export { HeroSection } from './HeroSection';
 export { DrawerContent } from './DrawerContent';
 export { AboutSection, type AboutSectionProps } from './AboutSection';
 export { EventsSection } from './EventsSection';
+export { EventsList } from './EventsList';
 export { LineupSection } from './LineupSection';
 export { BoothMapView, type BoothMapViewProps } from './BoothMapView';
 export { BoothGrid, type BoothGridProps } from './BoothGrid';

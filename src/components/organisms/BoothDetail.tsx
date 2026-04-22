@@ -1,18 +1,17 @@
 /**
- * BoothDetail - 부스 상세 (Figma 1272:1632)
+ * BoothDetail - 부스 상세 (Figma 964:663)
  *
- * 네이비 배경 + ScreenBackdrop + 흰 그라디언트 큰 카드 1장:
- *  - 상단: 뒤로가기 + 부스명 센터
- *  - 썸네일(좌) + 부스 안내(우)
- *  - Main / Side / Set 세로 스택, 섹션 사이 구분선
+ * 네이비 배경 + ScreenBackdrop + 흰 solid 카드 1장 (368, rounded-20):
+ *  - 상단: 뒤로가기 + 부스명(조직명) 센터
+ *  - 썸네일(좌 165×181 흰 + 검정 보더, 이미지 없으면 'Location In Map or Poster') + 부스 안내(우)
+ *  - Main / Side / Set 세로 스택, 섹션 라벨 센터(Roboto Black 20 #010070) — MenuSection molecule 재사용
+ *  - 섹션 사이 가로 구분선
  */
 import React from 'react';
-import { ScrollView, View, Pressable, Image } from 'react-native';
-import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import { ScrollView, View, Text, Pressable, Image, Platform, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { Booth, BoothMenuItem } from '../../types/booth';
-import { AppText } from '@atoms/AppText';
 import { MenuSection } from '@molecules/MenuSection';
 
 export interface BoothDetailProps {
@@ -20,6 +19,9 @@ export interface BoothDetailProps {
 }
 
 const CARD_WIDTH = 368;
+
+const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
+const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
 
 function group(items: BoothMenuItem[]) {
   const main: BoothMenuItem[] = [];
@@ -45,110 +47,126 @@ export function BoothDetail({ booth }: BoothDetailProps) {
   ].filter((s) => s.items.length > 0);
 
   return (
-    <ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 20, paddingBottom: 40 }}>
-      <View style={{ width: CARD_WIDTH, borderRadius: 20, overflow: 'hidden', position: 'relative' }}>
-        {/* 흰 세로 그라디언트 배경 */}
-        <Svg
-          width="100%"
-          height="100%"
-          style={{ position: 'absolute', top: 0, left: 0 }}
-          preserveAspectRatio="none"
-        >
-          <Defs>
-            <LinearGradient id="booth-detail-grad" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.5" />
-              <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.95" />
-            </LinearGradient>
-          </Defs>
-          <Rect x={0} y={0} width="100%" height="100%" rx={20} ry={20} fill="url(#booth-detail-grad)" />
-        </Svg>
-
-        <View style={{ padding: 20 }}>
-          {/* 상단 바: 뒤로가기 + 부스명 센터 */}
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
+    <ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 24, paddingBottom: 40 }}>
+      <View style={styles.card}>
+        {/* 상단 바: 뒤로가기 + 조직명 센터 */}
+        <View style={styles.topBar}>
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="뒤로 가기"
+            style={styles.backBtn}
+            className="active:opacity-70"
           >
-            <Pressable
-              onPress={() => router.back()}
-              accessibilityRole="button"
-              accessibilityLabel="뒤로 가기"
-              style={{ width: 28, height: 28 }}
-              className="active:opacity-70"
-            >
-              <Ionicons name="chevron-back" size={24} color="#02015B" />
-            </Pressable>
-            <View style={{ flex: 1, alignItems: 'center' }}>
-              <AppText
-                style={{
-                  fontFamily: 'Pretendard-SemiBold',
-                  fontSize: 15,
-                  color: '#02015B',
-                }}
-              >
-                {booth.organizer}
-              </AppText>
-            </View>
-            <View style={{ width: 28 }} />
+            <Ionicons name="chevron-back" size={24} color="#000000" />
+          </Pressable>
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <Text style={styles.organizer}>{booth.organizer}</Text>
+          </View>
+          <View style={{ width: 28 }} />
+        </View>
+
+        {/* 썸네일(좌) + 부스 안내(우) */}
+        <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 17, marginTop: 10 }}>
+          <View style={styles.thumb}>
+            {booth.imageUri ? (
+              <Image
+                source={{ uri: booth.imageUri }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+            ) : (
+              <Text style={styles.thumbPlaceholder}>
+                {'Location In Map\nor\nPoster'}
+              </Text>
+            )}
           </View>
 
-          {/* 썸네일 + 부스 안내 */}
-          <View style={{ flexDirection: 'row', gap: 14, marginBottom: 28 }}>
-            <View
-              style={{
-                width: 160,
-                height: 181,
-                borderRadius: 12,
-                overflow: 'hidden',
-                backgroundColor: '#E8E8F0',
-              }}
-            >
-              {booth.imageUri ? (
-                <Image
-                  source={{ uri: booth.imageUri }}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode="cover"
-                />
-              ) : null}
-            </View>
-            <View style={{ flex: 1 }}>
-              <AppText
-                style={{
-                  fontFamily: 'Pretendard-SemiBold',
-                  fontSize: 15,
-                  color: '#000000',
-                  marginBottom: 10,
-                }}
-              >
-                부스 안내
-              </AppText>
-              <AppText
-                style={{
-                  fontFamily: 'Pretendard-Regular',
-                  fontSize: 12,
-                  color: '#000000',
-                  lineHeight: 18,
-                }}
-              >
-                {booth.description}
-              </AppText>
-            </View>
+          <View style={{ flex: 1, paddingTop: 15 }}>
+            <Text style={styles.sideTitle}>부스 안내</Text>
+            <Text style={styles.sideBody}>{booth.description}</Text>
           </View>
+        </View>
 
-          {/* 섹션 스택 */}
+        {/* 섹션 스택 — MenuSection molecule 재사용, label 중앙 정렬 */}
+        <View style={{ marginTop: 32 }}>
           {sections.map((s, idx) => (
-            <View key={s.label}>
-              {idx > 0 && (
-                <View style={{ height: 1, backgroundColor: 'rgba(0,0,0,0.08)', marginVertical: 18 }} />
-              )}
-              <MenuSection label={s.label} items={s.items} />
+            <View key={s.label} style={{ paddingHorizontal: 20 }}>
+              {idx > 0 && <View style={styles.divider} />}
+              <MenuSection label={s.label} items={s.items} align="center" />
             </View>
           ))}
         </View>
+
+        <View style={{ height: 24 }} />
       </View>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    width: CARD_WIDTH,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 17,
+    paddingTop: 18,
+  },
+  backBtn: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  organizer: {
+    fontFamily: PRETENDARD_SEMIBOLD,
+    fontWeight: '600',
+    fontSize: 15,
+    color: '#000000',
+  },
+  thumb: {
+    width: 165,
+    height: 181,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thumbPlaceholder: {
+    fontFamily: PRETENDARD_SEMIBOLD,
+    fontWeight: '600',
+    fontSize: 15,
+    color: '#000000',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  sideTitle: {
+    fontFamily: PRETENDARD_SEMIBOLD,
+    fontWeight: '600',
+    fontSize: 15,
+    color: '#000000',
+    marginBottom: 10,
+  },
+  sideBody: {
+    fontFamily: PRETENDARD_REGULAR,
+    fontWeight: '400',
+    fontSize: 12,
+    color: '#000000',
+    lineHeight: 18,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#000000',
+    marginBottom: 18,
+    marginTop: 0,
+    opacity: 0.35,
+  },
+});
