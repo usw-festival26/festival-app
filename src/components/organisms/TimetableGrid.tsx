@@ -10,13 +10,12 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Pressable, Text, Platform, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import type { Stage, TimetableDay } from '../../types/timetable';
+import type { TimetableDay } from '../../types/timetable';
 import { EmptyState } from '@molecules/EmptyState';
 import { formatTimeRange } from '@utils/date';
 
 export interface TimetableGridProps {
   days: TimetableDay[];
-  stages: Stage[];
 }
 
 const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });

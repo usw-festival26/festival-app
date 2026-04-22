@@ -6,7 +6,7 @@
  *  - 반투명 흰 그라디언트 패널(top 0.5 → bottom 0.95): 카테고리 칩 + 카드 리스트 + 페이지 인디케이터
  * 칩: 50×29 rounded-14.5, Pretendard SemiBold 15. 전체 active=#010070/white, 비활성 white/navy.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View, Text, Pressable, Platform, StyleSheet, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
@@ -34,10 +34,9 @@ export interface LostFoundListProps {
   items: LostFoundItem[];
   isLoading?: boolean;
   error?: string | null;
-  onPressItem?: (item: LostFoundItem) => void;
 }
 
-export function LostFoundList({ items, isLoading, error, onPressItem }: LostFoundListProps) {
+export function LostFoundList({ items, isLoading, error }: LostFoundListProps) {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [page, setPage] = useState(0);
   const insets = useSafeAreaInsets();
@@ -50,6 +49,12 @@ export function LostFoundList({ items, isLoading, error, onPressItem }: LostFoun
   }, [items, filter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+  // items / filter 변경으로 totalPages 가 줄어 현재 page 가 범위를 벗어나면 클램프.
+  useEffect(() => {
+    if (page >= totalPages) setPage(Math.max(0, totalPages - 1));
+  }, [page, totalPages]);
+
   const pageItems = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
@@ -160,11 +165,7 @@ export function LostFoundList({ items, isLoading, error, onPressItem }: LostFoun
         ) : (
           <View style={{ gap: 12, paddingHorizontal: 21 }}>
             {pageItems.map((item) => (
-              <LostFoundCard
-                key={item.id}
-                item={item}
-                onPress={() => onPressItem?.(item)}
-              />
+              <LostFoundCard key={item.id} item={item} />
             ))}
           </View>
         )}

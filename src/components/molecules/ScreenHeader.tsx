@@ -101,11 +101,19 @@ export function ScreenHeader({
         ) : null}
 
         {title ? (
+          // 좌/우 동일 inset(72) 로 화면 중앙 기준 타이틀 정렬 유지.
+          // rightLabel(LOGO) 은 right:24 에 절대배치 + 폭 약 48px → inset 72 면 겹침 없이 ellipsis.
           <View
             pointerEvents="none"
-            style={{ position: 'absolute', left: 0, right: 0, top: 23 }}
+            style={{ position: 'absolute', left: 72, right: 72, top: 23 }}
           >
-            <RobotoBlackText size={20} lineHeight={23} color={textColor}>
+            <RobotoBlackText
+              size={20}
+              lineHeight={23}
+              color={textColor}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {title}
             </RobotoBlackText>
           </View>

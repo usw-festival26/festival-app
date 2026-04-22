@@ -111,7 +111,8 @@ export function InformationContent({ sections }: InformationContentProps) {
         <CenteredBody top={102}>{historyBody}</CenteredBody>
       </BlobCard>
 
-      {/* Who We Are? */}
+      {/* Who We Are? — body 는 1개만 렌더. Figma 는 placeholder lorem 을 2번 겹쳐놨지만
+          실제 데이터 구조(섹션 1개)에서는 동일 문단 반복이 어색함. 팀 소개가 확정되기 전까진 body 1개 + pill 2개. */}
       <BlobCard width={368} height={578} radii={[184, 184, 184, 10]} marginBottom={40}>
         <CenteredTitle top={82}>Who We Are?</CenteredTitle>
         <CenteredBody top={138.57}>{whoBody}</CenteredBody>
@@ -127,7 +128,6 @@ export function InformationContent({ sections }: InformationContentProps) {
         >
           <View style={{ width: 163, height: 107, borderRadius: 53.5, backgroundColor: '#010070' }} />
         </View>
-        <CenteredBody top={320}>{whoBody}</CenteredBody>
         <View
           style={{
             position: 'absolute',

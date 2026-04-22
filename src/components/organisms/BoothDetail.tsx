@@ -4,7 +4,7 @@
  * 네이비 배경 + ScreenBackdrop + 흰 solid 카드 1장 (368, rounded-20):
  *  - 상단: 뒤로가기 + 부스명(조직명) 센터
  *  - 썸네일(좌 165×181 흰 + 검정 보더, 이미지 없으면 'Location In Map or Poster') + 부스 안내(우)
- *  - Main / Side / Set 세로 스택, 섹션 라벨 센터(Roboto Black 20 #010070)
+ *  - Main / Side / Set 세로 스택, 섹션 라벨 센터(Roboto Black 20 #010070) — MenuSection molecule 재사용
  *  - 섹션 사이 가로 구분선
  */
 import React from 'react';
@@ -12,6 +12,7 @@ import { ScrollView, View, Text, Pressable, Image, Platform, StyleSheet } from '
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { Booth, BoothMenuItem } from '../../types/booth';
+import { MenuSection } from '@molecules/MenuSection';
 
 export interface BoothDetailProps {
   booth: Booth;
@@ -21,7 +22,6 @@ const CARD_WIDTH = 368;
 
 const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
 const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
-const ROBOTO_BLACK = Platform.select({ web: 'Roboto', default: 'Roboto_900Black' });
 
 function group(items: BoothMenuItem[]) {
   const main: BoothMenuItem[] = [];
@@ -34,36 +34,6 @@ function group(items: BoothMenuItem[]) {
     else main.push(i);
   });
   return { main, side, set };
-}
-
-function MenuRow({ name, price }: { name: string; price: number }) {
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 5,
-      }}
-    >
-      <Text style={styles.menuName}>{name}</Text>
-      <Text style={styles.menuPrice}>{price.toLocaleString()}</Text>
-    </View>
-  );
-}
-
-function Section({ label, items }: { label: string; items: BoothMenuItem[] }) {
-  if (items.length === 0) return null;
-  return (
-    <View style={{ paddingHorizontal: 20 }}>
-      <Text style={styles.sectionLabel}>{label}</Text>
-      <View>
-        {items.map((i) => (
-          <MenuRow key={i.id} name={i.name} price={i.price} />
-        ))}
-      </View>
-    </View>
-  );
 }
 
 export function BoothDetail({ booth }: BoothDetailProps) {
@@ -118,12 +88,12 @@ export function BoothDetail({ booth }: BoothDetailProps) {
           </View>
         </View>
 
-        {/* 섹션 스택 */}
+        {/* 섹션 스택 — MenuSection molecule 재사용, label 중앙 정렬 */}
         <View style={{ marginTop: 32 }}>
           {sections.map((s, idx) => (
-            <View key={s.label}>
+            <View key={s.label} style={{ paddingHorizontal: 20 }}>
               {idx > 0 && <View style={styles.divider} />}
-              <Section label={s.label} items={s.items} />
+              <MenuSection label={s.label} items={s.items} align="center" />
             </View>
           ))}
         </View>
@@ -192,33 +162,11 @@ const styles = StyleSheet.create({
     color: '#000000',
     lineHeight: 18,
   },
-  sectionLabel: {
-    fontFamily: ROBOTO_BLACK,
-    fontWeight: '900',
-    fontSize: 20,
-    lineHeight: 23,
-    color: '#010070',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  menuName: {
-    fontFamily: PRETENDARD_SEMIBOLD,
-    fontWeight: '600',
-    fontSize: 15,
-    color: '#000000',
-  },
-  menuPrice: {
-    fontFamily: PRETENDARD_SEMIBOLD,
-    fontWeight: '600',
-    fontSize: 15,
-    color: '#010070',
-    textAlign: 'right',
-  },
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: '#000000',
-    marginVertical: 18,
-    marginHorizontal: 20,
+    marginBottom: 18,
+    marginTop: 0,
     opacity: 0.35,
   },
 });

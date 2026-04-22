@@ -1,7 +1,8 @@
 /**
  * MenuSection - 부스 상세의 Main/Side/Set 섹션 하나
  *
- * Figma 1272:1632: Roboto Black 20 #010070 제목 + 이름(왼쪽) · 가격(오른쪽 네이비) 목록
+ * Figma 1272:1632 / 964:663: Roboto Black 20 #010070 제목 + 이름(왼쪽) · 가격(오른쪽 네이비) 목록.
+ * 라벨 정렬은 `align` 으로 제어 ('left' 기본, 'center' 는 Figma 964:663 스타일).
  */
 import React from 'react';
 import { View, Platform } from 'react-native';
@@ -11,11 +12,12 @@ import type { BoothMenuItem } from '../../types/booth';
 export interface MenuSectionProps {
   label: string;
   items: BoothMenuItem[];
+  align?: 'left' | 'center';
 }
 
 const ROBOTO_BLACK = Platform.select({ web: 'Roboto', default: 'Roboto_900Black' });
 
-export function MenuSection({ label, items }: MenuSectionProps) {
+export function MenuSection({ label, items, align = 'left' }: MenuSectionProps) {
   if (items.length === 0) return null;
   return (
     <View>
@@ -27,6 +29,7 @@ export function MenuSection({ label, items }: MenuSectionProps) {
           lineHeight: 23,
           color: '#010070',
           marginBottom: 14,
+          textAlign: align,
         }}
       >
         {label}

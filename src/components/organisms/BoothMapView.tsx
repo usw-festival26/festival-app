@@ -17,6 +17,7 @@ import {
   Animated,
   LayoutChangeEvent,
   GestureResponderEvent,
+  Platform,
   Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -238,7 +239,8 @@ export function BoothMapView({
             onResponderStart={onHandleTouchStart}
             onResponderMove={onHandleTouchMove}
             onResponderRelease={onHandleTouchEnd}
-            style={{ cursor: 'grab' } as any}
+            // cursor 는 web 전용 속성이라 네이티브에서는 undefined 로 스타일에서 빠진다.
+            style={Platform.OS === 'web' ? ({ cursor: 'grab' } as object) : undefined}
           >
             <DragHandle />
           </View>

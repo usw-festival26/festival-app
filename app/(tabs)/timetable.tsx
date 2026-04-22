@@ -9,11 +9,11 @@ import { TimetableGrid } from '../../src/components/organisms/TimetableGrid';
 import { useTimetable } from '../../src/hooks/useTimetable';
 
 export default function TimetableScreen() {
-  const { days, stages } = useTimetable();
+  const { days } = useTimetable();
 
   return (
     <BackdropScreenTemplate title="타임테이블" backdropVariant="timetable">
-      <TimetableGrid days={days} stages={stages} />
+      <TimetableGrid days={days} />
     </BackdropScreenTemplate>
   );
 }
