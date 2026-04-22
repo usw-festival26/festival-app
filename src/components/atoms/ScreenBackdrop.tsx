@@ -62,12 +62,8 @@ const PRESETS: Record<ScreenBackdropVariant, BlobSpec[]> = {
   menu: UNIFIED_BLOBS,
   timetable: UNIFIED_BLOBS,
   plain: UNIFIED_BLOBS,
-  // Figma 1228:1182 — Information (별도 레이아웃 유지)
-  information: [
-    { size: 154, top: 231, left: 272 },
-    { size: 92, top: 526, left: -3, rotate: 90, reversed: true },
-    { size: 289, top: 955, left: 283 },
-  ],
+  // Figma 920:4712 — Information 은 blob 을 카드 foreground 로 렌더(InformationContent 내부에서 처리)
+  information: [],
 };
 
 /**

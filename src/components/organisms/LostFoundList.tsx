@@ -8,6 +8,7 @@
  */
 import React, { useMemo, useState } from 'react';
 import { ScrollView, View, Text, Pressable, Platform, StyleSheet, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import type { LostFoundItem, LostFoundCategory } from '../../types/lostFound';
 import { LostFoundCard } from '@molecules/LostFoundCard';
@@ -39,6 +40,7 @@ export interface LostFoundListProps {
 export function LostFoundList({ items, isLoading, error, onPressItem }: LostFoundListProps) {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [page, setPage] = useState(0);
+  const insets = useSafeAreaInsets();
 
   const filtered = useMemo(() => {
     if (filter === 'all') return items;
@@ -53,7 +55,7 @@ export function LostFoundList({ items, isLoading, error, onPressItem }: LostFoun
   return (
     <ScrollView
       style={{ flex: 1 }}
-      contentContainerStyle={{ paddingBottom: 24 }}
+      contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
       {/* 1. 네이비 배경 상단: 말풍선 + 문의번호 */}
@@ -74,7 +76,7 @@ export function LostFoundList({ items, isLoading, error, onPressItem }: LostFoun
       </View>
 
       {/* 2. 반투명 흰 그라디언트 패널: 칩 + 카드 + 페이지 */}
-      <View style={{ position: 'relative', minHeight: 500 }}>
+      <View style={{ position: 'relative', flex: 1, minHeight: 500 }}>
         <Svg
           width="100%"
           height="100%"
@@ -174,6 +176,7 @@ export function LostFoundList({ items, isLoading, error, onPressItem }: LostFoun
             alignItems: 'center',
             paddingHorizontal: 21,
             marginTop: 20,
+            paddingBottom: 24 + insets.bottom,
           }}
         >
           <View style={{ flex: 1 }} />

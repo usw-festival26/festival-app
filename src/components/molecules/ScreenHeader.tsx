@@ -33,8 +33,8 @@ export interface ScreenHeaderProps {
 export function ScreenHeader({
   title,
   leftAction = 'hamburger',
-  bgColor = '#F0F0F0',
-  textColor = '#02015B',
+  bgColor = '#FFFFFF',
+  textColor = '#000000',
   rightLabel = 'LOGO',
   leftSlot,
   subHeader,

@@ -42,7 +42,7 @@ export function AnnouncementList({ announcements }: AnnouncementListProps) {
       {sorted.length === 0 ? (
         <EmptyState message="등록된 공지가 없습니다." iconName="megaphone-outline" />
       ) : (
-        <View style={{ gap: 10 }}>
+        <View style={{ gap: 4 }}>
           {sorted.map((item) => {
             const isExpanded = expandedId === item.id;
             return (

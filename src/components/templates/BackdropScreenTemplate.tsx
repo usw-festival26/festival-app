@@ -29,8 +29,8 @@ export function BackdropScreenTemplate({
   rightLabel = 'LOGO',
   leftAction = 'hamburger',
   leftSlot,
-  headerBg = '#F0F0F0',
-  headerTextColor = '#02015B',
+  headerBg = '#FFFFFF',
+  headerTextColor = '#000000',
   headerSubHeader,
   children,
 }: BackdropScreenTemplateProps) {

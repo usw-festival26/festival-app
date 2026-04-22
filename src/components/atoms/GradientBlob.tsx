@@ -1,117 +1,65 @@
 /**
- * GradientBlob - 장식용 보케 그라디언트 원 (Figma 충실 재현 + 웹 그레인)
+ * GradientBlob - 장식용 보케 그라디언트 원 (VectorCircle.png 기반)
  *
- * Figma 스펙 (Ellipse 68/69/70 공통):
- *   linearGradient (SE→NW) #0D00FF → #FFBEBF, feGaussianBlur stdDeviation=50.
- *   viewBox = size + 200 (100px 패딩으로 블러 halo 수용).
- *   gradient vector: start (+0.68r, +0.77r) / end (-0.68r, -0.70r) — 3개 blob 모두 동일 비율.
+ * Figma 1629:1165 의 Vector 원본을 export 한 PNG 한 장을 공용으로 사용한다.
+ * PNG 안에 원 + 그라디언트(#0D00FF → #FFBEBF) + halo 가 모두 포함되어 있어,
+ * 수동 SVG 합성(그라디언트 + feGaussianBlur + grain 오버레이)때 생기던 대비 튐이 없다.
  *
- * 외부 컨테이너는 size x size 로 유지해 기존 배치 좌표와 호환.
- * 실제 SVG 는 size+200 로 그려 블러 halo 가 컨테이너 밖으로 100px 오버플로 — RN `overflow:'visible'` 기본값에 의존.
+ * PNG 원본: 489×489 (RGBA).
+ *   원 지름 = 289, halo padding = 100px each side (Figma 스펙과 동일 비율).
  *
- * 웹: 추가로 feTurbulence 기반 grain 오버레이를 circle 영역 안에만 얹는다.
- * 네이티브: feGaussianBlur 가 네이티브에서도 렌더된다 (react-native-svg 15.x 지원).
+ * 호출 쪽 `size` 는 "원의 지름"을 의미 (기존 좌표 체계 유지). 따라서 PNG 를
+ * size × (489/289) ≈ 1.692 배 크기로 그리고, halo 만큼 음수 offset 으로 센터링한다.
+ * 부모 컨테이너는 size×size 로 유지되어 배치 좌표(top/left)가 변하지 않는다.
+ *
+ * - reversed: 좌우 반전 (scaleX: -1)
+ * - rotate:   z축 회전 (deg)
+ *
+ * gradientId / grainIntensity 는 과거 SVG 버전 호환용으로만 남겨두고 무시한다.
  */
 import React from 'react';
-import { View, Platform, StyleSheet } from 'react-native';
-import Svg, { Defs, LinearGradient, Stop, Circle, Filter, FeGaussianBlur } from 'react-native-svg';
+import { View, Image } from 'react-native';
+
+// Figma 에서 export 된 공용 blob PNG (489×489, 원 지름 289 + halo 100×2).
+const VECTOR_PNG = require('../../../assets/images/VectorCircle.png');
+
+const PNG_FULL = 489;
+const PNG_CIRCLE = 289;
+const IMG_SCALE = PNG_FULL / PNG_CIRCLE; // ≈ 1.692
+const HALO_RATIO = (IMG_SCALE - 1) / 2; // ≈ 0.346 — 각 방향 halo 크기 (size 대비)
 
 export type GrainIntensity = 'off' | 'soft' | 'strong';
 
 export interface GradientBlobProps {
   size: number;
-  gradientId: string;
+  /** @deprecated PNG 전환 후 사용 안 함. 호환 유지용. */
+  gradientId?: string;
   reversed?: boolean;
+  rotate?: number;
+  /** @deprecated PNG 전환 후 사용 안 함. 호환 유지용. */
   grainIntensity?: GrainIntensity;
 }
 
-const BLUR_PADDING = 100;
-const BLUR_STD_DEVIATION = 50;
+export function GradientBlob({ size, reversed, rotate }: GradientBlobProps) {
+  const imgSize = size * IMG_SCALE;
+  const offset = -size * HALO_RATIO;
 
-function buildGrainDataUri(baseFrequency: number, opacity: number, size: number): string {
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">` +
-    `<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="${baseFrequency}" numOctaves="2" stitchTiles="stitch"/>` +
-    `<feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 ${opacity} 0"/></filter>` +
-    `<circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="white" filter="url(#n)"/>` +
-    `</svg>`;
-  return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
-}
-
-export function GradientBlob({ size, gradientId, reversed, grainIntensity = 'soft' }: GradientBlobProps) {
-  const outer = size + BLUR_PADDING * 2;
-  const center = outer / 2;
-  const r = size / 2;
-
-  // Figma 공통 벡터: SE(+0.68r, +0.77r) → NW(-0.68r, -0.70r)
-  const sx = center + 0.68 * r;
-  const sy = center + 0.77 * r;
-  const ex = center - 0.68 * r;
-  const ey = center - 0.70 * r;
-  // start 에 #0D00FF(blue), end 에 #FFBEBF(pink) — reversed 는 스톱 스왑.
-  const [startColor, endColor] = reversed ? ['#FFBEBF', '#0D00FF'] : ['#0D00FF', '#FFBEBF'];
-
-  const filterId = `${gradientId}-blur`;
-
-  const showGrain = Platform.OS === 'web' && grainIntensity !== 'off';
-  const grainFreq = grainIntensity === 'strong' ? 1.6 : 1.0;
-  const grainOpacity = grainIntensity === 'strong' ? 0.3 : 0.18;
+  const transforms: Array<{ rotate: string } | { scaleX: number }> = [];
+  if (rotate) transforms.push({ rotate: `${rotate}deg` });
+  if (reversed) transforms.push({ scaleX: -1 });
 
   return (
-    <View style={{ width: size, height: size, position: 'relative' }}>
-      <View
-        pointerEvents="none"
+    <View style={{ width: size, height: size, overflow: 'visible', transform: transforms }}>
+      <Image
+        source={VECTOR_PNG}
         style={{
           position: 'absolute',
-          left: -BLUR_PADDING,
-          top: -BLUR_PADDING,
-          width: outer,
-          height: outer,
+          left: offset,
+          top: offset,
+          width: imgSize,
+          height: imgSize,
         }}
-      >
-        <Svg width={outer} height={outer} viewBox={`0 0 ${outer} ${outer}`}>
-          <Defs>
-            <LinearGradient
-              id={gradientId}
-              x1={sx}
-              y1={sy}
-              x2={ex}
-              y2={ey}
-              gradientUnits="userSpaceOnUse"
-            >
-              <Stop offset="0" stopColor={startColor} />
-              <Stop offset="1" stopColor={endColor} />
-            </LinearGradient>
-            <Filter id={filterId} x="0" y="0" width={outer} height={outer} filterUnits="userSpaceOnUse">
-              <FeGaussianBlur stdDeviation={BLUR_STD_DEVIATION} />
-            </Filter>
-          </Defs>
-          <Circle
-            cx={center}
-            cy={center}
-            r={r}
-            fill={`url(#${gradientId})`}
-            filter={`url(#${filterId})`}
-          />
-        </Svg>
-      </View>
-      {showGrain ? (
-        <View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              backgroundImage: buildGrainDataUri(grainFreq, grainOpacity, size),
-              backgroundSize: `${size}px ${size}px`,
-              backgroundRepeat: 'no-repeat',
-              mixBlendMode: 'overlay',
-              borderRadius: size / 2,
-              overflow: 'hidden',
-              opacity: 0.6,
-            } as any,
-          ]}
-        />
-      ) : null}
+      />
     </View>
   );
 }
