@@ -12,6 +12,7 @@ import { View, ScrollView, Pressable, Text, Platform, StyleSheet, ActivityIndica
 import { useRouter } from 'expo-router';
 import type { TimetableDay } from '../../types/timetable';
 import { EmptyState } from '@molecules/EmptyState';
+import { Colors } from '@constants/colors';
 import { formatTimeRange } from '@utils/date';
 
 export interface TimetableGridProps {
@@ -29,8 +30,8 @@ export function TimetableGrid({ days, isLoading, error }: TimetableGridProps) {
 
   if (isLoading) {
     return (
-      <View style={{ paddingVertical: 48, alignItems: 'center' }}>
-        <ActivityIndicator size="small" color="#02015B" />
+      <View className="py-12 items-center">
+        <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
       </View>
     );
   }

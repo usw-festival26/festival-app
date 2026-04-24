@@ -9,6 +9,7 @@ import { ScrollView, View, ActivityIndicator } from 'react-native';
 import { BackdropScreenTemplate } from '../../src/components/templates/BackdropScreenTemplate';
 import { InformationContent } from '../../src/components/organisms/InformationContent';
 import { EmptyState } from '../../src/components/molecules/EmptyState';
+import { Colors } from '../../src/constants/colors';
 import { useInformation } from '../../src/hooks/useInformation';
 
 export default function InformationScreen() {
@@ -23,8 +24,8 @@ export default function InformationScreen() {
     >
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {isLoading ? (
-          <View style={{ paddingVertical: 48, alignItems: 'center' }}>
-            <ActivityIndicator size="small" color="#02015B" />
+          <View className="py-12 items-center">
+            <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
           </View>
         ) : error ? (
           <EmptyState

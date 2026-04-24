@@ -11,6 +11,7 @@ import { BoothDetail } from '../../../src/components/organisms/BoothDetail';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
 import { useBoothById } from '../../../src/hooks/useBooths';
 import { AppButton } from '../../../src/components/atoms/AppButton';
+import { Colors } from '../../../src/constants/colors';
 
 export default function MenuDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -21,7 +22,7 @@ export default function MenuDetailScreen() {
     return (
       <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
         <View className="items-center py-16">
-          <ActivityIndicator size="small" color="#02015B" />
+          <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
         </View>
       </BackdropScreenTemplate>
     );

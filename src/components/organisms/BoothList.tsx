@@ -6,6 +6,7 @@ import { FlatList, View, ActivityIndicator } from 'react-native';
 import type { Booth } from '../../types/booth';
 import { InfoCard } from '@molecules/InfoCard';
 import { EmptyState } from '@molecules/EmptyState';
+import { Colors } from '@constants/colors';
 
 /** 카테고리 한글 매핑 */
 const CATEGORY_LABEL: Record<string, string> = {
@@ -27,8 +28,8 @@ export interface BoothListProps {
 export function BoothList({ booths, onPressBooth, isLoading, error }: BoothListProps) {
   if (isLoading) {
     return (
-      <View style={{ paddingVertical: 48, alignItems: 'center' }}>
-        <ActivityIndicator size="small" color="#02015B" />
+      <View className="py-12 items-center">
+        <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
       </View>
     );
   }

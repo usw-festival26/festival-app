@@ -23,9 +23,11 @@ const STATUS_LABEL: Record<LostFoundStatus, string> = {
   claimed: '수령 완료',
 };
 
-/** 오늘/어제/n일 전 + HH:MM 형태 */
-function formatRelativeDateTime(iso: string): string {
+/** 오늘/어제/n일 전 + HH:MM 형태. iso 가 없으면 "-". */
+function formatRelativeDateTime(iso: string | undefined): string {
+  if (!iso) return '-';
   const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '-';
   const hh = d.getHours().toString().padStart(2, '0');
   const mm = d.getMinutes().toString().padStart(2, '0');
   const time = `${hh}:${mm}`;
@@ -105,7 +107,7 @@ export function LostFoundCard({ item, onPress }: LostFoundCardProps) {
             {item.title}
           </Text>
           <Text style={styles.location} numberOfLines={1}>
-            {item.location}
+            {item.location ?? ''}
           </Text>
         </View>
       </View>

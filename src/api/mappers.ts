@@ -80,14 +80,15 @@ function mapLostCategory(apiCategory: string | undefined): LostFoundCategory {
   return LOST_CATEGORY_MAP[apiCategory] ?? 'other';
 }
 
+// location / reportedAt: 스펙(LostItemResponse)에 storageLocation · createdAt 이 없어 undefined 로 둔다.
+// 빈 문자열로 채우면 useLostFound 의 location 검색이 q 를 포함하지 않는 한 항상 false 가 되고
+// new Date('').getTime() 이 NaN 이라 정렬이 무력화됨 → 훅에서 optional 을 인지하고 처리.
 export function mapLostItem(raw: ApiLostItem): LostFoundItem {
   return {
     id: String(raw.lostItemId),
     title: raw.name,
     description: '',
-    location: '', // 스펙에 storageLocation 없음. 카드 UI 에서 '안내데스크' 로 기본 표기됨.
     status: mapLostStatus(raw.status),
-    reportedAt: '', // 스펙에 createdAt 없음.
     imageUri: raw.imageUrl,
     category: mapLostCategory(raw.category),
   };
@@ -98,9 +99,7 @@ export function mapLostItemDetail(raw: ApiLostItemDetail): LostFoundItem {
     id: String(raw.lostItemId),
     title: raw.name,
     description: raw.description,
-    location: '',
     status: mapLostStatus(raw.status),
-    reportedAt: '',
     imageUri: raw.imageUrl,
     category: mapLostCategory(raw.category),
   };

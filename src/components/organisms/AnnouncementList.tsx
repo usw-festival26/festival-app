@@ -10,6 +10,7 @@ import { NotificationBadge } from '@atoms/NotificationBadge';
 import { NotificationPill } from '@molecules/NotificationPill';
 import { FaqBubble } from '@molecules/FaqBubble';
 import { EmptyState } from '@molecules/EmptyState';
+import { Colors } from '@constants/colors';
 
 export interface AnnouncementListProps {
   announcements: Announcement[];
@@ -42,8 +43,8 @@ export function AnnouncementList({ announcements, isLoading, error }: Announceme
       </View>
 
       {isLoading ? (
-        <View style={{ paddingVertical: 24, alignItems: 'center' }}>
-          <ActivityIndicator size="small" color="#02015B" />
+        <View className="py-6 items-center">
+          <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
         </View>
       ) : error ? (
         <EmptyState

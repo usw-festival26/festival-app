@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { AppText } from '@atoms/AppText';
 import { BoothCard } from '@molecules/BoothCard';
 import { EmptyState } from '@molecules/EmptyState';
+import { Colors } from '@constants/colors';
 import type { Booth } from '../../types/booth';
 
 export interface FoodSheetContentProps {
@@ -29,8 +30,8 @@ export function FoodSheetContent({ booths, isLoading, error }: FoodSheetContentP
     <View>
       <AppText className="text-xl font-black text-center mb-4">푸드트럭</AppText>
       {isLoading ? (
-        <View style={{ paddingVertical: 24, alignItems: 'center' }}>
-          <ActivityIndicator size="small" color="#02015B" />
+        <View className="py-6 items-center">
+          <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
         </View>
       ) : error ? (
         <EmptyState

@@ -38,13 +38,17 @@ export function useLostFound(options?: UseLostFoundOptions) {
         return (
           item.title.toLowerCase().includes(q) ||
           item.description.toLowerCase().includes(q) ||
-          item.location.toLowerCase().includes(q)
+          // location 은 스펙에 없어 없을 수 있음 → 있을 때만 검색 대상.
+          (item.location?.toLowerCase().includes(q) ?? false)
         );
       }
       return true;
-    }).sort(
-      (a, b) => new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime(),
-    );
+    }).sort((a, b) => {
+      // reportedAt 이 없으면 정렬 기준에서 제외(가장 뒤로).
+      const at = a.reportedAt ? new Date(a.reportedAt).getTime() : 0;
+      const bt = b.reportedAt ? new Date(b.reportedAt).getTime() : 0;
+      return bt - at;
+    });
   }, [source, status, searchQuery]);
 
   return { data: items, items, isLoading, error };

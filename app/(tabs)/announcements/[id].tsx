@@ -10,6 +10,7 @@ import { AppText } from '../../../src/components/atoms/AppText';
 import { Badge } from '../../../src/components/atoms/Badge';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
 import { AppButton } from '../../../src/components/atoms/AppButton';
+import { Colors } from '../../../src/constants/colors';
 import { useAnnouncementById } from '../../../src/hooks/useAnnouncements';
 import { formatDate } from '../../../src/utils/date';
 import type { BadgeVariant } from '../../../src/components/atoms/Badge';
@@ -35,7 +36,7 @@ export default function AnnouncementDetailScreen() {
     return (
       <ScrollScreenTemplate title="공지" leftAction="back">
         <View className="items-center py-16">
-          <ActivityIndicator size="small" color="#02015B" />
+          <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
         </View>
       </ScrollScreenTemplate>
     );
