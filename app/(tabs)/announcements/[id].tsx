@@ -2,7 +2,7 @@
  * 공지사항 상세 화면
  */
 import React from 'react';
-import { View } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollScreenTemplate } from '../../../src/components/templates/ScrollScreenTemplate';
@@ -29,7 +29,31 @@ const PRIORITY_VARIANT: Record<string, BadgeVariant> = {
 export default function AnnouncementDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { announcement } = useAnnouncementById(id ?? '');
+  const { announcement, isLoading, error } = useAnnouncementById(id ?? '');
+
+  if (isLoading) {
+    return (
+      <ScrollScreenTemplate title="공지" leftAction="back">
+        <View className="items-center py-16">
+          <ActivityIndicator size="small" color="#02015B" />
+        </View>
+      </ScrollScreenTemplate>
+    );
+  }
+
+  if (error) {
+    return (
+      <ScrollScreenTemplate title="공지" leftAction="back">
+        <EmptyState
+          message={`공지를 불러오지 못했습니다.\n${error}`}
+          iconName="alert-circle-outline"
+        />
+        <View className="items-center mt-4">
+          <AppButton onPress={() => router.back()}>돌아가기</AppButton>
+        </View>
+      </ScrollScreenTemplate>
+    );
+  }
 
   if (!announcement) {
     return (

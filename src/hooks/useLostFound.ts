@@ -27,7 +27,8 @@ export function useLostFound(options?: UseLostFoundOptions) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const source = apiData ?? LOST_FOUND_DATA;
+  // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 배열 + error).
+  const source = config.isApiEnabled ? (apiData ?? []) : LOST_FOUND_DATA;
 
   const items = useMemo(() => {
     return source.filter((item) => {
@@ -74,6 +75,7 @@ export function useLostFoundById(id: string): {
 
   const item = useMemo(() => {
     if (apiData) return apiData;
+    if (config.isApiEnabled) return undefined;
     return LOST_FOUND_DATA.find((i) => i.id === id);
   }, [apiData, id]);
 

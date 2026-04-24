@@ -21,7 +21,11 @@ export function useInformation() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const sections = useMemo<InformationSection[]>(() => apiData ?? INFORMATION_DATA, [apiData]);
+  // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 배열 + error).
+  const sections = useMemo<InformationSection[]>(
+    () => (config.isApiEnabled ? (apiData ?? []) : INFORMATION_DATA),
+    [apiData],
+  );
 
   return { data: sections, sections, isLoading, error };
 }
