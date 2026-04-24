@@ -27,7 +27,9 @@ jobs:
 
       - name: Build web
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-        run: npx expo export --platform web
+        # build:web 스크립트: expo export 후 dist/assets/node_modules → dist/assets/_node 로 rename.
+        # Cloudflare Pages 가 node_modules 디렉터리를 자동 제외해 아이콘/폰트 TTF가 404 나는 것을 우회한다.
+        run: npm run build:web
         env:
           EXPO_PUBLIC_API_BASE_URL: ${{ secrets.API_BASE_URL }}
 

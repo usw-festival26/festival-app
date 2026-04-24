@@ -44,26 +44,28 @@ function assertObject(data: unknown, endpoint: string, requiredKeys: string[]): 
 // ── 부스 ────────────────────────────────────────────────────
 
 export async function fetchBooths(): Promise<Booth[]> {
-  const data = await apiClient.get<ApiBooth[]>('/api/booth');
-  assertArray(data, '/api/booth');
+  const data = await apiClient.get<ApiBooth[]>('/api/booths');
+  assertArray(data, '/api/booths');
   return (data as ApiBooth[]).map(mapBooth);
 }
 
 export async function fetchBooth(id: string): Promise<Booth> {
-  const data = await apiClient.get<ApiBoothDetail>(`/api/booth/${encodeURIComponent(id)}`);
-  assertObject(data, '/api/booth/:id', ['boothId', 'name']);
+  const data = await apiClient.get<ApiBoothDetail>(`/api/booths/${encodeURIComponent(id)}`);
+  assertObject(data, '/api/booths/:id', ['boothId', 'name']);
   return mapBoothDetail(data as ApiBoothDetail);
 }
 
 // ── 메뉴 (부스별) ──────────────────────────────────────────
 
 export async function fetchMenusByBooth(boothId: string): Promise<BoothMenuItem[]> {
-  const data = await apiClient.get<ApiMenu[]>(`/api/booth/${encodeURIComponent(boothId)}/menu`);
-  assertArray(data, '/api/booth/:id/menu');
+  const data = await apiClient.get<ApiMenu[]>(`/api/booths/${encodeURIComponent(boothId)}/menu`);
+  assertArray(data, '/api/booths/:id/menu');
   return (data as ApiMenu[]).map(mapMenu);
 }
 
 // ── 타임테이블 ──────────────────────────────────────────────
+// TODO: 백엔드 스펙 미정. 현재 swagger/openapi.json 에 타임테이블 엔드포인트 없음.
+// `config.isApiEnabled` 가 true 인 환경에서 호출되면 404. 확정 전까지 hook 이 하드코딩 fallback 으로 막아줌.
 
 export async function fetchTimetable(): Promise<TimetableData> {
   const data = await apiClient.get<TimetableData>('/api/timetable');
@@ -100,6 +102,7 @@ export async function fetchLostFoundItem(id: string): Promise<LostFoundItem> {
 }
 
 // ── 기타 정보 ───────────────────────────────────────────────
+// TODO: 백엔드 스펙 미정. swagger 에 information 엔드포인트 없음. Timetable 과 동일한 상태.
 
 export async function fetchInformation(): Promise<InformationSection[]> {
   const data = await apiClient.get<InformationSection[]>('/api/information');

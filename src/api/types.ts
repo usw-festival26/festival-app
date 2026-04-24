@@ -19,14 +19,16 @@ export interface ApiNoticeDetail extends ApiNotice {
 }
 
 // ── 분실물 (Lost Items) ─────────────────────────────────────
+// LostItemResponse: { lostItemId, name, status, category, imageUrl }
+// LostItemDetailResponse: + description
+// 스펙에 storageLocation / createdAt 없음 (UI LostFoundItem.location/reportedAt 은 mapper 에서 빈 값 처리).
 
 export interface ApiLostItem {
   lostItemId: number;
   name: string;
-  storageLocation: string;
   status: string;
+  category: string;
   imageUrl: string;
-  createdAt?: string;
 }
 
 export interface ApiLostItemDetail extends ApiLostItem {
