@@ -8,22 +8,42 @@
  *  - 하단 "라인업 보기" 버튼 (206×40, navy bg, rounded-20)
  */
 import React, { useState } from 'react';
-import { View, ScrollView, Pressable, Text, Platform, StyleSheet } from 'react-native';
+import { View, ScrollView, Pressable, Text, Platform, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { TimetableDay } from '../../types/timetable';
 import { EmptyState } from '@molecules/EmptyState';
+import { Colors } from '@constants/colors';
 import { formatTimeRange } from '@utils/date';
 
 export interface TimetableGridProps {
   days: TimetableDay[];
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
 const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
 
-export function TimetableGrid({ days }: TimetableGridProps) {
+export function TimetableGrid({ days, isLoading, error }: TimetableGridProps) {
   const router = useRouter();
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+
+  if (isLoading) {
+    return (
+      <View className="py-12 items-center">
+        <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <EmptyState
+        message={`타임테이블을 불러오지 못했습니다.\n${error}`}
+        iconName="alert-circle-outline"
+      />
+    );
+  }
 
   if (days.length === 0) {
     return <EmptyState message="등록된 공연이 없습니다." iconName="calendar-outline" />;

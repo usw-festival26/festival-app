@@ -13,7 +13,7 @@ import { EVENTS_DATA } from '../../../src/data/events';
 import type { SheetCategory } from '../../../src/types/map';
 
 export default function BoothMapScreen() {
-  const { booths: allBooths } = useBooths();
+  const { booths: allBooths, isLoading, error } = useBooths();
   const foodBooths = allBooths.filter((b) => b.category === 'food');
   const nonFoodBooths = allBooths.filter((b) => b.category !== 'food');
 
@@ -40,6 +40,8 @@ export default function BoothMapScreen() {
         foodBooths={foodBooths}
         facilities={FACILITIES_DATA}
         events={EVENTS_DATA}
+        isLoading={isLoading}
+        error={error}
         onExpandedChange={setExpanded}
         onCategoryChange={setActiveCategory}
       />

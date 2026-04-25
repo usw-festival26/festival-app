@@ -21,7 +21,9 @@ export function useAnnouncements() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const source = apiData ?? ANNOUNCEMENTS_DATA;
+  // API 활성화 상태에서는 하드코딩 fallback 을 쓰지 않는다.
+  // 실패 시 빈 배열과 error 를 반환해 화면이 "불러오지 못함" 을 표시할 수 있게 한다.
+  const source = config.isApiEnabled ? (apiData ?? []) : ANNOUNCEMENTS_DATA;
 
   const announcements = useMemo(() => {
     return [...source].sort((a, b) => {
@@ -59,6 +61,7 @@ export function useAnnouncementById(id: string): {
 
   const announcement = useMemo(() => {
     if (apiData) return apiData;
+    if (config.isApiEnabled) return undefined;
     return ANNOUNCEMENTS_DATA.find((a) => a.id === id);
   }, [apiData, id]);
 

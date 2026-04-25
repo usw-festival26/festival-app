@@ -20,12 +20,12 @@ export interface LostFoundItem {
   title: string;
   /** 상세 설명 */
   description: string;
-  /** 발견/분실 장소 */
-  location: string;
+  /** 발견/분실 장소. 백엔드 스펙에 storageLocation 이 없어 optional. */
+  location?: string;
   /** 현재 상태 */
   status: LostFoundStatus;
-  /** 신고 시각 (ISO 8601) */
-  reportedAt: string;
+  /** 신고 시각 (ISO 8601). 백엔드 스펙에 createdAt 이 없어 optional. */
+  reportedAt?: string;
   /** 물품 이미지 URI (선택) */
   imageUri?: string;
   /** 물품 카테고리 */

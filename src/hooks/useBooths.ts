@@ -27,7 +27,8 @@ export function useBooths(options?: UseBoothsOptions) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const source = apiData ?? BOOTHS_DATA;
+  // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 배열 + error).
+  const source = config.isApiEnabled ? (apiData ?? []) : BOOTHS_DATA;
 
   const booths = useMemo(() => {
     return source.filter((booth) => {
@@ -67,6 +68,7 @@ export function useBoothById(id: string): { data: Booth | undefined; booth: Boot
 
   const booth = useMemo(() => {
     if (apiData) return apiData;
+    if (config.isApiEnabled) return undefined;
     return BOOTHS_DATA.find((b) => b.id === id);
   }, [apiData, id]);
 
@@ -98,6 +100,7 @@ export function useBoothMenus(boothId: string): {
 
   const menus = useMemo(() => {
     if (apiData) return apiData;
+    if (config.isApiEnabled) return [];
     const booth = BOOTHS_DATA.find((b) => b.id === boothId);
     return booth?.menuItems ?? [];
   }, [apiData, boothId]);

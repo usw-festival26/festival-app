@@ -2,10 +2,11 @@
  * BoothList - 부스 카드 목록
  */
 import React from 'react';
-import { FlatList, View } from 'react-native';
+import { FlatList, View, ActivityIndicator } from 'react-native';
 import type { Booth } from '../../types/booth';
 import { InfoCard } from '@molecules/InfoCard';
 import { EmptyState } from '@molecules/EmptyState';
+import { Colors } from '@constants/colors';
 
 /** 카테고리 한글 매핑 */
 const CATEGORY_LABEL: Record<string, string> = {
@@ -20,9 +21,28 @@ const CATEGORY_LABEL: Record<string, string> = {
 export interface BoothListProps {
   booths: Booth[];
   onPressBooth?: (booth: Booth) => void;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
-export function BoothList({ booths, onPressBooth }: BoothListProps) {
+export function BoothList({ booths, onPressBooth, isLoading, error }: BoothListProps) {
+  if (isLoading) {
+    return (
+      <View className="py-12 items-center">
+        <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <EmptyState
+        message={`부스를 불러오지 못했습니다.\n${error}`}
+        iconName="alert-circle-outline"
+      />
+    );
+  }
+
   if (booths.length === 0) {
     return <EmptyState message="등록된 부스가 없습니다." iconName="storefront-outline" />;
   }

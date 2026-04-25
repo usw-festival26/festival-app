@@ -27,7 +27,8 @@ export function useLostFound(options?: UseLostFoundOptions) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const source = apiData ?? LOST_FOUND_DATA;
+  // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 배열 + error).
+  const source = config.isApiEnabled ? (apiData ?? []) : LOST_FOUND_DATA;
 
   const items = useMemo(() => {
     return source.filter((item) => {
@@ -37,13 +38,17 @@ export function useLostFound(options?: UseLostFoundOptions) {
         return (
           item.title.toLowerCase().includes(q) ||
           item.description.toLowerCase().includes(q) ||
-          item.location.toLowerCase().includes(q)
+          // location 은 스펙에 없어 없을 수 있음 → 있을 때만 검색 대상.
+          (item.location?.toLowerCase().includes(q) ?? false)
         );
       }
       return true;
-    }).sort(
-      (a, b) => new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime(),
-    );
+    }).sort((a, b) => {
+      // reportedAt 이 없으면 정렬 기준에서 제외(가장 뒤로).
+      const at = a.reportedAt ? new Date(a.reportedAt).getTime() : 0;
+      const bt = b.reportedAt ? new Date(b.reportedAt).getTime() : 0;
+      return bt - at;
+    });
   }, [source, status, searchQuery]);
 
   return { data: items, items, isLoading, error };
@@ -74,6 +79,7 @@ export function useLostFoundById(id: string): {
 
   const item = useMemo(() => {
     if (apiData) return apiData;
+    if (config.isApiEnabled) return undefined;
     return LOST_FOUND_DATA.find((i) => i.id === id);
   }, [apiData, id]);
 

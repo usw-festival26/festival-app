@@ -44,7 +44,10 @@ export function useTimetable(options?: UseTimetableOptions): UseTimetableResult 
       .finally(() => setIsLoading(false));
   }, []);
 
-  const source = apiData ?? TIMETABLE_DATA;
+  // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 데이터 + error).
+  const source = config.isApiEnabled
+    ? (apiData ?? { stages: [], days: [] })
+    : TIMETABLE_DATA;
 
   const filteredDays = useMemo(() => {
     let days = source.days;

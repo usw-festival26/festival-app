@@ -10,12 +10,16 @@ import { AnnouncementList } from '../../../src/components/organisms/Announcement
 import { useAnnouncements } from '../../../src/hooks/useAnnouncements';
 
 export default function AnnouncementsListScreen() {
-  const { announcements } = useAnnouncements();
+  const { announcements, isLoading, error } = useAnnouncements();
 
   return (
     <BackdropScreenTemplate title="공지" backdropVariant="announcement">
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <AnnouncementList announcements={announcements} />
+        <AnnouncementList
+          announcements={announcements}
+          isLoading={isLoading}
+          error={error}
+        />
       </ScrollView>
     </BackdropScreenTemplate>
   );

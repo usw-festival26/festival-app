@@ -38,6 +38,8 @@ export interface BoothMapViewProps {
   foodBooths: Booth[];
   facilities: Facility[];
   events: FestivalEvent[];
+  isLoading?: boolean;
+  error?: string | null;
   onExpandedChange: (expanded: boolean) => void;
   onCategoryChange: (category: SheetCategory) => void;
 }
@@ -58,6 +60,8 @@ export function BoothMapView({
   foodBooths,
   facilities,
   events,
+  isLoading,
+  error,
   onExpandedChange,
   onCategoryChange,
 }: BoothMapViewProps) {
@@ -265,14 +269,14 @@ export function BoothMapView({
               >
                 <View style={{ width: sheetWidth, flex: 1 }}>
                   <ScrollView showsVerticalScrollIndicator={false}>
-                    <BoothSheetContent booths={booths} />
+                    <BoothSheetContent booths={booths} isLoading={isLoading} error={error} />
                     <View className="h-6" />
                   </ScrollView>
                 </View>
 
                 <View style={{ width: sheetWidth, flex: 1 }}>
                   <ScrollView showsVerticalScrollIndicator={false}>
-                    <FoodSheetContent booths={foodBooths} />
+                    <FoodSheetContent booths={foodBooths} isLoading={isLoading} error={error} />
                     <View className="h-6" />
                   </ScrollView>
                 </View>
