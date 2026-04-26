@@ -1,5 +1,4 @@
 import type { Booth, BoothMenuItem } from '../types/booth';
-import type { TimetableData } from '../types/timetable';
 import type { Announcement } from '../types/announcement';
 import type { LostFoundItem } from '../types/lostFound';
 import type { InformationSection } from '../types/information';
@@ -63,16 +62,8 @@ export async function fetchMenusByBooth(boothId: string): Promise<BoothMenuItem[
   return (data as ApiMenu[]).map(mapMenu);
 }
 
-// ── 타임테이블 ──────────────────────────────────────────────
-// TODO: 백엔드 스펙 미정. 현재 swagger/openapi.json 에 타임테이블 엔드포인트 없음.
-// `config.isApiEnabled` 가 true 인 환경에서 호출되면 404 → useTimetable 이 빈 데이터 + error 로 UI 에 그대로 노출.
-// (API 비활성 환경에서는 훅이 TIMETABLE_DATA 하드코딩을 사용.)
-
-export async function fetchTimetable(): Promise<TimetableData> {
-  const data = await apiClient.get<TimetableData>('/api/timetable');
-  assertObject(data, '/api/timetable', ['stages', 'days']);
-  return data as TimetableData;
-}
+// 타임테이블은 백엔드 스펙 미정이라 src/data/timetable.ts 수동 입력만 사용
+// (useTimetable 이 하드코딩 데이터만 반환).
 
 // ── 공지 ────────────────────────────────────────────────────
 
