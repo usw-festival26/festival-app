@@ -42,8 +42,8 @@ export function useBooths(options?: UseBoothsOptions) {
         const q = searchQuery.toLowerCase();
         return (
           booth.name.toLowerCase().includes(q) ||
-          booth.organizer.toLowerCase().includes(q) ||
-          booth.description.toLowerCase().includes(q)
+          (booth.organizer?.toLowerCase().includes(q) ?? false) ||
+          (booth.description?.toLowerCase().includes(q) ?? false)
         );
       }
       return true;

@@ -70,10 +70,12 @@ export default function AnnouncementDetailScreen() {
           {announcement.isPinned && (
             <Badge text="고정" variant="warning" />
           )}
-          <Badge
-            text={PRIORITY_LABEL[announcement.priority] ?? announcement.priority}
-            variant={PRIORITY_VARIANT[announcement.priority] ?? 'default'}
-          />
+          {announcement.priority && (
+            <Badge
+              text={PRIORITY_LABEL[announcement.priority] ?? announcement.priority}
+              variant={PRIORITY_VARIANT[announcement.priority] ?? 'default'}
+            />
+          )}
         </View>
 
         {/* 제목 */}

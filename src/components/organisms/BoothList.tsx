@@ -54,7 +54,7 @@ export function BoothList({ booths, onPressBooth, isLoading, error, onRetry }: B
           title={item.name}
           subtitle={item.organizer}
           description={item.description}
-          badgeText={CATEGORY_LABEL[item.category] ?? item.category}
+          badgeText={item.category ? (CATEGORY_LABEL[item.category] ?? item.category) : undefined}
           badgeVariant="default"
           onPress={() => onPressBooth?.(item)}
         />

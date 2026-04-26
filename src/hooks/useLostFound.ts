@@ -42,7 +42,7 @@ export function useLostFound(options?: UseLostFoundOptions) {
         const q = searchQuery.toLowerCase();
         return (
           item.title.toLowerCase().includes(q) ||
-          item.description.toLowerCase().includes(q) ||
+          (item.description?.toLowerCase().includes(q) ?? false) ||
           // location 은 스펙에 없어 없을 수 있음 → 있을 때만 검색 대상.
           (item.location?.toLowerCase().includes(q) ?? false)
         );

@@ -38,7 +38,7 @@ function group(items: BoothMenuItem[]) {
 
 export function BoothDetail({ booth }: BoothDetailProps) {
   const router = useRouter();
-  const { main, side, set } = group(booth.menuItems);
+  const { main, side, set } = group(booth.menuItems ?? []);
 
   const sections: { label: string; items: BoothMenuItem[] }[] = [
     { label: 'Main', items: main },

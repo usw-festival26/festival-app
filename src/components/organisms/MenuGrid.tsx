@@ -42,14 +42,14 @@ export function MenuGrid({ booths, isLoading, error, onRetry }: MenuGridProps) {
         rows.map((row, i) => (
           <View key={i} className="flex-row">
             {row.map((item) => {
-              const mainMenus = item.menuItems
+              const mainMenus = (item.menuItems ?? [])
                 .filter((m) => m.menuCategory === 'main')
                 .map((m) => m.name)
                 .join(', ');
               return (
                 <MenuBoothCard
                   key={item.id}
-                  organizer={item.organizer}
+                  organizer={item.organizer ?? item.name}
                   mainMenu="메인메뉴"
                   menuItems={mainMenus || undefined}
                   onPress={() => router.push(`/(tabs)/menu/${item.id}` as any)}
