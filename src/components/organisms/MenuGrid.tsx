@@ -10,15 +10,17 @@ import { useRouter } from 'expo-router';
 import type { Booth } from '../../types/booth';
 import { MenuBoothCard } from '@molecules/MenuBoothCard';
 import { EmptyState } from '@molecules/EmptyState';
+import { NetworkErrorState } from '@atoms/NetworkErrorState';
 import { Colors } from '@constants/colors';
 
 export interface MenuGridProps {
   booths: Booth[];
   isLoading?: boolean;
   error?: string | null;
+  onRetry?: () => void;
 }
 
-export function MenuGrid({ booths, isLoading, error }: MenuGridProps) {
+export function MenuGrid({ booths, isLoading, error, onRetry }: MenuGridProps) {
   const router = useRouter();
 
   const rows: Booth[][] = [];
@@ -33,10 +35,7 @@ export function MenuGrid({ booths, isLoading, error }: MenuGridProps) {
           <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
         </View>
       ) : error ? (
-        <EmptyState
-          message={`메뉴를 불러오지 못했습니다.\n${error}`}
-          iconName="alert-circle-outline"
-        />
+        <NetworkErrorState onRetry={onRetry} />
       ) : rows.length === 0 ? (
         <EmptyState message="등록된 부스가 없습니다." iconName="storefront-outline" />
       ) : (

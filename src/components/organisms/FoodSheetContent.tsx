@@ -8,7 +8,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@atoms/AppText';
 import { BoothCard } from '@molecules/BoothCard';
-import { EmptyState } from '@molecules/EmptyState';
+import { NetworkErrorState } from '@atoms/NetworkErrorState';
 import { Colors } from '@constants/colors';
 import type { Booth } from '../../types/booth';
 
@@ -16,9 +16,10 @@ export interface FoodSheetContentProps {
   booths: Booth[];
   isLoading?: boolean;
   error?: string | null;
+  onRetry?: () => void;
 }
 
-export function FoodSheetContent({ booths, isLoading, error }: FoodSheetContentProps) {
+export function FoodSheetContent({ booths, isLoading, error, onRetry }: FoodSheetContentProps) {
   const router = useRouter();
 
   const rows: Booth[][] = [];
@@ -34,10 +35,7 @@ export function FoodSheetContent({ booths, isLoading, error }: FoodSheetContentP
           <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
         </View>
       ) : error ? (
-        <EmptyState
-          message={`푸드트럭을 불러오지 못했습니다.\n${error}`}
-          iconName="alert-circle-outline"
-        />
+        <NetworkErrorState onRetry={onRetry} />
       ) : (
         <View className="px-3">
           {rows.map((row, i) => (

@@ -10,7 +10,7 @@ import { AnnouncementList } from '../../../src/components/organisms/Announcement
 import { useAnnouncements } from '../../../src/hooks/useAnnouncements';
 
 export default function AnnouncementsListScreen() {
-  const { announcements, isLoading, error } = useAnnouncements();
+  const { announcements, isLoading, error, retry } = useAnnouncements();
 
   return (
     <BackdropScreenTemplate title="공지" backdropVariant="announcement">
@@ -19,6 +19,7 @@ export default function AnnouncementsListScreen() {
           announcements={announcements}
           isLoading={isLoading}
           error={error}
+          onRetry={retry}
         />
       </ScrollView>
     </BackdropScreenTemplate>

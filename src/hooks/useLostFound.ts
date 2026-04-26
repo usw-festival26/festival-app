@@ -1,7 +1,7 @@
 /**
  * 분실물 데이터 접근 훅
  */
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { config } from '@config/env';
 import { fetchLostFoundItems, fetchLostFoundItem } from '@api/endpoints';
 import { LOST_FOUND_DATA } from '@data/lostFound';
@@ -18,14 +18,19 @@ export function useLostFound(options?: UseLostFoundOptions) {
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
     setIsLoading(true);
+    setError(null);
     fetchLostFoundItems()
       .then(setApiData)
       .catch((e: Error) => setError(e.message))
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    retry();
+  }, [retry]);
 
   // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 배열 + error).
   const source = config.isApiEnabled ? (apiData ?? []) : LOST_FOUND_DATA;
@@ -51,7 +56,7 @@ export function useLostFound(options?: UseLostFoundOptions) {
     });
   }, [source, status, searchQuery]);
 
-  return { data: items, items, isLoading, error };
+  return { data: items, items, isLoading, error, retry };
 }
 
 export function useLostFoundById(id: string): {
@@ -59,23 +64,26 @@ export function useLostFoundById(id: string): {
   item: LostFoundItem | undefined;
   isLoading: boolean;
   error: string | null;
+  retry: () => void;
 } {
   const [apiData, setApiData] = useState<LostFoundItem | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
-    let isCurrent = true;
     setApiData(null);
     setError(null);
     setIsLoading(true);
     fetchLostFoundItem(id)
-      .then((data) => { if (isCurrent) setApiData(data); })
-      .catch((e: Error) => { if (isCurrent) setError(e.message); })
-      .finally(() => { if (isCurrent) setIsLoading(false); });
-    return () => { isCurrent = false; };
+      .then(setApiData)
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setIsLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    retry();
+  }, [retry]);
 
   const item = useMemo(() => {
     if (apiData) return apiData;
@@ -83,5 +91,5 @@ export function useLostFoundById(id: string): {
     return LOST_FOUND_DATA.find((i) => i.id === id);
   }, [apiData, id]);
 
-  return { data: item, item, isLoading, error };
+  return { data: item, item, isLoading, error, retry };
 }

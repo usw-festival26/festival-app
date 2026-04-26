@@ -13,6 +13,7 @@ import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import type { LostFoundItem, LostFoundCategory } from '../../types/lostFound';
 import { LostFoundCard } from '@molecules/LostFoundCard';
 import { EmptyState } from '@molecules/EmptyState';
+import { NetworkErrorState } from '@atoms/NetworkErrorState';
 import { FaqBubble } from '@molecules/FaqBubble';
 
 type FilterKey = 'all' | 'electronics' | 'wallet' | 'clothing-bags' | 'other';
@@ -34,9 +35,10 @@ export interface LostFoundListProps {
   items: LostFoundItem[];
   isLoading?: boolean;
   error?: string | null;
+  onRetry?: () => void;
 }
 
-export function LostFoundList({ items, isLoading, error }: LostFoundListProps) {
+export function LostFoundList({ items, isLoading, error, onRetry }: LostFoundListProps) {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [page, setPage] = useState(0);
   const insets = useSafeAreaInsets();
@@ -153,10 +155,7 @@ export function LostFoundList({ items, isLoading, error }: LostFoundListProps) {
           </View>
         ) : error ? (
           <View style={{ paddingTop: 48 }}>
-            <EmptyState
-              message={`분실물을 불러오지 못했습니다.\n${error}`}
-              iconName="alert-circle-outline"
-            />
+            <NetworkErrorState onRetry={onRetry} />
           </View>
         ) : pageItems.length === 0 ? (
           <View style={{ paddingTop: 48 }}>

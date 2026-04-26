@@ -1,7 +1,7 @@
 /**
  * 부스 데이터 접근 훅
  */
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { config } from '@config/env';
 import { fetchBooths, fetchBooth, fetchMenusByBooth } from '@api/endpoints';
 import { BOOTHS_DATA } from '@data/booths';
@@ -18,14 +18,19 @@ export function useBooths(options?: UseBoothsOptions) {
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
     setIsLoading(true);
+    setError(null);
     fetchBooths()
       .then(setApiData)
       .catch((e: Error) => setError(e.message))
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    retry();
+  }, [retry]);
 
   // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 배열 + error).
   const source = config.isApiEnabled ? (apiData ?? []) : BOOTHS_DATA;
@@ -45,26 +50,34 @@ export function useBooths(options?: UseBoothsOptions) {
     });
   }, [source, category, searchQuery]);
 
-  return { data: booths, booths, isLoading, error };
+  return { data: booths, booths, isLoading, error, retry };
 }
 
-export function useBoothById(id: string): { data: Booth | undefined; booth: Booth | undefined; isLoading: boolean; error: string | null } {
+export function useBoothById(id: string): {
+  data: Booth | undefined;
+  booth: Booth | undefined;
+  isLoading: boolean;
+  error: string | null;
+  retry: () => void;
+} {
   const [apiData, setApiData] = useState<Booth | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
-    let isCurrent = true;
     setApiData(null);
     setError(null);
     setIsLoading(true);
     fetchBooth(id)
-      .then((data) => { if (isCurrent) setApiData(data); })
-      .catch((e: Error) => { if (isCurrent) setError(e.message); })
-      .finally(() => { if (isCurrent) setIsLoading(false); });
-    return () => { isCurrent = false; };
+      .then(setApiData)
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setIsLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    retry();
+  }, [retry]);
 
   const booth = useMemo(() => {
     if (apiData) return apiData;
@@ -72,7 +85,7 @@ export function useBoothById(id: string): { data: Booth | undefined; booth: Boot
     return BOOTHS_DATA.find((b) => b.id === id);
   }, [apiData, id]);
 
-  return { data: booth, booth, isLoading, error };
+  return { data: booth, booth, isLoading, error, retry };
 }
 
 export function useBoothMenus(boothId: string): {
@@ -80,23 +93,26 @@ export function useBoothMenus(boothId: string): {
   menus: BoothMenuItem[];
   isLoading: boolean;
   error: string | null;
+  retry: () => void;
 } {
   const [apiData, setApiData] = useState<BoothMenuItem[] | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
-    let isCurrent = true;
     setApiData(null);
     setError(null);
     setIsLoading(true);
     fetchMenusByBooth(boothId)
-      .then((data) => { if (isCurrent) setApiData(data); })
-      .catch((e: Error) => { if (isCurrent) setError(e.message); })
-      .finally(() => { if (isCurrent) setIsLoading(false); });
-    return () => { isCurrent = false; };
+      .then(setApiData)
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setIsLoading(false));
   }, [boothId]);
+
+  useEffect(() => {
+    retry();
+  }, [retry]);
 
   const menus = useMemo(() => {
     if (apiData) return apiData;
@@ -105,5 +121,5 @@ export function useBoothMenus(boothId: string): {
     return booth?.menuItems ?? [];
   }, [apiData, boothId]);
 
-  return { data: menus, menus, isLoading, error };
+  return { data: menus, menus, isLoading, error, retry };
 }

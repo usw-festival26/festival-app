@@ -7,7 +7,7 @@ import { LostFoundList } from '../../../src/components/organisms/LostFoundList';
 import { useLostFound } from '../../../src/hooks/useLostFound';
 
 export default function LostFoundListScreen() {
-  const { items, isLoading, error } = useLostFound();
+  const { items, isLoading, error, retry } = useLostFound();
 
   return (
     <BackdropScreenTemplate
@@ -15,7 +15,7 @@ export default function LostFoundListScreen() {
       backdropVariant="lost-found"
       headerTextColor="#000000"
     >
-      <LostFoundList items={items} isLoading={isLoading} error={error} />
+      <LostFoundList items={items} isLoading={isLoading} error={error} onRetry={retry} />
     </BackdropScreenTemplate>
   );
 }

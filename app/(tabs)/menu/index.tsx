@@ -9,11 +9,11 @@ import { MenuGrid } from '../../../src/components/organisms/MenuGrid';
 import { useBooths } from '../../../src/hooks/useBooths';
 
 export default function MenuListScreen() {
-  const { booths, isLoading, error } = useBooths();
+  const { booths, isLoading, error, retry } = useBooths();
 
   return (
     <BackdropScreenTemplate title="메뉴" backdropVariant="menu">
-      <MenuGrid booths={booths} isLoading={isLoading} error={error} />
+      <MenuGrid booths={booths} isLoading={isLoading} error={error} onRetry={retry} />
     </BackdropScreenTemplate>
   );
 }
