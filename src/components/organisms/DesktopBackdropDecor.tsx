@@ -12,7 +12,7 @@
  */
 import React from 'react';
 import { View, Text } from 'react-native';
-import { GradientBlob } from './GradientBlob';
+import { GradientBlob } from '@atoms/GradientBlob';
 import { Colors } from '@constants/colors';
 
 const FIGMA_FRAME_WIDTH = 1920;

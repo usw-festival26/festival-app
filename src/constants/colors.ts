@@ -16,6 +16,7 @@ export const Colors = {
     text: '#000000',
     muted: '#7D7D7D',
     mutedDark: '#515151',
+    errorRed: '#FF3B30',
   },
   status: {
     success: '#22C55E',

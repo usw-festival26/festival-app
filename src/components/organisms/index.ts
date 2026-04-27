@@ -20,3 +20,4 @@ export { NotFoundContent, type NotFoundContentProps } from './NotFoundContent';
 export { SplashContent, type SplashContentProps } from './SplashContent';
 export { LineupList, type LineupListProps } from './LineupList';
 export { MenuGrid, type MenuGridProps } from './MenuGrid';
+export { DesktopBackdropDecor } from './DesktopBackdropDecor';

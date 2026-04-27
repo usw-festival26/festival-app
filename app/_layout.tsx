@@ -15,7 +15,7 @@ import { Platform } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import '../global.css';
-import { DesktopBackdropDecor } from '@atoms/DesktopBackdropDecor';
+import { DesktopBackdropDecor } from '@organisms/DesktopBackdropDecor';
 
 export { ErrorBoundary } from 'expo-router';
 

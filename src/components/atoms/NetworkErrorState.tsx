@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, Pressable, Text, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '@constants/colors';
 
 export interface NetworkErrorStateProps {
   message?: string;
@@ -28,17 +29,11 @@ export function NetworkErrorState({
 }: NetworkErrorStateProps) {
   return (
     <View className={`items-center justify-center py-16 ${className}`}>
-      <Ionicons name="warning" size={100} color="#FF3B30" />
+      <Ionicons name="warning" size={100} color={Colors.festival.errorRed} />
 
       <Text
-        style={{
-          marginTop: 24,
-          fontFamily: PRETENDARD_SEMIBOLD,
-          fontWeight: '600',
-          fontSize: 15,
-          color: '#000000',
-          textAlign: 'center',
-        }}
+        className="mt-6 text-[15px] font-semibold text-center text-festival-text"
+        style={{ fontFamily: PRETENDARD_SEMIBOLD }}
       >
         {message}
       </Text>
@@ -48,25 +43,12 @@ export function NetworkErrorState({
           onPress={onRetry}
           accessibilityRole="button"
           accessibilityLabel={retryLabel}
-          style={({ pressed }) => ({
-            marginTop: 20,
-            width: 135,
-            height: 40,
-            borderRadius: 20,
-            borderWidth: 1,
-            borderColor: '#000000',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.7 : 1,
-          })}
+          className="mt-5 w-[135px] h-10 rounded-[20px] border border-festival-text items-center justify-center"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Text
-            style={{
-              fontFamily: PRETENDARD_SEMIBOLD,
-              fontWeight: '600',
-              fontSize: 15,
-              color: '#000000',
-            }}
+            className="text-[15px] font-semibold text-festival-text"
+            style={{ fontFamily: PRETENDARD_SEMIBOLD }}
           >
             {retryLabel}
           </Text>

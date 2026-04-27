@@ -25,6 +25,7 @@ module.exports = {
           text: '#000000',
           muted: '#7D7D7D',
           'muted-dark': '#515151',
+          'error-red': '#FF3B30',
         },
       },
       borderRadius: {

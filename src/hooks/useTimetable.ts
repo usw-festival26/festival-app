@@ -46,7 +46,7 @@ export function useTimetable(options?: UseTimetableOptions): UseTimetableResult 
           const q = searchQuery.toLowerCase();
           return (
             p.artistName.toLowerCase().includes(q) ||
-            (p.description?.toLowerCase().includes(q) ?? false)
+            p.description.toLowerCase().includes(q)
           );
         }
         return true;
