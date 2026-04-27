@@ -9,7 +9,7 @@ import { View } from 'react-native';
 export function DragHandle() {
   return (
     <View className="items-center py-3">
-      <View className="w-[60px] h-[5px] bg-festival-secondary rounded-full" />
+      <View className="w-[60px] h-[5px] bg-festival-muted rounded-full" />
     </View>
   );
 }

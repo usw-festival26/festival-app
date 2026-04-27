@@ -2,14 +2,16 @@
  * 공지사항 상세 화면
  */
 import React from 'react';
-import { View } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollScreenTemplate } from '../../../src/components/templates/ScrollScreenTemplate';
 import { AppText } from '../../../src/components/atoms/AppText';
 import { Badge } from '../../../src/components/atoms/Badge';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
+import { NetworkErrorState } from '../../../src/components/atoms/NetworkErrorState';
 import { AppButton } from '../../../src/components/atoms/AppButton';
+import { Colors } from '../../../src/constants/colors';
 import { useAnnouncementById } from '../../../src/hooks/useAnnouncements';
 import { formatDate } from '../../../src/utils/date';
 import type { BadgeVariant } from '../../../src/components/atoms/Badge';
@@ -29,7 +31,25 @@ const PRIORITY_VARIANT: Record<string, BadgeVariant> = {
 export default function AnnouncementDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { announcement } = useAnnouncementById(id ?? '');
+  const { announcement, isLoading, error, retry } = useAnnouncementById(id ?? '');
+
+  if (isLoading) {
+    return (
+      <ScrollScreenTemplate title="공지" leftAction="back">
+        <View className="items-center py-16">
+          <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
+        </View>
+      </ScrollScreenTemplate>
+    );
+  }
+
+  if (error) {
+    return (
+      <ScrollScreenTemplate title="공지" leftAction="back">
+        <NetworkErrorState onRetry={retry} />
+      </ScrollScreenTemplate>
+    );
+  }
 
   if (!announcement) {
     return (
@@ -50,10 +70,12 @@ export default function AnnouncementDetailScreen() {
           {announcement.isPinned && (
             <Badge text="고정" variant="warning" />
           )}
-          <Badge
-            text={PRIORITY_LABEL[announcement.priority] ?? announcement.priority}
-            variant={PRIORITY_VARIANT[announcement.priority] ?? 'default'}
-          />
+          {announcement.priority && (
+            <Badge
+              text={PRIORITY_LABEL[announcement.priority] ?? announcement.priority}
+              variant={PRIORITY_VARIANT[announcement.priority] ?? 'default'}
+            />
+          )}
         </View>
 
         {/* 제목 */}

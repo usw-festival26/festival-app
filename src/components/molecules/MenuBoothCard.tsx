@@ -18,7 +18,7 @@ export function MenuBoothCard({ organizer, mainMenu, menuItems, onPress }: MenuB
   return (
     <Pressable onPress={onPress} className="flex-1 mx-[13px] mb-[25px] bg-festival-card rounded-card p-3 active:opacity-70">
       {/* 이미지 플레이스홀더 */}
-      <View className="bg-festival-primary rounded-[12px] h-[140px] mb-2" />
+      <View className="bg-festival-lavender rounded-[12px] h-[140px] mb-2" />
       <AppText className="text-[15px] font-semibold text-black">{organizer}</AppText>
       {mainMenu && (
         <AppText className="text-xs text-festival-muted mt-0.5">{mainMenu}</AppText>

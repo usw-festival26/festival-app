@@ -1,79 +1,240 @@
 /**
- * LostFoundList - 분실물 테이블 리스트
+ * LostFoundList - 분실물 카드 리스트 (Figma 1422:2435)
  *
- * Figma 82:77: 단일 흰색 카드 안에 2열(물품/정보) 테이블 레이아웃 + 하단 문의번호
+ * 레이아웃:
+ *  - 네이비 배경 (상단 영역): FaqBubble + "문의번호 · 010-1234-5678"
+ *  - 반투명 흰 그라디언트 패널(top 0.5 → bottom 0.95): 카테고리 칩 + 카드 리스트 + 페이지 인디케이터
+ * 칩: 50×29 rounded-14.5, Pretendard SemiBold 15. 전체 active=#010070/white, 비활성 white/navy.
  */
-import React from 'react';
-import { ScrollView, View } from 'react-native';
-import type { LostFoundItem } from '../../types/lostFound';
-import { AppText } from '../atoms/AppText';
-import { LostFoundTableRow } from '../molecules/LostFoundTableRow';
-import { EmptyState } from '../molecules/EmptyState';
-import { formatDate } from '../../utils/date';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ScrollView, View, Text, Pressable, Platform, StyleSheet, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import type { LostFoundItem, LostFoundCategory } from '../../types/lostFound';
+import { LostFoundCard } from '@molecules/LostFoundCard';
+import { EmptyState } from '@molecules/EmptyState';
+import { NetworkErrorState } from '@atoms/NetworkErrorState';
+import { FaqBubble } from '@molecules/FaqBubble';
 
-const STATUS_LABEL: Record<string, string> = {
-  lost: '분실',
-  found: '발견',
-  claimed: '수령완료',
-};
+type FilterKey = 'all' | 'electronics' | 'wallet' | 'clothing-bags' | 'other';
 
-const CATEGORY_LABEL: Record<string, string> = {
-  electronics: '전자기기',
-  clothing: '의류',
-  accessories: '액세서리',
-  bags: '가방',
-  other: '기타',
-};
+const FILTERS: { key: FilterKey; label: string; matches: LostFoundCategory[] }[] = [
+  { key: 'all', label: '전체', matches: [] },
+  { key: 'electronics', label: '전자기기', matches: ['electronics'] },
+  { key: 'wallet', label: '지갑·카드', matches: ['accessories'] },
+  { key: 'clothing-bags', label: '의류·가방', matches: ['clothing', 'bags'] },
+  { key: 'other', label: '기타', matches: ['other'] },
+];
 
-const CONTACT_NUMBERS = ['010-1234-5678', '010-1234-5678'];
+const PAGE_SIZE = 5;
+
+const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
+const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
 
 export interface LostFoundListProps {
   items: LostFoundItem[];
-  onPressItem?: (item: LostFoundItem) => void;
+  isLoading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
 }
 
-export function LostFoundList({ items, onPressItem }: LostFoundListProps) {
-  if (items.length === 0) {
-    return <EmptyState message="등록된 분실물이 없습니다." iconName="search-outline" />;
-  }
+export function LostFoundList({ items, isLoading, error, onRetry }: LostFoundListProps) {
+  const [filter, setFilter] = useState<FilterKey>('all');
+  const [page, setPage] = useState(0);
+  const insets = useSafeAreaInsets();
+
+  const filtered = useMemo(() => {
+    if (filter === 'all') return items;
+    const f = FILTERS.find((x) => x.key === filter);
+    if (!f) return items;
+    return items.filter((i) => f.matches.includes(i.category));
+  }, [items, filter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+  // items / filter 변경으로 totalPages 가 줄어 현재 page 가 범위를 벗어나면 클램프.
+  useEffect(() => {
+    if (page >= totalPages) setPage(Math.max(0, totalPages - 1));
+  }, [page, totalPages]);
+
+  const pageItems = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
-    <ScrollView contentContainerClassName="px-4 py-4 gap-4">
-      {/* 메인 카드: 2열 테이블 */}
-      <View className="bg-festival-card rounded-card-lg px-2 py-4">
-        {items.map((item) => (
-          <LostFoundTableRow
-            key={item.id}
-            productTitle={item.title}
-            productItems={[
-              CATEGORY_LABEL[item.category] ?? item.category,
-              item.description,
-              STATUS_LABEL[item.status] ?? item.status,
-            ]}
-            infoTitle={item.location}
-            infoItems={[
-              formatDate(item.reportedAt),
-              STATUS_LABEL[item.status] ?? item.status,
-              CATEGORY_LABEL[item.category] ?? item.category,
-            ]}
-          />
-        ))}
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* 1. 네이비 배경 상단: 말풍선 + 문의번호 */}
+      <View style={{ paddingTop: 34, paddingBottom: 20, alignItems: 'center' }}>
+        <FaqBubble question="분실물을 습득하셨다면 아래 번호로 연락주세요!" />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            marginTop: 18,
+          }}
+        >
+          <Text style={styles.contactLabel}>문의번호</Text>
+          <View style={styles.dotDivider} />
+          <Text style={styles.contactValue}>010-1234-5678</Text>
+        </View>
       </View>
 
-      {/* 하단 문의번호 */}
-      <View className="bg-festival-card rounded-card-lg px-4 py-3 items-center gap-1">
-        {CONTACT_NUMBERS.map((number, idx) => (
-          <View key={idx} className="flex-row items-center gap-3">
-            <AppText variant="caption" className="text-festival-text">
-              문의번호
-            </AppText>
-            <View className="w-[3px] h-[3px] rounded-full bg-festival-text" />
-            <AppText variant="caption" className="text-festival-text">
-              {number}
-            </AppText>
+      {/* 2. 반투명 흰 그라디언트 패널: 칩 + 카드 + 페이지 */}
+      <View style={{ position: 'relative', flex: 1, minHeight: 500 }}>
+        <Svg
+          width="100%"
+          height="100%"
+          style={{ position: 'absolute', top: 0, left: 0 }}
+          preserveAspectRatio="none"
+        >
+          <Defs>
+            <LinearGradient id="lost-found-panel" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.5" />
+              <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.95" />
+            </LinearGradient>
+          </Defs>
+          <Rect x={0} y={0} width="100%" height="100%" fill="url(#lost-found-panel)" />
+        </Svg>
+
+        {/* 칩 */}
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 8,
+            paddingHorizontal: 16,
+            paddingTop: 20,
+            paddingBottom: 14,
+            justifyContent: 'center',
+          }}
+        >
+          {FILTERS.map((f) => {
+            const active = filter === f.key;
+            return (
+              <Pressable
+                key={f.key}
+                onPress={() => {
+                  setFilter(f.key);
+                  setPage(0);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`${f.label} 필터`}
+                accessibilityState={{ selected: active }}
+                style={{
+                  minWidth: 50,
+                  height: 29,
+                  borderRadius: 14.5,
+                  backgroundColor: active ? '#010070' : '#FFFFFF',
+                  paddingHorizontal: 12,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: PRETENDARD_SEMIBOLD,
+                    fontWeight: '600',
+                    fontSize: 15,
+                    color: active ? '#FFFFFF' : '#02015B',
+                  }}
+                >
+                  {f.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* 카드 리스트 */}
+        {isLoading ? (
+          <View style={{ paddingTop: 48, alignItems: 'center' }}>
+            <ActivityIndicator size="small" color="#02015B" />
           </View>
-        ))}
+        ) : error ? (
+          <View style={{ paddingTop: 48 }}>
+            <NetworkErrorState onRetry={onRetry} />
+          </View>
+        ) : pageItems.length === 0 ? (
+          <View style={{ paddingTop: 48 }}>
+            <EmptyState message="등록된 분실물이 없습니다." iconName="search-outline" />
+          </View>
+        ) : (
+          <View style={{ gap: 12, paddingHorizontal: 21 }}>
+            {pageItems.map((item) => (
+              <LostFoundCard key={item.id} item={item} />
+            ))}
+          </View>
+        )}
+
+        {/* 페이지 인디케이터 */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 21,
+            marginTop: 20,
+            paddingBottom: 24 + insets.bottom,
+          }}
+        >
+          <View style={{ flex: 1 }} />
+          <Text style={styles.pageIndicator}>
+            {page + 1}/{totalPages}
+          </Text>
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            <Pressable
+              onPress={() => setPage((p) => (p + 1) % totalPages)}
+              accessibilityRole="button"
+              accessibilityLabel="다음 페이지"
+              disabled={totalPages <= 1}
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                opacity: totalPages <= 1 ? 0.4 : pressed ? 0.7 : 1,
+              })}
+            >
+              <Text style={styles.nextLink}>다음페이지</Text>
+              <Text style={styles.nextLink}>{'>'}</Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  contactLabel: {
+    fontFamily: PRETENDARD_REGULAR,
+    fontWeight: '400',
+    fontSize: 12,
+    color: '#FFFFFF',
+  },
+  contactValue: {
+    fontFamily: PRETENDARD_REGULAR,
+    fontWeight: '400',
+    fontSize: 12,
+    color: '#FFFFFF',
+  },
+  dotDivider: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#FFFFFF',
+  },
+  pageIndicator: {
+    fontFamily: PRETENDARD_SEMIBOLD,
+    fontWeight: '600',
+    fontSize: 15,
+    color: '#000000',
+  },
+  nextLink: {
+    fontFamily: PRETENDARD_REGULAR,
+    fontWeight: '400',
+    fontSize: 12,
+    color: '#000000',
+  },
+});

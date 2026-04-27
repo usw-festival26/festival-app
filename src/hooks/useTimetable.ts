@@ -1,11 +1,11 @@
 /**
  * 타임테이블 데이터 접근 훅
  *
- * 현재는 하드코딩 데이터를 반환합니다.
- * 백엔드 연동 시 이 훅 내부만 수정하면 됩니다.
+ * 타임테이블은 백엔드 스펙이 미정이라 API 연동 없이 src/data/timetable.ts 의
+ * 하드코딩 데이터만 사용한다. 운영팀이 직접 편집해 배포한다.
  */
 import { useMemo } from 'react';
-import { TIMETABLE_DATA } from '../data/timetable';
+import { TIMETABLE_DATA } from '@data/timetable';
 import type { Performance, PerformanceCategory, Stage, TimetableDay } from '../types/timetable';
 
 export interface UseTimetableOptions {
@@ -24,6 +24,7 @@ export interface UseTimetableResult {
   days: TimetableDay[];
   performances: Performance[];
   isLoading: boolean;
+  error: string | null;
 }
 
 export function useTimetable(options?: UseTimetableOptions): UseTimetableResult {
@@ -63,5 +64,6 @@ export function useTimetable(options?: UseTimetableOptions): UseTimetableResult 
     days: filteredDays,
     performances: allPerformances,
     isLoading: false,
+    error: null,
   };
 }

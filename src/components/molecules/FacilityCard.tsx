@@ -16,7 +16,7 @@ export function FacilityCard({ name, phone }: FacilityCardProps) {
   return (
     <View className="flex-row items-center mx-4 mb-5 py-1">
       {/* 이미지 플레이스홀더 */}
-      <View className="w-[80px] h-[80px] bg-festival-primary rounded-[10px] mr-4" />
+      <View className="w-[80px] h-[80px] bg-festival-lavender rounded-[10px] mr-4" />
       <View className="flex-1">
         <AppText className="text-[15px] font-semibold text-black mb-1">{name}</AppText>
         <View className="flex-row items-center gap-[5px]">

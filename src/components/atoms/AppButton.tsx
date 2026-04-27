@@ -20,9 +20,9 @@ export interface AppButtonProps extends Omit<PressableProps, 'children'> {
 }
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: 'bg-festival-accent active:opacity-80',
-  secondary: 'bg-festival-primary active:opacity-80',
-  outline: 'border border-festival-accent bg-transparent active:opacity-80',
+  primary: 'bg-festival-primary-dark active:opacity-80',
+  secondary: 'bg-festival-surface active:opacity-80',
+  outline: 'border border-festival-primary-dark bg-transparent active:opacity-80',
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {

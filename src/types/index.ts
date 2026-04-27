@@ -25,6 +25,8 @@ export type {
 
 export type { InformationSection } from './information';
 
+export type { Artist } from './lineup';
+
 export type {
   MapFilterCategory,
   Facility,

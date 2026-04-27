@@ -1,58 +1,172 @@
 /**
- * BoothDetail - 부스 상세 (메뉴 테이블)
+ * BoothDetail - 부스 상세 (Figma 964:663)
  *
- * Figma 135:134: 뒤로가기 + 학과명 + 이미지/포스터 + 3열 메뉴 테이블 + 부스 공지
+ * 네이비 배경 + ScreenBackdrop + 흰 solid 카드 1장 (368, rounded-20):
+ *  - 상단: 뒤로가기 + 부스명(조직명) 센터
+ *  - 썸네일(좌 165×181 흰 + 검정 보더, 이미지 없으면 'Location In Map or Poster') + 부스 안내(우)
+ *  - Main / Side / Set 세로 스택, 섹션 라벨 센터(Roboto Black 20 #010070) — MenuSection molecule 재사용
+ *  - 섹션 사이 가로 구분선
  */
 import React from 'react';
-import { ScrollView, View, Pressable } from 'react-native';
+import { ScrollView, View, Text, Pressable, Image, Platform, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import type { Booth } from '../../types/booth';
-import { AppText } from '../atoms/AppText';
-import { MenuTable } from '../molecules/MenuTable';
+import type { Booth, BoothMenuItem } from '../../types/booth';
+import { MenuSection } from '@molecules/MenuSection';
 
 export interface BoothDetailProps {
   booth: Booth;
 }
 
+const CARD_WIDTH = 368;
+
+const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
+const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
+
+function group(items: BoothMenuItem[]) {
+  const main: BoothMenuItem[] = [];
+  const side: BoothMenuItem[] = [];
+  const set: BoothMenuItem[] = [];
+  items.forEach((i) => {
+    const cat = i.menuCategory ?? 'main';
+    if (cat === 'side') side.push(i);
+    else if (cat === 'set') set.push(i);
+    else main.push(i);
+  });
+  return { main, side, set };
+}
+
 export function BoothDetail({ booth }: BoothDetailProps) {
   const router = useRouter();
+  const { main, side, set } = group(booth.menuItems ?? []);
+
+  const sections: { label: string; items: BoothMenuItem[] }[] = [
+    { label: 'Main', items: main },
+    { label: 'Side', items: side },
+    { label: 'Set', items: set },
+  ].filter((s) => s.items.length > 0);
 
   return (
-    <ScrollView className="flex-1 bg-festival-bg">
-      {/* 메인 카드 */}
-      <View className="mx-4 mt-4 bg-festival-card rounded-card-lg p-6">
-        {/* 뒤로가기 + 학과/부스 이름 */}
-        <View className="flex-row items-center mb-4">
-          <Pressable onPress={() => router.back()} className="mr-3 active:opacity-70">
+    <ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 24, paddingBottom: 40 }}>
+      <View style={styles.card}>
+        {/* 상단 바: 뒤로가기 + 조직명 센터 */}
+        <View style={styles.topBar}>
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="뒤로 가기"
+            style={styles.backBtn}
+            className="active:opacity-70"
+          >
             <Ionicons name="chevron-back" size={24} color="#000000" />
           </Pressable>
-          <AppText className="text-[15px] font-semibold text-black text-center flex-1">
-            {booth.organizer}
-          </AppText>
-          <View className="w-[24px]" />
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <Text style={styles.organizer}>{booth.organizer}</Text>
+          </View>
+          <View style={{ width: 28 }} />
         </View>
 
-        {/* 이미지/포스터 플레이스홀더 */}
-        <View className="bg-festival-primary rounded-card-lg h-[280px] mb-6 items-center justify-center">
-          <AppText className="text-[15px] font-semibold text-black text-center">
-            Location In Map{'\n'}or{'\n'}Poster
-          </AppText>
+        {/* 썸네일(좌) + 부스 안내(우) */}
+        <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 17, marginTop: 10 }}>
+          <View style={styles.thumb}>
+            {booth.imageUri ? (
+              <Image
+                source={{ uri: booth.imageUri }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+            ) : (
+              <Text style={styles.thumbPlaceholder}>
+                {'Location In Map\nor\nPoster'}
+              </Text>
+            )}
+          </View>
+
+          <View style={{ flex: 1, paddingTop: 15 }}>
+            <Text style={styles.sideTitle}>부스 안내</Text>
+            <Text style={styles.sideBody}>{booth.description}</Text>
+          </View>
         </View>
 
-        {/* 메뉴 테이블 */}
-        <MenuTable menuItems={booth.menuItems} />
-      </View>
+        {/* 섹션 스택 — MenuSection molecule 재사용, label 중앙 정렬 */}
+        <View style={{ marginTop: 32 }}>
+          {sections.map((s, idx) => (
+            <View key={s.label} style={{ paddingHorizontal: 20 }}>
+              {idx > 0 && <View style={styles.divider} />}
+              <MenuSection label={s.label} items={s.items} align="center" />
+            </View>
+          ))}
+        </View>
 
-      {/* 부스 공지 */}
-      <View className="mx-6 mt-6 mb-8">
-        <AppText className="text-[15px] font-black text-black mb-2">
-          학과별 부스 안내??
-        </AppText>
-        <AppText className="text-xs text-black leading-5">
-          {booth.description}
-        </AppText>
+        <View style={{ height: 24 }} />
       </View>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    width: CARD_WIDTH,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 17,
+    paddingTop: 18,
+  },
+  backBtn: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  organizer: {
+    fontFamily: PRETENDARD_SEMIBOLD,
+    fontWeight: '600',
+    fontSize: 15,
+    color: '#000000',
+  },
+  thumb: {
+    width: 165,
+    height: 181,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thumbPlaceholder: {
+    fontFamily: PRETENDARD_SEMIBOLD,
+    fontWeight: '600',
+    fontSize: 15,
+    color: '#000000',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  sideTitle: {
+    fontFamily: PRETENDARD_SEMIBOLD,
+    fontWeight: '600',
+    fontSize: 15,
+    color: '#000000',
+    marginBottom: 10,
+  },
+  sideBody: {
+    fontFamily: PRETENDARD_REGULAR,
+    fontWeight: '400',
+    fontSize: 12,
+    color: '#000000',
+    lineHeight: 18,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#000000',
+    marginBottom: 18,
+    marginTop: 0,
+    opacity: 0.35,
+  },
+});

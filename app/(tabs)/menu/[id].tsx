@@ -4,36 +4,53 @@
  * 뒤로가기 + 학부명 + 이미지 + 3열 메뉴 테이블 + 부스 설명
  */
 import React from 'react';
-import { View } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScreenHeader } from '../../../src/components/molecules/ScreenHeader';
+import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
 import { BoothDetail } from '../../../src/components/organisms/BoothDetail';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
+import { NetworkErrorState } from '../../../src/components/atoms/NetworkErrorState';
 import { useBoothById } from '../../../src/hooks/useBooths';
 import { AppButton } from '../../../src/components/atoms/AppButton';
+import { Colors } from '../../../src/constants/colors';
 
 export default function MenuDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { booth } = useBoothById(id ?? '');
+  const { booth, isLoading, error, retry } = useBoothById(id ?? '');
+
+  if (isLoading) {
+    return (
+      <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
+        <View className="items-center py-16">
+          <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
+        </View>
+      </BackdropScreenTemplate>
+    );
+  }
+
+  if (error) {
+    return (
+      <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
+        <NetworkErrorState onRetry={retry} />
+      </BackdropScreenTemplate>
+    );
+  }
 
   if (!booth) {
     return (
-      <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
-        <ScreenHeader title="메뉴" leftAction="back" />
+      <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
         <EmptyState message="부스를 찾을 수 없습니다." />
         <View className="items-center">
           <AppButton onPress={() => router.back()}>돌아가기</AppButton>
         </View>
-      </SafeAreaView>
+      </BackdropScreenTemplate>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
-      <ScreenHeader title="메뉴" leftAction="back" />
+    <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
       <BoothDetail booth={booth} />
-    </SafeAreaView>
+    </BackdropScreenTemplate>
   );
 }

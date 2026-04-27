@@ -1,24 +1,26 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import {
   Roboto_400Regular,
   Roboto_500Medium,
   Roboto_600SemiBold,
   Roboto_700Bold,
+  Roboto_900Black,
 } from '@expo-google-fonts/roboto';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import '../global.css';
-import { OnboardingProvider, useOnboarding } from '../src/hooks/useOnboarding';
+import { DesktopBackdropDecor } from '@organisms/DesktopBackdropDecor';
 
 export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
-  initialRouteName: '(onboarding)',
+  initialRouteName: 'index',
 };
 
 SplashScreen.preventAutoHideAsync();
@@ -30,34 +32,9 @@ function MobileWeb({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="mobile-backdrop">
+      <DesktopBackdropDecor />
       <div className="mobile-content">{children}</div>
     </div>
-  );
-}
-
-function RootNavigator() {
-  const { hasOnboarded } = useOnboarding();
-  const router = useRouter();
-  const segments = useSegments();
-
-  useEffect(() => {
-    if (hasOnboarded === null) return;
-
-    const inOnboarding = (segments[0] as string) === '(onboarding)';
-
-    if (hasOnboarded && inOnboarding) {
-      router.replace('/(tabs)/home' as any);
-    } else if (!hasOnboarded && !inOnboarding) {
-      router.replace('/(onboarding)/' as any);
-    }
-  }, [hasOnboarded, segments]);
-
-  return (
-    <Stack>
-      <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="+not-found" />
-    </Stack>
   );
 }
 
@@ -68,11 +45,14 @@ export default function RootLayout() {
     Roboto_500Medium,
     Roboto_600SemiBold,
     Roboto_700Bold,
+    Roboto_900Black,
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.otf'),
     'Pretendard-Medium': require('../assets/fonts/Pretendard-Medium.otf'),
     'Pretendard-SemiBold': require('../assets/fonts/Pretendard-SemiBold.otf'),
     'Pretendard-Bold': require('../assets/fonts/Pretendard-Bold.otf'),
+    'Pretendard-Black': require('../assets/fonts/Pretendard-Black.otf'),
     ...FontAwesome.font,
+    ...Ionicons.font,
   });
 
   useEffect(() => {
@@ -90,10 +70,12 @@ export default function RootLayout() {
   }
 
   return (
-    <OnboardingProvider>
-      <MobileWeb>
-        <RootNavigator />
-      </MobileWeb>
-    </OnboardingProvider>
+    <MobileWeb>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+    </MobileWeb>
   );
 }

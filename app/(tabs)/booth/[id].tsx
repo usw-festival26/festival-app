@@ -1,39 +1,56 @@
 /**
- * 부스 상세 화면 - Figma 135:134
+ * 부스 상세 화면 - Figma 1272:1632
  *
- * 학과명 + 이미지 + 메뉴 테이블 + 부스 공지
+ * BackdropScreenTemplate 헤더(햄버거) + BoothDetail(카드 안에 자체 뒤로가기 존재)
  */
 import React from 'react';
-import { View } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScreenHeader } from '../../../src/components/molecules/ScreenHeader';
+import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
 import { BoothDetail } from '../../../src/components/organisms/BoothDetail';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
+import { NetworkErrorState } from '../../../src/components/atoms/NetworkErrorState';
 import { useBoothById } from '../../../src/hooks/useBooths';
 import { AppButton } from '../../../src/components/atoms/AppButton';
+import { Colors } from '../../../src/constants/colors';
 
 export default function BoothDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { booth } = useBoothById(id ?? '');
+  const { booth, isLoading, error, retry } = useBoothById(id ?? '');
+
+  if (isLoading) {
+    return (
+      <BackdropScreenTemplate title="메뉴" backdropVariant="booth-detail">
+        <View className="items-center py-16">
+          <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
+        </View>
+      </BackdropScreenTemplate>
+    );
+  }
+
+  if (error) {
+    return (
+      <BackdropScreenTemplate title="메뉴" backdropVariant="booth-detail">
+        <NetworkErrorState onRetry={retry} />
+      </BackdropScreenTemplate>
+    );
+  }
 
   if (!booth) {
     return (
-      <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
-        <ScreenHeader title="메뉴" leftAction="back" />
+      <BackdropScreenTemplate title="메뉴" backdropVariant="booth-detail">
         <EmptyState message="부스를 찾을 수 없습니다." />
         <View className="items-center">
           <AppButton onPress={() => router.back()}>돌아가기</AppButton>
         </View>
-      </SafeAreaView>
+      </BackdropScreenTemplate>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-bg" edges={['top']}>
-      <ScreenHeader title="메뉴" leftAction="back" />
+    <BackdropScreenTemplate title="메뉴" backdropVariant="booth-detail">
       <BoothDetail booth={booth} />
-    </SafeAreaView>
+    </BackdropScreenTemplate>
   );
 }

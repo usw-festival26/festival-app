@@ -18,7 +18,7 @@ export function DotPagination({ total, current }: DotPaginationProps) {
         <View
           key={i}
           className={`h-[7px] rounded-full ${
-            i === current ? 'w-[20px] bg-black' : 'w-[7px] bg-festival-secondary'
+            i === current ? 'w-[20px] bg-festival-primary-dark' : 'w-[7px] bg-festival-muted'
           }`}
         />
       ))}
