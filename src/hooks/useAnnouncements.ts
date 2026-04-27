@@ -60,6 +60,14 @@ export function useAnnouncementById(id: string): {
 
   const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
+    // 빈 id 면 fetch 하지 않음. AnnouncementList 에서 expandedId 가 null 일 때
+    // 안전하게 호출할 수 있도록.
+    if (!id) {
+      setApiData(null);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
     const requestId = ++requestIdRef.current;
     setApiData(null);
     setError(null);
@@ -78,6 +86,7 @@ export function useAnnouncementById(id: string): {
   const announcement = useMemo(() => {
     if (apiData) return apiData;
     if (config.isApiEnabled) return undefined;
+    if (!id) return undefined;
     return ANNOUNCEMENTS_DATA.find((a) => a.id === id);
   }, [apiData, id]);
 
