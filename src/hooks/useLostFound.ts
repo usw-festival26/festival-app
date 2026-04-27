@@ -17,19 +17,23 @@ export function useLostFound(options?: UseLostFoundOptions) {
   const [apiData, setApiData] = useState<LostFoundItem[] | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
+  // unmount/재요청 시 in-flight 응답이 unmounted state 를 건드리지 않도록 request 식별자로 가드.
+  const requestIdRef = useRef(0);
 
   const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
+    const requestId = ++requestIdRef.current;
     setIsLoading(true);
     setError(null);
     fetchLostFoundItems()
-      .then(setApiData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setIsLoading(false));
+      .then((d) => { if (requestId === requestIdRef.current) setApiData(d); })
+      .catch((e: Error) => { if (requestId === requestIdRef.current) setError(e.message); })
+      .finally(() => { if (requestId === requestIdRef.current) setIsLoading(false); });
   }, []);
 
   useEffect(() => {
     retry();
+    return () => { requestIdRef.current++; };
   }, [retry]);
 
   // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 배열 + error).

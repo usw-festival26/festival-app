@@ -191,6 +191,7 @@ export function DesktopBackdropDecor() {
               {'  경기도 화성시 봉담읍 와우안길 17  ㅣ  '}
             </Text>
             <Text style={{ color: Colors.festival.mutedDark }}>{'문의 '}</Text>
+            {/* TODO: 운영팀 실제 문의 연락처로 교체 (현재 Figma 시안 그대로) */}
             <Text style={{ color: Colors.festival.muted }}>{' 02-000-0000'}</Text>
           </Text>
         </View>
