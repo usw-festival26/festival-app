@@ -9,6 +9,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
 import { BoothDetail } from '../../../src/components/organisms/BoothDetail';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
+import { NetworkErrorState } from '../../../src/components/atoms/NetworkErrorState';
 import { useBoothById } from '../../../src/hooks/useBooths';
 import { AppButton } from '../../../src/components/atoms/AppButton';
 import { Colors } from '../../../src/constants/colors';
@@ -16,7 +17,7 @@ import { Colors } from '../../../src/constants/colors';
 export default function BoothDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { booth, isLoading, error } = useBoothById(id ?? '');
+  const { booth, isLoading, error, retry } = useBoothById(id ?? '');
 
   if (isLoading) {
     return (
@@ -31,13 +32,7 @@ export default function BoothDetailScreen() {
   if (error) {
     return (
       <BackdropScreenTemplate title="메뉴" backdropVariant="booth-detail">
-        <EmptyState
-          message={`부스를 불러오지 못했습니다.\n${error}`}
-          iconName="alert-circle-outline"
-        />
-        <View className="items-center">
-          <AppButton onPress={() => router.back()}>돌아가기</AppButton>
-        </View>
+        <NetworkErrorState onRetry={retry} />
       </BackdropScreenTemplate>
     );
   }

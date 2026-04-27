@@ -1,7 +1,7 @@
 /**
  * 부스 데이터 접근 훅
  */
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { config } from '@config/env';
 import { fetchBooths, fetchBooth, fetchMenusByBooth } from '@api/endpoints';
 import { BOOTHS_DATA } from '@data/booths';
@@ -17,15 +17,24 @@ export function useBooths(options?: UseBoothsOptions) {
   const [apiData, setApiData] = useState<Booth[] | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
+  // unmount/재요청 시 in-flight 응답이 unmounted state 를 건드리지 않도록 request 식별자로 가드.
+  const requestIdRef = useRef(0);
+
+  const retry = useCallback(() => {
+    if (!config.isApiEnabled) return;
+    const requestId = ++requestIdRef.current;
+    setIsLoading(true);
+    setError(null);
+    fetchBooths()
+      .then((d) => { if (requestId === requestIdRef.current) setApiData(d); })
+      .catch((e: Error) => { if (requestId === requestIdRef.current) setError(e.message); })
+      .finally(() => { if (requestId === requestIdRef.current) setIsLoading(false); });
+  }, []);
 
   useEffect(() => {
-    if (!config.isApiEnabled) return;
-    setIsLoading(true);
-    fetchBooths()
-      .then(setApiData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setIsLoading(false));
-  }, []);
+    retry();
+    return () => { requestIdRef.current++; };
+  }, [retry]);
 
   // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 배열 + error).
   const source = config.isApiEnabled ? (apiData ?? []) : BOOTHS_DATA;
@@ -37,34 +46,46 @@ export function useBooths(options?: UseBoothsOptions) {
         const q = searchQuery.toLowerCase();
         return (
           booth.name.toLowerCase().includes(q) ||
-          booth.organizer.toLowerCase().includes(q) ||
-          booth.description.toLowerCase().includes(q)
+          (booth.organizer?.toLowerCase().includes(q) ?? false) ||
+          (booth.description?.toLowerCase().includes(q) ?? false)
         );
       }
       return true;
     });
   }, [source, category, searchQuery]);
 
-  return { data: booths, booths, isLoading, error };
+  return { data: booths, booths, isLoading, error, retry };
 }
 
-export function useBoothById(id: string): { data: Booth | undefined; booth: Booth | undefined; isLoading: boolean; error: string | null } {
+export function useBoothById(id: string): {
+  data: Booth | undefined;
+  booth: Booth | undefined;
+  isLoading: boolean;
+  error: string | null;
+  retry: () => void;
+} {
   const [apiData, setApiData] = useState<Booth | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
+  // request 식별자: id 가 빠르게 바뀌어도 가장 최신 요청의 응답만 state 에 반영.
+  const requestIdRef = useRef(0);
 
-  useEffect(() => {
+  const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
-    let isCurrent = true;
+    const requestId = ++requestIdRef.current;
     setApiData(null);
     setError(null);
     setIsLoading(true);
     fetchBooth(id)
-      .then((data) => { if (isCurrent) setApiData(data); })
-      .catch((e: Error) => { if (isCurrent) setError(e.message); })
-      .finally(() => { if (isCurrent) setIsLoading(false); });
-    return () => { isCurrent = false; };
+      .then((d) => { if (requestId === requestIdRef.current) setApiData(d); })
+      .catch((e: Error) => { if (requestId === requestIdRef.current) setError(e.message); })
+      .finally(() => { if (requestId === requestIdRef.current) setIsLoading(false); });
   }, [id]);
+
+  useEffect(() => {
+    retry();
+    return () => { requestIdRef.current++; };
+  }, [retry]);
 
   const booth = useMemo(() => {
     if (apiData) return apiData;
@@ -72,7 +93,7 @@ export function useBoothById(id: string): { data: Booth | undefined; booth: Boot
     return BOOTHS_DATA.find((b) => b.id === id);
   }, [apiData, id]);
 
-  return { data: booth, booth, isLoading, error };
+  return { data: booth, booth, isLoading, error, retry };
 }
 
 export function useBoothMenus(boothId: string): {
@@ -80,23 +101,30 @@ export function useBoothMenus(boothId: string): {
   menus: BoothMenuItem[];
   isLoading: boolean;
   error: string | null;
+  retry: () => void;
 } {
   const [apiData, setApiData] = useState<BoothMenuItem[] | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
+  // request 식별자: boothId 가 빠르게 바뀌어도 가장 최신 요청의 응답만 state 에 반영.
+  const requestIdRef = useRef(0);
 
-  useEffect(() => {
+  const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
-    let isCurrent = true;
+    const requestId = ++requestIdRef.current;
     setApiData(null);
     setError(null);
     setIsLoading(true);
     fetchMenusByBooth(boothId)
-      .then((data) => { if (isCurrent) setApiData(data); })
-      .catch((e: Error) => { if (isCurrent) setError(e.message); })
-      .finally(() => { if (isCurrent) setIsLoading(false); });
-    return () => { isCurrent = false; };
+      .then((d) => { if (requestId === requestIdRef.current) setApiData(d); })
+      .catch((e: Error) => { if (requestId === requestIdRef.current) setError(e.message); })
+      .finally(() => { if (requestId === requestIdRef.current) setIsLoading(false); });
   }, [boothId]);
+
+  useEffect(() => {
+    retry();
+    return () => { requestIdRef.current++; };
+  }, [retry]);
 
   const menus = useMemo(() => {
     if (apiData) return apiData;
@@ -105,5 +133,5 @@ export function useBoothMenus(boothId: string): {
     return booth?.menuItems ?? [];
   }, [apiData, boothId]);
 
-  return { data: menus, menus, isLoading, error };
+  return { data: menus, menus, isLoading, error, retry };
 }

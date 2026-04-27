@@ -19,11 +19,13 @@ module.exports = {
           primary: '#0D00FF',
           lavender: '#E0DCFF',
           pink: '#FFBEBF',
+          bright: '#FEF2FF',
           surface: '#D9D9D9',
           card: '#FFFFFF',
           text: '#000000',
           muted: '#7D7D7D',
           'muted-dark': '#515151',
+          'error-red': '#FF3B30',
         },
       },
       borderRadius: {

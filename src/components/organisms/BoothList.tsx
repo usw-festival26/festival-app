@@ -6,6 +6,7 @@ import { FlatList, View, ActivityIndicator } from 'react-native';
 import type { Booth } from '../../types/booth';
 import { InfoCard } from '@molecules/InfoCard';
 import { EmptyState } from '@molecules/EmptyState';
+import { NetworkErrorState } from '@atoms/NetworkErrorState';
 import { Colors } from '@constants/colors';
 
 /** 카테고리 한글 매핑 */
@@ -23,9 +24,10 @@ export interface BoothListProps {
   onPressBooth?: (booth: Booth) => void;
   isLoading?: boolean;
   error?: string | null;
+  onRetry?: () => void;
 }
 
-export function BoothList({ booths, onPressBooth, isLoading, error }: BoothListProps) {
+export function BoothList({ booths, onPressBooth, isLoading, error, onRetry }: BoothListProps) {
   if (isLoading) {
     return (
       <View className="py-12 items-center">
@@ -35,12 +37,7 @@ export function BoothList({ booths, onPressBooth, isLoading, error }: BoothListP
   }
 
   if (error) {
-    return (
-      <EmptyState
-        message={`부스를 불러오지 못했습니다.\n${error}`}
-        iconName="alert-circle-outline"
-      />
-    );
+    return <NetworkErrorState onRetry={onRetry} />;
   }
 
   if (booths.length === 0) {
@@ -57,7 +54,7 @@ export function BoothList({ booths, onPressBooth, isLoading, error }: BoothListP
           title={item.name}
           subtitle={item.organizer}
           description={item.description}
-          badgeText={CATEGORY_LABEL[item.category] ?? item.category}
+          badgeText={item.category ? (CATEGORY_LABEL[item.category] ?? item.category) : undefined}
           badgeVariant="default"
           onPress={() => onPressBooth?.(item)}
         />

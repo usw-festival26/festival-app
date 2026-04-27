@@ -8,7 +8,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@atoms/AppText';
 import { BoothCard } from '@molecules/BoothCard';
-import { EmptyState } from '@molecules/EmptyState';
+import { NetworkErrorState } from '@atoms/NetworkErrorState';
 import { Colors } from '@constants/colors';
 import type { Booth } from '../../types/booth';
 
@@ -16,9 +16,10 @@ export interface BoothSheetContentProps {
   booths: Booth[];
   isLoading?: boolean;
   error?: string | null;
+  onRetry?: () => void;
 }
 
-export function BoothSheetContent({ booths, isLoading, error }: BoothSheetContentProps) {
+export function BoothSheetContent({ booths, isLoading, error, onRetry }: BoothSheetContentProps) {
   const router = useRouter();
 
   // 2열 그리드를 위해 짝수 인덱스끼리 묶기
@@ -35,10 +36,7 @@ export function BoothSheetContent({ booths, isLoading, error }: BoothSheetConten
           <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
         </View>
       ) : error ? (
-        <EmptyState
-          message={`부스를 불러오지 못했습니다.\n${error}`}
-          iconName="alert-circle-outline"
-        />
+        <NetworkErrorState onRetry={onRetry} />
       ) : (
         <View className="px-3">
           {rows.map((row, i) => (

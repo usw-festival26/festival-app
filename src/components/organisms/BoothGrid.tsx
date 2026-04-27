@@ -21,8 +21,9 @@ const THUMB_H = 143;
 
 function BoothGridCard({ booth, onPress }: { booth: Booth; onPress?: () => void }) {
   // 메인 카테고리 2개 추출, 없으면 전체에서 첫 2개
-  const mainItems = booth.menuItems.filter((m) => (m.menuCategory ?? 'main') === 'main');
-  const preview = (mainItems.length ? mainItems : booth.menuItems)
+  const allItems = booth.menuItems ?? [];
+  const mainItems = allItems.filter((m) => (m.menuCategory ?? 'main') === 'main');
+  const preview = (mainItems.length ? mainItems : allItems)
     .slice(0, 2)
     .map((m) => m.name)
     .join(', ');

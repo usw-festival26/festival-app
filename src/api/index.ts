@@ -5,7 +5,6 @@ export {
   fetchBooths,
   fetchBooth,
   fetchMenusByBooth,
-  fetchTimetable,
   fetchAnnouncements,
   fetchAnnouncement,
   fetchLostFoundItems,

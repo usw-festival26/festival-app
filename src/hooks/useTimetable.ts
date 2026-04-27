@@ -1,14 +1,12 @@
 /**
  * 타임테이블 데이터 접근 훅
  *
- * 현재는 하드코딩 데이터를 반환합니다.
- * 백엔드 연동 시 이 훅 내부만 수정하면 됩니다.
+ * 타임테이블은 백엔드 스펙이 미정이라 API 연동 없이 src/data/timetable.ts 의
+ * 하드코딩 데이터만 사용한다. 운영팀이 직접 편집해 배포한다.
  */
-import { useMemo, useState, useEffect } from 'react';
-import { config } from '@config/env';
-import { fetchTimetable } from '@api/endpoints';
+import { useMemo } from 'react';
 import { TIMETABLE_DATA } from '@data/timetable';
-import type { Performance, PerformanceCategory, Stage, TimetableDay, TimetableData } from '../types/timetable';
+import type { Performance, PerformanceCategory, Stage, TimetableDay } from '../types/timetable';
 
 export interface UseTimetableOptions {
   /** 특정 날짜로 필터 (ISO date) */
@@ -31,26 +29,9 @@ export interface UseTimetableResult {
 
 export function useTimetable(options?: UseTimetableOptions): UseTimetableResult {
   const { date, stageId, category, searchQuery } = options ?? {};
-  const [apiData, setApiData] = useState<TimetableData | null>(null);
-  const [isLoading, setIsLoading] = useState(config.isApiEnabled);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!config.isApiEnabled) return;
-    setIsLoading(true);
-    fetchTimetable()
-      .then(setApiData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setIsLoading(false));
-  }, []);
-
-  // API 활성화 시에는 하드코딩 fallback 을 쓰지 않는다 (실패하면 빈 데이터 + error).
-  const source = config.isApiEnabled
-    ? (apiData ?? { stages: [], days: [] })
-    : TIMETABLE_DATA;
 
   const filteredDays = useMemo(() => {
-    let days = source.days;
+    let days = TIMETABLE_DATA.days;
 
     if (date) {
       days = days.filter((d) => d.date === date);
@@ -71,7 +52,7 @@ export function useTimetable(options?: UseTimetableOptions): UseTimetableResult 
         return true;
       }),
     }));
-  }, [source, date, stageId, category, searchQuery]);
+  }, [date, stageId, category, searchQuery]);
 
   const allPerformances = useMemo(
     () => filteredDays.flatMap((d) => d.performances),
@@ -79,10 +60,10 @@ export function useTimetable(options?: UseTimetableOptions): UseTimetableResult 
   );
 
   return {
-    stages: source.stages,
+    stages: TIMETABLE_DATA.stages,
     days: filteredDays,
     performances: allPerformances,
-    isLoading,
-    error,
+    isLoading: false,
+    error: null,
   };
 }

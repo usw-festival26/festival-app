@@ -9,6 +9,7 @@ import { ScrollScreenTemplate } from '../../../src/components/templates/ScrollSc
 import { AppText } from '../../../src/components/atoms/AppText';
 import { Badge } from '../../../src/components/atoms/Badge';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
+import { NetworkErrorState } from '../../../src/components/atoms/NetworkErrorState';
 import { AppButton } from '../../../src/components/atoms/AppButton';
 import { Colors } from '../../../src/constants/colors';
 import { useAnnouncementById } from '../../../src/hooks/useAnnouncements';
@@ -30,7 +31,7 @@ const PRIORITY_VARIANT: Record<string, BadgeVariant> = {
 export default function AnnouncementDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { announcement, isLoading, error } = useAnnouncementById(id ?? '');
+  const { announcement, isLoading, error, retry } = useAnnouncementById(id ?? '');
 
   if (isLoading) {
     return (
@@ -45,13 +46,7 @@ export default function AnnouncementDetailScreen() {
   if (error) {
     return (
       <ScrollScreenTemplate title="공지" leftAction="back">
-        <EmptyState
-          message={`공지를 불러오지 못했습니다.\n${error}`}
-          iconName="alert-circle-outline"
-        />
-        <View className="items-center mt-4">
-          <AppButton onPress={() => router.back()}>돌아가기</AppButton>
-        </View>
+        <NetworkErrorState onRetry={retry} />
       </ScrollScreenTemplate>
     );
   }
@@ -75,10 +70,12 @@ export default function AnnouncementDetailScreen() {
           {announcement.isPinned && (
             <Badge text="고정" variant="warning" />
           )}
-          <Badge
-            text={PRIORITY_LABEL[announcement.priority] ?? announcement.priority}
-            variant={PRIORITY_VARIANT[announcement.priority] ?? 'default'}
-          />
+          {announcement.priority && (
+            <Badge
+              text={PRIORITY_LABEL[announcement.priority] ?? announcement.priority}
+              variant={PRIORITY_VARIANT[announcement.priority] ?? 'default'}
+            />
+          )}
         </View>
 
         {/* 제목 */}

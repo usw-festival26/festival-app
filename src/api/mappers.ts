@@ -3,6 +3,9 @@
  *
  * 백엔드 필드명/형식과 프론트엔드 타입 사이의 차이를 여기서 흡수한다.
  * 변환 규칙이 바뀌면 이 파일만 수정하면 된다.
+ *
+ * 누락 필드 정책: 백엔드가 제공하지 않는 필드는 도메인 타입에서 optional 로 두고,
+ * 매퍼는 dummy 값으로 채우지 않고 undefined 로 둔다 (UI 가 fallback 표시).
  */
 import type { Announcement } from '../types/announcement';
 import type { LostFoundItem, LostFoundStatus, LostFoundCategory } from '../types/lostFound';
@@ -23,9 +26,7 @@ export function mapNotice(raw: ApiNotice): Announcement {
   return {
     id: String(raw.noticeId),
     title: raw.title,
-    content: '',
     publishedAt: raw.createdAt,
-    priority: 'normal',
     isPinned: raw.pinned,
   };
 }
@@ -36,7 +37,6 @@ export function mapNoticeDetail(raw: ApiNoticeDetail): Announcement {
     title: raw.title,
     content: raw.content,
     publishedAt: raw.createdAt,
-    priority: 'normal',
     isPinned: raw.pinned,
   };
 }
@@ -80,14 +80,10 @@ function mapLostCategory(apiCategory: string | undefined): LostFoundCategory {
   return LOST_CATEGORY_MAP[apiCategory] ?? 'other';
 }
 
-// location / reportedAt: 스펙(LostItemResponse)에 storageLocation · createdAt 이 없어 undefined 로 둔다.
-// 빈 문자열로 채우면 useLostFound 의 location 검색이 q 를 포함하지 않는 한 항상 false 가 되고
-// new Date('').getTime() 이 NaN 이라 정렬이 무력화됨 → 훅에서 optional 을 인지하고 처리.
 export function mapLostItem(raw: ApiLostItem): LostFoundItem {
   return {
     id: String(raw.lostItemId),
     title: raw.name,
-    description: '',
     status: mapLostStatus(raw.status),
     imageUri: raw.imageUrl,
     category: mapLostCategory(raw.category),
@@ -111,11 +107,6 @@ export function mapBooth(raw: ApiBooth): Booth {
   return {
     id: String(raw.boothId),
     name: raw.name,
-    organizer: '',
-    description: '',
-    location: '',
-    category: 'other',
-    menuItems: [],
     imageUri: raw.imageUrl,
   };
 }
@@ -124,11 +115,7 @@ export function mapBoothDetail(raw: ApiBoothDetail): Booth {
   return {
     id: String(raw.boothId),
     name: raw.name,
-    organizer: '',
     description: raw.description,
-    location: '',
-    category: 'other',
-    menuItems: [],
     imageUri: raw.imageUrl,
     notice: raw.notice,
   };

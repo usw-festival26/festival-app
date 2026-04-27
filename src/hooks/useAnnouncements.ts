@@ -1,7 +1,7 @@
 /**
  * 공지사항 데이터 접근 훅
  */
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { config } from '@config/env';
 import { fetchAnnouncements, fetchAnnouncement } from '@api/endpoints';
 import { ANNOUNCEMENTS_DATA } from '@data/announcements';
@@ -11,15 +11,24 @@ export function useAnnouncements() {
   const [apiData, setApiData] = useState<Announcement[] | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
+  // unmount/재요청 시 in-flight 응답이 unmounted state 를 건드리지 않도록 request 식별자로 가드.
+  const requestIdRef = useRef(0);
+
+  const retry = useCallback(() => {
+    if (!config.isApiEnabled) return;
+    const requestId = ++requestIdRef.current;
+    setIsLoading(true);
+    setError(null);
+    fetchAnnouncements()
+      .then((d) => { if (requestId === requestIdRef.current) setApiData(d); })
+      .catch((e: Error) => { if (requestId === requestIdRef.current) setError(e.message); })
+      .finally(() => { if (requestId === requestIdRef.current) setIsLoading(false); });
+  }, []);
 
   useEffect(() => {
-    if (!config.isApiEnabled) return;
-    setIsLoading(true);
-    fetchAnnouncements()
-      .then(setApiData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setIsLoading(false));
-  }, []);
+    retry();
+    return () => { requestIdRef.current++; };
+  }, [retry]);
 
   // API 활성화 상태에서는 하드코딩 fallback 을 쓰지 않는다.
   // 실패 시 빈 배열과 error 를 반환해 화면이 "불러오지 못함" 을 표시할 수 있게 한다.
@@ -33,7 +42,7 @@ export function useAnnouncements() {
     });
   }, [source]);
 
-  return { data: announcements, announcements, isLoading, error };
+  return { data: announcements, announcements, isLoading, error, retry };
 }
 
 export function useAnnouncementById(id: string): {
@@ -41,23 +50,30 @@ export function useAnnouncementById(id: string): {
   announcement: Announcement | undefined;
   isLoading: boolean;
   error: string | null;
+  retry: () => void;
 } {
   const [apiData, setApiData] = useState<Announcement | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
+  // request 식별자: id 가 빠르게 바뀌어도 가장 최신 요청의 응답만 state 에 반영.
+  const requestIdRef = useRef(0);
 
-  useEffect(() => {
+  const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
-    let isCurrent = true;
+    const requestId = ++requestIdRef.current;
     setApiData(null);
     setError(null);
     setIsLoading(true);
     fetchAnnouncement(id)
-      .then((data) => { if (isCurrent) setApiData(data); })
-      .catch((e: Error) => { if (isCurrent) setError(e.message); })
-      .finally(() => { if (isCurrent) setIsLoading(false); });
-    return () => { isCurrent = false; };
+      .then((d) => { if (requestId === requestIdRef.current) setApiData(d); })
+      .catch((e: Error) => { if (requestId === requestIdRef.current) setError(e.message); })
+      .finally(() => { if (requestId === requestIdRef.current) setIsLoading(false); });
   }, [id]);
+
+  useEffect(() => {
+    retry();
+    return () => { requestIdRef.current++; };
+  }, [retry]);
 
   const announcement = useMemo(() => {
     if (apiData) return apiData;
@@ -65,5 +81,5 @@ export function useAnnouncementById(id: string): {
     return ANNOUNCEMENTS_DATA.find((a) => a.id === id);
   }, [apiData, id]);
 
-  return { data: announcement, announcement, isLoading, error };
+  return { data: announcement, announcement, isLoading, error, retry };
 }

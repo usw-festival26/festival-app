@@ -18,8 +18,8 @@ export interface LostFoundItem {
   id: string;
   /** 물품 이름 */
   title: string;
-  /** 상세 설명 */
-  description: string;
+  /** 상세 설명 — list 응답에는 없고 detail 에서만 채워짐 */
+  description?: string;
   /** 발견/분실 장소. 백엔드 스펙에 storageLocation 이 없어 optional. */
   location?: string;
   /** 현재 상태 */

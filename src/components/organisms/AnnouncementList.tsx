@@ -10,12 +10,14 @@ import { NotificationBadge } from '@atoms/NotificationBadge';
 import { NotificationPill } from '@molecules/NotificationPill';
 import { FaqBubble } from '@molecules/FaqBubble';
 import { EmptyState } from '@molecules/EmptyState';
+import { NetworkErrorState } from '@atoms/NetworkErrorState';
 import { Colors } from '@constants/colors';
 
 export interface AnnouncementListProps {
   announcements: Announcement[];
   isLoading?: boolean;
   error?: string | null;
+  onRetry?: () => void;
 }
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
@@ -23,7 +25,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   { q: '주차는 가능한가요?', a: '교내 주차 제한, 대중교통·셔틀버스 이용을 권장합니다.' },
 ];
 
-export function AnnouncementList({ announcements, isLoading, error }: AnnouncementListProps) {
+export function AnnouncementList({ announcements, isLoading, error, onRetry }: AnnouncementListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const sorted = useMemo(
@@ -47,10 +49,7 @@ export function AnnouncementList({ announcements, isLoading, error }: Announceme
           <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
         </View>
       ) : error ? (
-        <EmptyState
-          message={`공지를 불러오지 못했습니다.\n${error}`}
-          iconName="alert-circle-outline"
-        />
+        <NetworkErrorState onRetry={onRetry} />
       ) : sorted.length === 0 ? (
         <EmptyState message="등록된 공지가 없습니다." iconName="megaphone-outline" />
       ) : (
