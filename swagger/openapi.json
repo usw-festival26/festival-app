@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://15.165.17.83",
+      "url": "https://api.usw-festival.site",
       "description": "Generated server url"
     }
   ],

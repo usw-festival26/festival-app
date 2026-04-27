@@ -11,7 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const DEFAULT_URL = 'http://15.165.17.83/v3/api-docs';
+const DEFAULT_URL = 'https://api.usw-festival.site/v3/api-docs';
 const url = process.env.SWAGGER_URL || DEFAULT_URL;
 const outDir = 'swagger';
 const outFile = path.join(outDir, 'openapi.json');
