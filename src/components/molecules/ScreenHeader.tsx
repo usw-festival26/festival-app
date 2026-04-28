@@ -119,14 +119,19 @@ export function ScreenHeader({
           </View>
         ) : null}
 
-        <View
-          pointerEvents="none"
+        {/* LOGO — 어느 화면에서도 탭하면 홈으로 이동.
+            Drawer 내비게이션과 동일하게 router.replace 로 동작시켜 탭 사이 이동을 일치시킨다. */}
+        <Pressable
+          onPress={() => router.replace('/(tabs)/home')}
+          accessibilityRole="button"
+          accessibilityLabel="홈으로 이동"
           style={{ position: 'absolute', right: 24, top: 23 }}
+          className="active:opacity-70"
         >
           <RobotoBlackText size={20} lineHeight={23} color={textColor}>
             {rightLabel}
           </RobotoBlackText>
-        </View>
+        </Pressable>
       </View>
 
       {/* 보조 영역 — Figma 지도 칩 row (paddingTop 6, paddingBottom 15) */}
