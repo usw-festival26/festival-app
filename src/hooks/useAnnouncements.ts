@@ -61,8 +61,10 @@ export function useAnnouncementById(id: string): {
   const retry = useCallback(() => {
     if (!config.isApiEnabled) return;
     // 빈 id 면 fetch 하지 않음. AnnouncementList 에서 expandedId 가 null 일 때
-    // 안전하게 호출할 수 있도록.
+    // 안전하게 호출할 수 있도록 한다. 직전에 다른 id 로 in-flight 요청이 떠 있을 수
+    // 있으므로 requestId 를 bump 해 그 응답이 state 를 덮지 못하게 무효화한다.
     if (!id) {
+      requestIdRef.current++;
       setApiData(null);
       setIsLoading(false);
       setError(null);
@@ -84,9 +86,10 @@ export function useAnnouncementById(id: string): {
   }, [retry]);
 
   const announcement = useMemo(() => {
-    if (apiData) return apiData;
-    if (config.isApiEnabled) return undefined;
     if (!id) return undefined;
+    // 직전 id 의 응답이 새 id 로 바뀐 직후 잠깐 살아남아 stale 상세를 노출하는 것을 막는다.
+    if (apiData?.id === id) return apiData;
+    if (config.isApiEnabled) return undefined;
     return ANNOUNCEMENTS_DATA.find((a) => a.id === id);
   }, [apiData, id]);
 

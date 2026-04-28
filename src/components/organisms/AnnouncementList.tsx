@@ -61,17 +61,19 @@ export function AnnouncementList({ announcements, isLoading, error, onRetry }: A
         <View style={{ gap: 4 }}>
           {sorted.map((item) => {
             const isExpanded = expandedId === item.id;
-            // list 항목에 content 가 이미 있으면(하드코딩 fallback) 그대로 쓰고,
-            // 없으면 detail fetch 결과를 사용. fetch 중에는 빈 문자열로 기다림.
-            const detailContent =
-              item.content ?? expandedDetail.announcement?.content ?? '';
+            // expandedDetail 은 현재 expandedId 한 건에 대해서만 의미가 있으므로
+            // 펼친 항목에서만 본문을 계산한다. list 항목에 content 가 이미 있으면
+            // (하드코딩 fallback) 그대로 쓰고, 없으면 detail fetch 결과를 사용한다.
+            const detailContent = isExpanded
+              ? (item.content ?? expandedDetail.announcement?.content ?? '')
+              : undefined;
             return (
               <NotificationPill
                 key={item.id}
                 title={item.title}
                 pinned={item.isPinned}
                 expanded={isExpanded}
-                content={isExpanded ? detailContent : undefined}
+                content={detailContent}
                 onPress={() => setExpandedId(isExpanded ? null : item.id)}
               />
             );

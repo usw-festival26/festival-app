@@ -27,8 +27,9 @@ const MOBILE_CONTENT_WIDTH = 402;
 const CONTENT_GROUP_WIDTH = 294;
 const CONTENT_GROUP_HEIGHT = 336;
 const TEXT_INSET = 90; // 426 - 336
-// MAIN LOGO 색 (Figma 900:219) — 팔레트에 없는 어두운 보라
-const MAIN_LOGO_PURPLE = '#9B5A9A';
+// 푸터 문의 연락처. 운영팀 실제 번호가 정해지기 전까지는 빈 문자열로 두어 푸터에 노출하지 않는다.
+// 배포 전 반드시 실제 번호로 교체.
+const SUPPORT_CONTACT = '';
 // Blob 사이즈 (Figma 좌표 그대로)
 const BLOB_TOP_RIGHT = 222;
 const BLOB_LEFT_CENTER = 342;
@@ -117,7 +118,7 @@ export function DesktopBackdropDecor() {
                     fontFamily: 'Roboto_900Black',
                     fontSize: 48,
                     lineHeight: 40,
-                    color: MAIN_LOGO_PURPLE,
+                    color: Colors.festival.logoPurple,
                   }}
                 >
                   {line}
@@ -205,7 +206,7 @@ export function DesktopBackdropDecor() {
                   marginBottom: COPYRIGHT_BOTTOM_GAP,
                 }}
               >
-                © 2026 LIKELION USW All right reserved
+                © 2026 LIKELION USW All rights reserved
               </Text>
 
               {/* 900:237 — 푸터 크레딧 3줄 */}
@@ -223,11 +224,16 @@ export function DesktopBackdropDecor() {
               <Text style={{ fontFamily: 'Pretendard-Medium', fontSize: 9, lineHeight: 12 }}>
                 <Text style={{ color: Colors.festival.mutedDark }}>주소</Text>
                 <Text style={{ color: Colors.festival.muted }}>
-                  {'  경기도 화성시 봉담읍 와우안길 17  ㅣ  '}
+                  {SUPPORT_CONTACT
+                    ? '  경기도 화성시 봉담읍 와우안길 17  ㅣ  '
+                    : '  경기도 화성시 봉담읍 와우안길 17'}
                 </Text>
-                <Text style={{ color: Colors.festival.mutedDark }}>{'문의 '}</Text>
-                {/* TODO: 운영팀 실제 문의 연락처로 교체 (현재 Figma 시안 그대로) */}
-                <Text style={{ color: Colors.festival.muted }}>{' 02-000-0000'}</Text>
+                {SUPPORT_CONTACT ? (
+                  <>
+                    <Text style={{ color: Colors.festival.mutedDark }}>{'문의 '}</Text>
+                    <Text style={{ color: Colors.festival.muted }}>{` ${SUPPORT_CONTACT}`}</Text>
+                  </>
+                ) : null}
               </Text>
             </View>
           </View>
