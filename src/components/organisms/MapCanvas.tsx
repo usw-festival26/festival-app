@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { MapPin, MAP_PIN_DIMENSIONS } from '@molecules/MapPin';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  GestureResponderEvent,
   ImageSourcePropType,
   LayoutChangeEvent,
   Pressable,
@@ -39,7 +40,7 @@ import type {
   FoodPin,
   PinCategory,
 } from '../../types/cluster';
-import type { Facility } from '../../types/map';
+import type { Facility, MapCoords } from '../../types/map';
 
 export type AnyPin = BoothCluster | FoodPin | FacilityPin;
 
@@ -60,6 +61,13 @@ export interface MapCanvasProps {
   onPinPress?: (pin: AnyPin) => void;
   /** 선택된 핀 id (에디터 또는 강조 표시용) */
   selectedPinId?: string;
+  /**
+   * 에디터 모드 — true 일 때 이미지 영역을 탭하면 onCanvasTap 콜백.
+   * 핀이 선택된 상태에서 탭하면 그 위치로 이동시키는 식으로 사용.
+   */
+  editable?: boolean;
+  /** 이미지 영역 탭 시 정규화 좌표(0~1) 반환. editable=true 일 때만 활성. */
+  onCanvasTap?: (coords: MapCoords) => void;
 }
 
 const ZOOM_MIN = 0.5;
@@ -79,6 +87,8 @@ export function MapCanvas({
   facilityById,
   onPinPress,
   selectedPinId,
+  editable,
+  onCanvasTap,
 }: MapCanvasProps) {
   const aspect = imgNaturalHeight / imgNaturalWidth;
 
@@ -225,11 +235,31 @@ export function MapCanvas({
               animatedStyle,
             ]}
           >
-            <RNImage
-              source={imgSource}
-              style={{ width: imgW, height: imgH }}
-              resizeMode="cover"
-            />
+            {editable ? (
+              <Pressable
+                onPress={(e: GestureResponderEvent) => {
+                  if (imgW === 0 || imgH === 0) return;
+                  const norm = {
+                    x: e.nativeEvent.locationX / imgW,
+                    y: e.nativeEvent.locationY / imgH,
+                  };
+                  onCanvasTap?.(norm);
+                }}
+                style={{ width: imgW, height: imgH }}
+              >
+                <RNImage
+                  source={imgSource}
+                  style={{ width: imgW, height: imgH }}
+                  resizeMode="cover"
+                />
+              </Pressable>
+            ) : (
+              <RNImage
+                source={imgSource}
+                style={{ width: imgW, height: imgH }}
+                resizeMode="cover"
+              />
+            )}
 
             {showCluster &&
               clusters.map((c) => (
