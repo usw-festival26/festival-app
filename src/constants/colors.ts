@@ -18,6 +18,9 @@ export const Colors = {
     mutedDark: '#515151',
     errorRed: '#FF3B30',
     logoPurple: '#9B5A9A',
+    pinCluster: '#0D00FF',
+    pinFood: '#FF7A00',
+    pinFacility: '#22C55E',
   },
   status: {
     success: '#22C55E',
