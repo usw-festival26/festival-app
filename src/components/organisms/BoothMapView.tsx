@@ -48,8 +48,12 @@ export interface BoothMapViewProps {
   facilityPins: FacilityPin[];
   /** 핀 카테고리 필터 — 'all' / cluster / food / facility */
   pinFilter?: 'all' | PinCategory;
-  /** 핀 클릭 핸들러 — Phase 3 에서 시트/라우팅 분기에 사용 */
+  /** 핀 클릭 핸들러 (cluster/food/facility 분기) */
   onPinPress?: (pin: AnyPin) => void;
+  /** 클러스터 핀으로 부스 시트가 필터링됐을 때 표시할 단과대명. 있으면 시트 상단에 노출. */
+  selectedClusterName?: string;
+  /** 클러스터 필터 해제 콜백 — 시트 상단 "전체 보기" 버튼 등에서 사용 */
+  onClearClusterFilter?: () => void;
   isLoading?: boolean;
   error?: string | null;
   onRetry?: () => void;
@@ -74,6 +78,8 @@ export function BoothMapView({
   facilityPins,
   pinFilter,
   onPinPress,
+  selectedClusterName,
+  onClearClusterFilter,
   isLoading,
   error,
   onRetry,
@@ -281,7 +287,14 @@ export function BoothMapView({
               >
                 <View style={{ width: sheetWidth, flex: 1 }}>
                   <ScrollView showsVerticalScrollIndicator={false}>
-                    <BoothSheetContent booths={booths} isLoading={isLoading} error={error} onRetry={onRetry} />
+                    <BoothSheetContent
+                      booths={booths}
+                      isLoading={isLoading}
+                      error={error}
+                      onRetry={onRetry}
+                      filterLabel={selectedClusterName}
+                      onClearFilter={onClearClusterFilter}
+                    />
                     <View className="h-6" />
                   </ScrollView>
                 </View>
