@@ -21,3 +21,4 @@ export { SplashContent, type SplashContentProps } from './SplashContent';
 export { LineupList, type LineupListProps } from './LineupList';
 export { MenuGrid, type MenuGridProps } from './MenuGrid';
 export { DesktopBackdropDecor } from './DesktopBackdropDecor';
+export { MapCanvas, type MapCanvasProps, type AnyPin } from './MapCanvas';

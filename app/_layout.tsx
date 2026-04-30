@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import '../global.css';
 import { DesktopBackdropDecor } from '@organisms/DesktopBackdropDecor';
 
@@ -70,12 +71,14 @@ export default function RootLayout() {
   }
 
   return (
-    <MobileWeb>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </MobileWeb>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <MobileWeb>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </MobileWeb>
+    </GestureHandlerRootView>
   );
 }
