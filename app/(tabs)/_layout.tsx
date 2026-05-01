@@ -1,11 +1,16 @@
 /**
  * 드로어 네비게이션 레이아웃
  *
- * 햄버거 메뉴를 통한 사이드 드로어 내비게이션
+ * 햄버거 메뉴를 통한 사이드 드로어 내비게이션.
+ * 각 화면의 `title` 옵션은 웹 브라우저 탭의 document.title 로도 사용됨
+ * (헤더는 hidden — drawer 라벨과 별개로 웹 탭 제목 노출 목적).
  */
 import React from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContent } from '../../src/components/organisms/DrawerContent';
+
+const SITE = 'USW Festival 2026';
+const t = (label: string) => `${label} · ${SITE}`;
 
 export default function DrawerLayout() {
   return (
@@ -21,15 +26,15 @@ export default function DrawerLayout() {
         },
       }}
     >
-      <Drawer.Screen name="home" options={{ drawerLabel: '홈' }} />
-      <Drawer.Screen name="booth" options={{ drawerLabel: '지도' }} />
-      <Drawer.Screen name="menu" options={{ drawerLabel: '메뉴' }} />
-      <Drawer.Screen name="timetable" options={{ drawerLabel: '타임테이블' }} />
-      <Drawer.Screen name="lineup" options={{ drawerLabel: '라인업' }} />
-      <Drawer.Screen name="events" options={{ drawerLabel: '이벤트' }} />
-      <Drawer.Screen name="announcements" options={{ drawerLabel: '공지' }} />
-      <Drawer.Screen name="lost-found" options={{ drawerLabel: '분실물' }} />
-      <Drawer.Screen name="information" options={{ drawerLabel: '추가정보' }} />
+      <Drawer.Screen name="home" options={{ drawerLabel: '홈', title: t('홈') }} />
+      <Drawer.Screen name="booth" options={{ drawerLabel: '지도', title: t('지도') }} />
+      <Drawer.Screen name="menu" options={{ drawerLabel: '메뉴', title: t('메뉴') }} />
+      <Drawer.Screen name="timetable" options={{ drawerLabel: '타임테이블', title: t('타임테이블') }} />
+      <Drawer.Screen name="lineup" options={{ drawerLabel: '라인업', title: t('라인업') }} />
+      <Drawer.Screen name="events" options={{ drawerLabel: '이벤트', title: t('이벤트') }} />
+      <Drawer.Screen name="announcements" options={{ drawerLabel: '공지', title: t('공지') }} />
+      <Drawer.Screen name="lost-found" options={{ drawerLabel: '분실물', title: t('분실물') }} />
+      <Drawer.Screen name="information" options={{ drawerLabel: '추가정보', title: t('추가정보') }} />
     </Drawer>
   );
 }
