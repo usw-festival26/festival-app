@@ -74,14 +74,12 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       {/*
-        웹 브라우저 탭 메타 — 기본 제목 + SVG 파비콘.
+        웹 브라우저 탭 기본 제목.
         per-route 제목은 (tabs)/_layout.tsx 의 Drawer.Screen options.title 에서 덮어씀.
-        SVG 파비콘은 public/favicon.svg 에서 정적 서빙 (모던 브라우저는 PNG 보다 SVG 우선).
-        구형 브라우저 fallback 은 app.json 의 web.favicon (assets/images/favicon.png).
+        favicon 은 app.json web.favicon (assets/images/VectorCircle.png) 으로 일원화.
       */}
       <Head>
         <title>USW Festival 2026</title>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       </Head>
       <MobileWeb>
         <Stack screenOptions={{ headerShown: false }}>
