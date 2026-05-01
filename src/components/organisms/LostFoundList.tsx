@@ -6,17 +6,17 @@
  * 연결 (현재는 정적 1/3 표기).
  *
  * 레이아웃
- *  - 네이비 배경 상단: FaqBubble + "문의번호 · 010-1234-5678"
+ *  - 네이비 배경 상단: FaqBubble + "문의 · 카카오톡 채널"
  *  - 반투명 흰 패널(rounded 20): 안내 문구 + 흰 카드 placeholder + 페이지 도트 + "1/3"
+ *
+ * 스타일링: NativeWind className (CLAUDE.md 규칙). insets 는 런타임 동적 값이라
+ * contentContainerStyle 만 인라인 유지.
  */
 import React from 'react';
-import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FaqBubble } from '@molecules/FaqBubble';
 import { CONTACT_INFO } from '@data/contact';
-
-const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
-const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
 
 const TOTAL_PAGES = 3;
 const ACTIVE_PAGE = 0;
@@ -27,12 +27,12 @@ export function LostFoundList() {
 
   return (
     <ScrollView
-      style={{ flex: 1 }}
+      className="flex-1"
       contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 + insets.bottom }}
       showsVerticalScrollIndicator={false}
     >
-      {/* 1. 네이비 배경 상단: 말풍선 + 문의번호 */}
-      <View style={{ paddingTop: 34, paddingBottom: 28, alignItems: 'center' }}>
+      {/* 1. 네이비 배경 상단: 말풍선 + 문의 라인 */}
+      <View className="pt-[34px] pb-[28px] items-center">
         <FaqBubble question="분실물을 습득하셨다면 아래 번호로 연락주세요!" />
         <Pressable
           onPress={() => {
@@ -41,102 +41,42 @@ export function LostFoundList() {
           accessibilityRole={kakaoUrl ? 'link' : undefined}
           accessibilityLabel="카카오톡 문의 채널 열기"
           disabled={!kakaoUrl}
-          style={({ pressed }) => ({
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 12,
-            marginTop: 18,
-            opacity: pressed && kakaoUrl ? 0.7 : 1,
-          })}
+          className="flex-row items-center gap-3 mt-[18px] active:opacity-70"
         >
-          <Text style={styles.contactLabel}>문의</Text>
-          <View style={styles.dotDivider} />
-          <Text style={styles.contactValue}>{CONTACT_INFO.kakaoChannelLabel}</Text>
+          <Text className="font-pretendard text-[12px] text-white">문의</Text>
+          <View className="w-[3px] h-[3px] rounded-full bg-white" />
+          <Text className="font-pretendard text-[12px] text-white">
+            {CONTACT_INFO.kakaoChannelLabel}
+          </Text>
         </Pressable>
       </View>
 
       {/* 2. 반투명 흰 패널: 안내 + placeholder 캐러셀 */}
-      <View
-        style={{
-          marginHorizontal: 18,
-          backgroundColor: 'rgba(255, 255, 255, 0.7)',
-          borderRadius: 20,
-          paddingTop: 57,
-          paddingBottom: 42,
-          alignItems: 'center',
-        }}
-      >
-        <Text style={styles.notice}>전체 분실물은 당일 축제가 끝난 후에 업로드됩니다</Text>
+      <View className="mx-[18px] bg-white/70 rounded-[20px] pt-[57px] pb-[42px] items-center">
+        <Text className="font-pretendard text-[12px] text-black text-center mb-[28px]">
+          전체 분실물은 당일 축제가 끝난 후에 업로드됩니다
+        </Text>
 
         {/* 사진 자리 — 실제 데이터 연결 시 캐러셀로 교체 */}
-        <View style={styles.photoPlaceholder} />
+        <View className="w-[292px] h-[395px] bg-white rounded-[5px]" />
 
         {/* 페이지 인디케이터 도트 */}
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 13 }}>
+        <View className="flex-row gap-2 mt-[13px]">
           {Array.from({ length: TOTAL_PAGES }).map((_, i) => (
             <View
               key={i}
-              style={[styles.dot, i === ACTIVE_PAGE && styles.dotActive]}
+              className={`w-[6px] h-[6px] rounded-full ${
+                i === ACTIVE_PAGE ? 'bg-black' : 'bg-black/20'
+              }`}
             />
           ))}
         </View>
 
         {/* 페이지 표시 */}
-        <Text style={styles.pageIndicator}>
+        <Text className="font-pretendard font-semibold text-[15px] text-black mt-[6px]">
           {ACTIVE_PAGE + 1}/{TOTAL_PAGES}
         </Text>
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  contactLabel: {
-    fontFamily: PRETENDARD_REGULAR,
-    fontWeight: '400',
-    fontSize: 12,
-    color: '#FFFFFF',
-  },
-  contactValue: {
-    fontFamily: PRETENDARD_REGULAR,
-    fontWeight: '400',
-    fontSize: 12,
-    color: '#FFFFFF',
-  },
-  dotDivider: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: '#FFFFFF',
-  },
-  notice: {
-    fontFamily: PRETENDARD_REGULAR,
-    fontWeight: '400',
-    fontSize: 12,
-    color: '#000000',
-    textAlign: 'center',
-    marginBottom: 28,
-  },
-  photoPlaceholder: {
-    width: 292,
-    height: 395,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 5,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  },
-  dotActive: {
-    backgroundColor: '#000000',
-  },
-  pageIndicator: {
-    fontFamily: PRETENDARD_SEMIBOLD,
-    fontWeight: '600',
-    fontSize: 15,
-    color: '#000000',
-    marginTop: 6,
-  },
-});

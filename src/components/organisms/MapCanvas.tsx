@@ -400,6 +400,11 @@ interface PinAnchorProps {
 }
 
 function PinAnchor({ coords, imgW, imgH, children }: PinAnchorProps) {
+  // 망가진 좌표 (NaN/Infinity) 가 들어오면 left/top 이 NaN 으로 계산되어 RN 이 렌더
+  // 단계에서 throw 할 수 있다. pinBBox 계산이 같은 방어를 하므로 여기서도 일관 가드.
+  if (!Number.isFinite(coords.x) || !Number.isFinite(coords.y)) {
+    return null;
+  }
   return (
     <View
       style={{
