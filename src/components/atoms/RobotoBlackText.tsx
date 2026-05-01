@@ -1,10 +1,14 @@
 /**
- * RobotoBlackText - Roboto Black(900) 전용 텍스트
+ * RobotoBlackText - Black(900) 헤딩 텍스트
  *
- * AppText는 default variant="body"가 text-base/text-festival-text를 주입해서
- * Roboto Black 같은 굵은 디자인 헤딩을 그릴 때 덮어씌워질 수 있음.
- * 이 atom은 RN <Text>를 직접 사용하고 Platform별로 font family를 분기해서
- * Figma 헤딩(20/32/48px Roboto Black) 렌더를 보장한다.
+ * Figma 디자인은 영문 "메인 로고" 는 Roboto Black, 한글 헤더는 Noto Sans KR
+ * Bold 로 분기 (font-['Roboto:Black','Noto_Sans_KR:Bold']). 이전 구현은 fontFamily
+ * 를 'Roboto' 만 지정해 한글이 시스템 폴백으로 표시돼 깨져 보이는 문제가 있었다.
+ *
+ * 해결:
+ *  - web: fontFamily chain 으로 영문은 Roboto, 한글은 Pretendard Variable 자동 폴백.
+ *  - native: 한·영 모두 지원하는 Pretendard-Black 으로 통일 (RN 은 chain 미지원).
+ *    영문이 Roboto 가 아닌 Pretendard 라 시각이 살짝 다르지만 한글 깨짐은 사라짐.
  */
 import React from 'react';
 import { Text, StyleSheet, Platform, type TextStyle, type StyleProp } from 'react-native';
@@ -45,7 +49,10 @@ export function RobotoBlackText({
 
 const styles = StyleSheet.create({
   base: {
-    fontFamily: Platform.select({ web: 'Roboto', default: 'Roboto_900Black' }),
+    fontFamily: Platform.select({
+      web: '"Roboto", "Pretendard Variable", sans-serif',
+      default: 'Pretendard-Black',
+    }),
     fontWeight: '900',
     letterSpacing: 0,
     textAlign: 'center',
