@@ -4,3 +4,4 @@ export { ANNOUNCEMENTS_DATA } from './announcements';
 export { LOST_FOUND_DATA } from './lostFound';
 export { INFORMATION_DATA } from './information';
 export { LINEUP_DATA } from './lineup';
+export { CONTACT_INFO } from './contact';

@@ -27,6 +27,9 @@ module.exports = {
           'muted-dark': '#515151',
           'error-red': '#FF3B30',
           'logo-purple': '#9B5A9A',
+          'pin-cluster': '#0D00FF',
+          'pin-food': '#FF7A00',
+          'pin-facility': '#22C55E',
         },
       },
       borderRadius: {

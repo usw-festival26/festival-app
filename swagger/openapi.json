@@ -326,6 +326,79 @@
         }
       }
     },
+    "/api/admin/booths/{boothId}/menus": {
+      "get": {
+        "tags": [
+          "admin-booth-controller"
+        ],
+        "operationId": "getBoothMenus",
+        "parameters": [
+          {
+            "name": "boothId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminBoothMenuResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin-booth-controller"
+        ],
+        "operationId": "createBoothMenu",
+        "parameters": [
+          {
+            "name": "boothId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoothMenuCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminBoothMenuResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/auth/logout": {
       "post": {
         "tags": [
@@ -432,6 +505,137 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/BoothDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/booths/{boothId}/menus/{menuId}": {
+      "delete": {
+        "tags": [
+          "admin-booth-controller"
+        ],
+        "operationId": "deleteBoothMenu",
+        "parameters": [
+          {
+            "name": "boothId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "menuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "admin-booth-controller"
+        ],
+        "operationId": "updateBoothMenu",
+        "parameters": [
+          {
+            "name": "boothId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "menuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoothMenuUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminBoothMenuResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/booths/{boothId}/menus/{menuId}/status": {
+      "patch": {
+        "tags": [
+          "admin-booth-controller"
+        ],
+        "operationId": "updateBoothMenuStatus",
+        "parameters": [
+          {
+            "name": "boothId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "menuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoothMenuStatusUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminBoothMenuResponse"
                 }
               }
             }
@@ -606,7 +810,7 @@
         "tags": [
           "booth-controller"
         ],
-        "operationId": "getBoothMenus",
+        "operationId": "getBoothMenus_1",
         "parameters": [
           {
             "name": "id",
@@ -799,6 +1003,51 @@
           }
         }
       },
+      "BoothMenuCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 0
+          },
+          "price": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "imageUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "price"
+        ]
+      },
+      "AdminBoothMenuResponse": {
+        "type": "object",
+        "properties": {
+          "menuId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
       "AdminLoginRequest": {
         "type": "object",
         "properties": {
@@ -842,6 +1091,43 @@
             "pattern": ".*\\S.*"
           }
         }
+      },
+      "BoothMenuUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 0,
+            "pattern": ".*\\S.*"
+          },
+          "price": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "imageUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 0,
+            "pattern": ".*\\S.*"
+          }
+        }
+      },
+      "BoothMenuStatusUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ON_SALE",
+              "SOLD_OUT"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
       },
       "NoticeResponse": {
         "type": "object",

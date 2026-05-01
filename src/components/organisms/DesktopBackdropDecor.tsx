@@ -15,10 +15,11 @@
  *
  * 모바일 폭(<701px)에서는 global.css 가 .desktop-decor 를 display:none.
  */
-import React from 'react';
-import { View, Text } from 'react-native';
 import { GradientBlob } from '@atoms/GradientBlob';
 import { Colors } from '@constants/colors';
+import { CONTACT_INFO } from '@data/contact';
+import React from 'react';
+import { Linking, Text, View } from 'react-native';
 
 // mobile-content 폭 (global.css 의 max-width 와 동기화)
 const MOBILE_CONTENT_WIDTH = 402;
@@ -27,15 +28,28 @@ const MOBILE_CONTENT_WIDTH = 402;
 const CONTENT_GROUP_WIDTH = 294;
 const CONTENT_GROUP_HEIGHT = 336;
 const TEXT_INSET = 90; // 426 - 336
-// 푸터 문의 연락처. 운영팀 실제 번호가 정해지기 전까지는 빈 문자열로 두어 푸터에 노출하지 않는다.
-// 배포 전 반드시 실제 번호로 교체.
-const SUPPORT_CONTACT = '';
 // Blob 사이즈 (Figma 좌표 그대로)
 const BLOB_TOP_RIGHT = 222;
 const BLOB_LEFT_CENTER = 342;
 const BLOB_RIGHT_LARGE = 800;
+// 우상단 blob 을 mobile-content 의 우상단 코너 쪽으로 밀어낼 거리.
+// View 는 size×size 정사각형이라 left:0,top:0 으로 두면 원의 호가 코너에서
+// size*(1-1/√2)/2 ≈ size*0.146 만큼 안쪽으로 떨어져 보인다.
+// 그만큼 음수 오프셋을 줘 호가 코너에 정확히 접하게 만든다 (코너가 원 위에 위치).
+// (mobile-content 가 z:1 로 데코 위에 덮여 있어, 코너 안쪽으로 들어간 부분은
+// mobile-content 에 가려지고 오른쪽·아래로 노출되는 1/4 호만 보인다.)
+const BLOB_TOP_RIGHT_CORNER_OFFSET = Math.round(
+  (BLOB_TOP_RIGHT * (1 - 1 / Math.sqrt(2))) / 2,
+);
 // 우중앙 거대 blob 의 화면 밖 오프셋 (Figma 1920 frame 에서 168px 밖으로 삐져나옴)
 const BLOB_RIGHT_LARGE_OVERFLOW = 168;
+// 우중앙 거대 blob 의 회전(deg). Figma 시안은 180 이지만, 보케/halo 의 진한
+// 부분이 화면 안쪽으로 향하도록 이 값을 조정해서 미세 튜닝한다.
+const BLOB_RIGHT_LARGE_ROTATE = 0;
+// 우중앙 거대 blob 의 미세 위치 조정 (Figma 기본 위치에서의 nudge).
+// VERTICAL 양수 = 아래로 / HORIZONTAL 양수 = 더 화면 바깥(오른쪽). 0 이면 Figma 위치 그대로.
+const BLOB_RIGHT_LARGE_VERTICAL_NUDGE = 360;
+const BLOB_RIGHT_LARGE_HORIZONTAL_NUDGE = 100;
 // 푸터 하단 여백 (Figma 의 1040 프레임 하단 오프셋(≈88) 그대로 쓰면 일반 데스크탑 뷰포트에서
 // 너무 떠 보여 32 로 축소)
 const FOOTER_BOTTOM_INSET = 32;
@@ -150,31 +164,32 @@ export function DesktopBackdropDecor() {
 
         {/* 우측 영역 */}
         <View style={{ flex: 1 }}>
-          {/* 900:220 우상단 blob */}
-          <View
+          {/* 900:220 우상단 blob — 호가 mobile-content 우상단 코너에 접하도록
+              영역 좌상단(= mobile-content 의 우상단)으로 OFFSET 만큼 밀어냄 */}
+          {/* <View
             style={{
               position: 'absolute',
-              right: 0,
-              top: 0,
+              left: -BLOB_TOP_RIGHT_CORNER_OFFSET,
+              top: -BLOB_TOP_RIGHT_CORNER_OFFSET,
               width: BLOB_TOP_RIGHT,
               height: BLOB_TOP_RIGHT,
             }}
           >
             <GradientBlob size={BLOB_TOP_RIGHT} rotate={180} reversed />
-          </View>
-
-          {/* 900:215 우중앙 거대 blob — 일부 화면 밖으로 삐져나가는 게 의도 */}
+          </View> */}
+          {/* 900:215 우중앙 거대 blob — 일부 화면 밖으로 삐져나가는 게 의도.
+              회전/위치는 BLOB_RIGHT_LARGE_ROTATE / *_NUDGE 로 분리해 미세 조정. */}
           <View
             style={{
               position: 'absolute',
-              right: -BLOB_RIGHT_LARGE_OVERFLOW,
+              right: -BLOB_RIGHT_LARGE_OVERFLOW - BLOB_RIGHT_LARGE_HORIZONTAL_NUDGE,
               top: '50%',
-              marginTop: -BLOB_RIGHT_LARGE / 2,
+              marginTop: -BLOB_RIGHT_LARGE / 2 + BLOB_RIGHT_LARGE_VERTICAL_NUDGE,
               width: BLOB_RIGHT_LARGE,
               height: BLOB_RIGHT_LARGE,
             }}
           >
-            <GradientBlob size={BLOB_RIGHT_LARGE} rotate={180} />
+            <GradientBlob size={BLOB_RIGHT_LARGE} rotate={BLOB_RIGHT_LARGE_ROTATE} />
           </View>
         </View>
       </View>
@@ -224,16 +239,23 @@ export function DesktopBackdropDecor() {
               <Text style={{ fontFamily: 'Pretendard-Medium', fontSize: 9, lineHeight: 12 }}>
                 <Text style={{ color: Colors.festival.mutedDark }}>주소</Text>
                 <Text style={{ color: Colors.festival.muted }}>
-                  {SUPPORT_CONTACT
-                    ? '  경기도 화성시 봉담읍 와우안길 17  ㅣ  '
-                    : '  경기도 화성시 봉담읍 와우안길 17'}
+                  {'  경기도 화성시 봉담읍 와우안길 17  ㅣ  '}
                 </Text>
-                {SUPPORT_CONTACT ? (
-                  <>
-                    <Text style={{ color: Colors.festival.mutedDark }}>{'문의 '}</Text>
-                    <Text style={{ color: Colors.festival.muted }}>{` ${SUPPORT_CONTACT}`}</Text>
-                  </>
-                ) : null}
+                <Text style={{ color: Colors.festival.mutedDark }}>{'문의 '}</Text>
+                {CONTACT_INFO.kakaoChannelUrl ? (
+                  <Text
+                    onPress={() => Linking.openURL(CONTACT_INFO.kakaoChannelUrl)}
+                    accessibilityRole="link"
+                    accessibilityLabel="카카오톡 문의 채널 열기"
+                    style={{ color: Colors.festival.muted }}
+                  >
+                    {` ${CONTACT_INFO.kakaoChannelLabel}`}
+                  </Text>
+                ) : (
+                  <Text style={{ color: Colors.festival.muted }}>
+                    {` ${CONTACT_INFO.kakaoChannelLabel}`}
+                  </Text>
+                )}
               </Text>
             </View>
           </View>

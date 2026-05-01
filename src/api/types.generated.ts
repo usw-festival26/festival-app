@@ -84,6 +84,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/booths/{boothId}/menus": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getBoothMenus"];
+        put?: never;
+        post: operations["createBoothMenu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/auth/logout": {
         parameters: {
             query?: never;
@@ -130,6 +146,38 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["updateBooth"];
+        trace?: never;
+    };
+    "/api/admin/booths/{boothId}/menus/{menuId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteBoothMenu"];
+        options?: never;
+        head?: never;
+        patch: operations["updateBoothMenu"];
+        trace?: never;
+    };
+    "/api/admin/booths/{boothId}/menus/{menuId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateBoothMenuStatus"];
         trace?: never;
     };
     "/api/notices": {
@@ -235,7 +283,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["getBoothMenus"];
+        get: operations["getBoothMenus_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -297,6 +345,21 @@ export interface components {
             imageUrl?: string;
             notice?: string;
         };
+        BoothMenuCreateRequest: {
+            name?: string;
+            /** Format: int32 */
+            price: number;
+            imageUrl?: string;
+        };
+        AdminBoothMenuResponse: {
+            /** Format: int64 */
+            menuId?: number;
+            name?: string;
+            /** Format: int32 */
+            price?: number;
+            imageUrl?: string;
+            status?: string;
+        };
         AdminLoginRequest: {
             loginId?: string;
             password?: string;
@@ -308,6 +371,16 @@ export interface components {
             name?: string;
             description?: string;
             imageUrl?: string;
+        };
+        BoothMenuUpdateRequest: {
+            name?: string;
+            /** Format: int32 */
+            price?: number;
+            imageUrl?: string;
+        };
+        BoothMenuStatusUpdateRequest: {
+            /** @enum {string} */
+            status: "ON_SALE" | "SOLD_OUT";
         };
         NoticeResponse: {
             /** Format: int64 */
@@ -597,6 +670,54 @@ export interface operations {
             };
         };
     };
+    getBoothMenus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boothId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminBoothMenuResponse"][];
+                };
+            };
+        };
+    };
+    createBoothMenu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boothId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BoothMenuCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminBoothMenuResponse"];
+                };
+            };
+        };
+    };
     logout: {
         parameters: {
             query?: never;
@@ -683,6 +804,81 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BoothDetailResponse"];
+                };
+            };
+        };
+    };
+    deleteBoothMenu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boothId: number;
+                menuId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateBoothMenu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boothId: number;
+                menuId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BoothMenuUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminBoothMenuResponse"];
+                };
+            };
+        };
+    };
+    updateBoothMenuStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boothId: number;
+                menuId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BoothMenuStatusUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminBoothMenuResponse"];
                 };
             };
         };
@@ -813,7 +1009,7 @@ export interface operations {
             };
         };
     };
-    getBoothMenus: {
+    getBoothMenus_1: {
         parameters: {
             query?: never;
             header?: never;

@@ -5,15 +5,13 @@
  * "Imformation" 표기는 Figma 원문 유지(AboutSection의 타이포와 통일).
  */
 import React from 'react';
-import { ScrollView, View, ActivityIndicator } from 'react-native';
+import { ScrollView } from 'react-native';
 import { BackdropScreenTemplate } from '../../src/components/templates/BackdropScreenTemplate';
 import { InformationContent } from '../../src/components/organisms/InformationContent';
-import { NetworkErrorState } from '../../src/components/atoms/NetworkErrorState';
-import { Colors } from '../../src/constants/colors';
 import { useInformation } from '../../src/hooks/useInformation';
 
 export default function InformationScreen() {
-  const { sections, isLoading, error, retry } = useInformation();
+  const { sections } = useInformation();
 
   return (
     <BackdropScreenTemplate
@@ -23,15 +21,7 @@ export default function InformationScreen() {
       headerTextColor="#000000"
     >
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        {isLoading ? (
-          <View className="py-12 items-center">
-            <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
-          </View>
-        ) : error ? (
-          <NetworkErrorState onRetry={retry} />
-        ) : (
-          <InformationContent sections={sections} />
-        )}
+        <InformationContent sections={sections} />
       </ScrollView>
     </BackdropScreenTemplate>
   );

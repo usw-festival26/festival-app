@@ -19,5 +19,5 @@ export { ArtistCard, type ArtistCardProps } from './ArtistCard';
 export { NotificationPill, type NotificationPillProps } from './NotificationPill';
 export { FaqBubble, type FaqBubbleProps } from './FaqBubble';
 export { MenuSection, type MenuSectionProps } from './MenuSection';
-export { LostFoundCard, type LostFoundCardProps } from './LostFoundCard';
 export { MapCategoryChips, type MapCategoryChipsProps, type MapChipKey } from './MapCategoryChips';
+export { MapPin, MAP_PIN_DIMENSIONS, type MapPinProps } from './MapPin';
