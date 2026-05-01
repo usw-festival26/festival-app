@@ -13,6 +13,7 @@ import React from 'react';
 import { Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FaqBubble } from '@molecules/FaqBubble';
+import { CONTACT_INFO } from '@data/contact';
 
 const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
 const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
@@ -20,14 +21,9 @@ const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', defaul
 const TOTAL_PAGES = 3;
 const ACTIVE_PAGE = 0;
 
-/**
- * 카카오톡 채널 URL — 빈 문자열이면 클릭 비활성. 실제 채널이 정해지면 입력.
- * 형식 예: 'https://pf.kakao.com/_xxxxxx'
- */
-const KAKAO_CHANNEL_URL = '';
-
 export function LostFoundList() {
   const insets = useSafeAreaInsets();
+  const kakaoUrl = CONTACT_INFO.kakaoChannelUrl;
 
   return (
     <ScrollView
@@ -40,22 +36,22 @@ export function LostFoundList() {
         <FaqBubble question="분실물을 습득하셨다면 아래 번호로 연락주세요!" />
         <Pressable
           onPress={() => {
-            if (KAKAO_CHANNEL_URL) Linking.openURL(KAKAO_CHANNEL_URL);
+            if (kakaoUrl) Linking.openURL(kakaoUrl);
           }}
-          accessibilityRole={KAKAO_CHANNEL_URL ? 'link' : undefined}
+          accessibilityRole={kakaoUrl ? 'link' : undefined}
           accessibilityLabel="카카오톡 문의 채널 열기"
-          disabled={!KAKAO_CHANNEL_URL}
+          disabled={!kakaoUrl}
           style={({ pressed }) => ({
             flexDirection: 'row',
             alignItems: 'center',
             gap: 12,
             marginTop: 18,
-            opacity: pressed && KAKAO_CHANNEL_URL ? 0.7 : 1,
+            opacity: pressed && kakaoUrl ? 0.7 : 1,
           })}
         >
           <Text style={styles.contactLabel}>문의</Text>
           <View style={styles.dotDivider} />
-          <Text style={styles.contactValue}>카카오톡 채널</Text>
+          <Text style={styles.contactValue}>{CONTACT_INFO.kakaoChannelLabel}</Text>
         </Pressable>
       </View>
 

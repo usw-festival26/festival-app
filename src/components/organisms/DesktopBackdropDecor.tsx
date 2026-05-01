@@ -17,8 +17,9 @@
  */
 import { GradientBlob } from '@atoms/GradientBlob';
 import { Colors } from '@constants/colors';
+import { CONTACT_INFO } from '@data/contact';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Linking, Text, View } from 'react-native';
 
 // mobile-content 폭 (global.css 의 max-width 와 동기화)
 const MOBILE_CONTENT_WIDTH = 402;
@@ -27,9 +28,6 @@ const MOBILE_CONTENT_WIDTH = 402;
 const CONTENT_GROUP_WIDTH = 294;
 const CONTENT_GROUP_HEIGHT = 336;
 const TEXT_INSET = 90; // 426 - 336
-// 푸터 문의 연락처. 운영팀 실제 번호가 정해지기 전까지는 빈 문자열로 두어 푸터에 노출하지 않는다.
-// 배포 전 반드시 실제 번호로 교체.
-const SUPPORT_CONTACT = '';
 // Blob 사이즈 (Figma 좌표 그대로)
 const BLOB_TOP_RIGHT = 222;
 const BLOB_LEFT_CENTER = 342;
@@ -242,16 +240,23 @@ export function DesktopBackdropDecor() {
               <Text style={{ fontFamily: 'Pretendard-Medium', fontSize: 9, lineHeight: 12 }}>
                 <Text style={{ color: Colors.festival.mutedDark }}>주소</Text>
                 <Text style={{ color: Colors.festival.muted }}>
-                  {SUPPORT_CONTACT
-                    ? '  경기도 화성시 봉담읍 와우안길 17  ㅣ  '
-                    : '  경기도 화성시 봉담읍 와우안길 17'}
+                  {'  경기도 화성시 봉담읍 와우안길 17  ㅣ  '}
                 </Text>
-                {SUPPORT_CONTACT ? (
-                  <>
-                    <Text style={{ color: Colors.festival.mutedDark }}>{'문의 '}</Text>
-                    <Text style={{ color: Colors.festival.muted }}>{` ${SUPPORT_CONTACT}`}</Text>
-                  </>
-                ) : null}
+                <Text style={{ color: Colors.festival.mutedDark }}>{'문의 '}</Text>
+                {CONTACT_INFO.kakaoChannelUrl ? (
+                  <Text
+                    onPress={() => Linking.openURL(CONTACT_INFO.kakaoChannelUrl)}
+                    accessibilityRole="link"
+                    accessibilityLabel="카카오톡 문의 채널 열기"
+                    style={{ color: Colors.festival.muted }}
+                  >
+                    {` ${CONTACT_INFO.kakaoChannelLabel}`}
+                  </Text>
+                ) : (
+                  <Text style={{ color: Colors.festival.muted }}>
+                    {` ${CONTACT_INFO.kakaoChannelLabel}`}
+                  </Text>
+                )}
               </Text>
             </View>
           </View>

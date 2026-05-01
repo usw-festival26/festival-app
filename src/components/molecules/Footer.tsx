@@ -3,10 +3,14 @@
  *
  * 좌우 패딩 대칭(40px), LOGO → bullet + 카피라이트 → 1px hairline → 팀/주소 3줄.
  * 폰트 사이즈: LOGO 20px / 카피 10px / 크레딧 11px (16lh). 라벨 다크(#515151) + 값 뮤트(#7D7D7D).
+ *
+ * 문의 텍스트는 `src/data/contact.ts` 의 카카오톡 채널 URL 이 있으면 Pressable 로
+ * 클릭 가능. URL 이 비어 있으면 라벨만 표시.
  */
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable, Linking } from 'react-native';
 import { RobotoBlackText } from '@atoms/RobotoBlackText';
+import { CONTACT_INFO } from '@data/contact';
 
 const MUTED_DARK = '#515151';
 const MUTED = '#7D7D7D';
@@ -17,6 +21,15 @@ const VALUE = { color: MUTED, fontFamily: 'Pretendard-Regular' };
 const DIVIDER = { color: MUTED, fontFamily: 'Pretendard-Regular' };
 
 export function Footer() {
+  const kakaoUrl = CONTACT_INFO.kakaoChannelUrl;
+
+  const inquiryNode = (
+    <Text style={{ fontSize: 11, lineHeight: 16 }}>
+      <Text style={LABEL}>문의</Text>
+      <Text style={VALUE}>{`   ${CONTACT_INFO.kakaoChannelLabel}`}</Text>
+    </Text>
+  );
+
   return (
     <View
       style={{
@@ -55,10 +68,19 @@ export function Footer() {
         <Text style={{ fontSize: 11, lineHeight: 16 }}>
           <Text style={LABEL}>주소</Text>
           <Text style={VALUE}>{'   경기도 화성시 봉담읍 와우안길 17'}</Text>
-          <Text style={DIVIDER}>{'   ㅣ   '}</Text>
-          <Text style={LABEL}>문의</Text>
-          <Text style={VALUE}>{'   02-000-0000'}</Text>
         </Text>
+        {kakaoUrl ? (
+          <Pressable
+            onPress={() => Linking.openURL(kakaoUrl)}
+            accessibilityRole="link"
+            accessibilityLabel="카카오톡 문의 채널 열기"
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          >
+            {inquiryNode}
+          </Pressable>
+        ) : (
+          inquiryNode
+        )}
       </View>
     </View>
   );
