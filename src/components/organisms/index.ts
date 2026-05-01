@@ -2,7 +2,7 @@ export { BoothList, type BoothListProps } from './BoothList';
 export { BoothDetail, type BoothDetailProps } from './BoothDetail';
 export { TimetableGrid, type TimetableGridProps } from './TimetableGrid';
 export { AnnouncementList, type AnnouncementListProps } from './AnnouncementList';
-export { LostFoundList, type LostFoundListProps } from './LostFoundList';
+export { LostFoundList } from './LostFoundList';
 export { HeroSection } from './HeroSection';
 export { DrawerContent } from './DrawerContent';
 export { AboutSection, type AboutSectionProps } from './AboutSection';
