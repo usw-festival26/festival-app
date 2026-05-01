@@ -97,6 +97,73 @@ function getFactoryState(): EditorState {
   };
 }
 
+const DEFAULT_COORDS: MapCoords = { x: 0.5, y: 0.5 };
+
+/**
+ * 좌표를 강제로 finite number 로 정규화. NaN/null/undefined/형식 오류 시 (0.5, 0.5).
+ *
+ * Why: JSON.stringify({x: NaN}) → '{"x":null}' 이라 NaN 좌표가 한번이라도 state 에
+ * 들어가면 다음 hydration 때 toFixed 가 깨진다. AsyncStorage 경계에서 한 번 조이면
+ * 그 이후 코드는 항상 finite 좌표를 가정해도 안전.
+ */
+function coerceCoords(c: unknown): MapCoords {
+  if (
+    c &&
+    typeof c === 'object' &&
+    Number.isFinite((c as MapCoords).x) &&
+    Number.isFinite((c as MapCoords).y)
+  ) {
+    return { x: (c as MapCoords).x, y: (c as MapCoords).y };
+  }
+  return { ...DEFAULT_COORDS };
+}
+
+/**
+ * AsyncStorage 의 raw JSON 을 EditorState 로 정규화. 좌표가 망가진 핀은 버리지 않고
+ * (0.5, 0.5) 로 복원해 이름/그룹 등 운영자 입력은 유지한다.
+ * id/category 등 핵심 필드가 깨진 항목은 drop.
+ */
+function sanitizeEditorState(parsed: unknown): EditorState | null {
+  if (!parsed || typeof parsed !== 'object') return null;
+  const r = parsed as Record<string, unknown>;
+  if (!Array.isArray(r.clusters)) return null;
+
+  const clusters: BoothCluster[] = (r.clusters as unknown[])
+    .filter((c): c is Record<string, unknown> => !!c && typeof c === 'object' && typeof (c as { id?: unknown }).id === 'string')
+    .map((c) => ({
+      id: c.id as string,
+      category: 'cluster',
+      name: typeof c.name === 'string' ? c.name : '',
+      coords: coerceCoords(c.coords),
+      boothIds: Array.isArray(c.boothIds)
+        ? (c.boothIds as unknown[]).filter((b): b is string => typeof b === 'string')
+        : [],
+    }));
+
+  const foodPins: FoodPin[] = (Array.isArray(r.foodPins) ? (r.foodPins as unknown[]) : [])
+    .filter((p): p is Record<string, unknown> => !!p && typeof p === 'object' && typeof (p as { id?: unknown }).id === 'string')
+    .map((p) => ({
+      id: p.id as string,
+      category: 'food',
+      name: typeof p.name === 'string' ? p.name : '',
+      boothId: typeof p.boothId === 'string' ? p.boothId : undefined,
+      description: typeof p.description === 'string' ? p.description : undefined,
+      coords: coerceCoords(p.coords),
+    }));
+
+  const facilityPins: FacilityPin[] = (Array.isArray(r.facilityPins) ? (r.facilityPins as unknown[]) : [])
+    .filter((p): p is Record<string, unknown> => !!p && typeof p === 'object' && typeof (p as { id?: unknown }).id === 'string')
+    .map((p) => ({
+      id: p.id as string,
+      category: 'facility',
+      name: typeof p.name === 'string' ? p.name : '',
+      phone: typeof p.phone === 'string' ? p.phone : '',
+      coords: coerceCoords(p.coords),
+    }));
+
+  return { clusters, foodPins, facilityPins };
+}
+
 export default function MapEditorScreen() {
   const router = useRouter();
   const [state, setState] = useState<EditorState>(getFactoryState);
@@ -115,14 +182,8 @@ export default function MapEditorScreen() {
       .then((raw) => {
         if (raw) {
           try {
-            const parsed = JSON.parse(raw);
-            if (parsed && Array.isArray(parsed.clusters)) {
-              setState({
-                clusters: parsed.clusters,
-                foodPins: parsed.foodPins ?? [],
-                facilityPins: parsed.facilityPins ?? [],
-              });
-            }
+            const sanitized = sanitizeEditorState(JSON.parse(raw));
+            if (sanitized) setState(sanitized);
           } catch {
             // invalid JSON — factory state 유지
           }
@@ -319,7 +380,8 @@ export default function MapEditorScreen() {
             {FILTER_LABELS[selectedPin.category]} 핀 — {selectedPin.id}
           </Text>
           <Text style={{ fontSize: 12, color: '#666' }}>
-            x: {selectedPin.coords.x.toFixed(4)}, y: {selectedPin.coords.y.toFixed(4)}
+            x: {Number.isFinite(selectedPin.coords?.x) ? selectedPin.coords.x.toFixed(4) : '?'},{' '}
+            y: {Number.isFinite(selectedPin.coords?.y) ? selectedPin.coords.y.toFixed(4) : '?'}
           </Text>
           <Text style={{ fontSize: 11, color: '#999', marginBottom: 8 }}>
             {moveMode

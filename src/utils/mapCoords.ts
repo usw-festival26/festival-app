@@ -28,7 +28,10 @@ export function imageToScreen(
   };
 }
 
-/** 화면(viewport) 좌표 → 정규화 좌표. 핀 에디터 드래그 종료 시 사용. */
+/**
+ * 화면(viewport) 좌표 → 정규화 좌표. 핀 에디터 드래그 종료 시 사용.
+ * 좌표는 [0, 1] 로 강제하지 않음 — 이미지 바깥에 핀이 있을 수 있는 자유 좌표계.
+ */
 export function screenToImage(
   sx: number,
   sy: number,
@@ -39,14 +42,7 @@ export function screenToImage(
   scale: number,
 ): MapCoords {
   return {
-    x: clamp01(((sx - tx) / scale) / imgW),
-    y: clamp01(((sy - ty) / scale) / imgH),
+    x: ((sx - tx) / scale) / imgW,
+    y: ((sy - ty) / scale) / imgH,
   };
-}
-
-/** 0~1 범위 clamp. JS thread 용 (worklet 아님). */
-export function clamp01(v: number): number {
-  if (v < 0) return 0;
-  if (v > 1) return 1;
-  return v;
 }

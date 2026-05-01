@@ -98,13 +98,45 @@ export function MapCanvas({
     return { imgW: w, imgH: w * aspect };
   }, [layout.cw, aspect]);
 
+  /**
+   * 정규화 좌표계 union bbox — 이미지(0,0)~(1,1) 와 모든 핀 좌표를 포함.
+   * 핀이 모두 이미지 안일 때 (0,1,0,1) 로 현재 동작과 호환.
+   * NaN/Infinity 좌표는 무시 (방어).
+   */
+  const pinBBox = useMemo(() => {
+    let minX = 0, maxX = 1, minY = 0, maxY = 1;
+    for (const p of [...clusters, ...foodPins, ...facilityPins]) {
+      const x = p.coords?.x;
+      const y = p.coords?.y;
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+    return { minX, maxX, minY, maxY };
+  }, [clusters, foodPins, facilityPins]);
+
   const tx = useSharedValue(0);
   const ty = useSharedValue(0);
   const scale = useSharedValue(ZOOM_INITIAL);
   const startTx = useSharedValue(0);
   const startTy = useSharedValue(0);
+  // worklet 안에서 bbox 를 읽기 위한 sharedValue. JS 의 pinBBox 변경 시 useEffect 로 동기화.
+  const bboxMinX = useSharedValue(0);
+  const bboxMaxX = useSharedValue(1);
+  const bboxMinY = useSharedValue(0);
+  const bboxMaxY = useSharedValue(1);
 
-  // layout / 이미지 크기 결정 시 초기 위치 (가운데 정렬)
+  useEffect(() => {
+    bboxMinX.value = pinBBox.minX;
+    bboxMaxX.value = pinBBox.maxX;
+    bboxMinY.value = pinBBox.minY;
+    bboxMaxY.value = pinBBox.maxY;
+  }, [pinBBox]);
+
+  // layout / 이미지 크기 결정 시 초기 위치 (이미지를 viewport 가운데 정렬)
+  // bbox 변경에는 반응하지 않음 — 사용자가 팬한 위치를 보존.
   useEffect(() => {
     if (layout.cw === 0 || layout.ch === 0 || imgW === 0) return;
     scale.value = ZOOM_INITIAL;
@@ -120,22 +152,42 @@ export function MapCanvas({
     });
   };
 
-  // tx/ty 의 허용 범위 — 이미지가 viewport 보다 작으면 가운데 강제, 크면 가장자리 clamp
+  /**
+   * tx/ty 허용 범위 — bbox 가 viewport 안에 머물도록.
+   * bbox 가 viewport 보다 작으면 가운데 강제, 크면 가장자리 clamp.
+   * bbox=(0,1,0,1) (모든 핀이 이미지 안) 일 때 이전 식과 결과 동일.
+   */
   const computeBounds = useCallback(
     (s: number) => {
-      const dispW = imgW * s;
-      const dispH = imgH * s;
-      const minTx = layout.cw - dispW;
-      const minTy = layout.ch - dispH;
-      // dispW < cw (이미지가 좁음) 이면 가운데 정렬: minTx === maxTx === (cw - dispW) / 2
-      const txMin = dispW < layout.cw ? (layout.cw - dispW) / 2 : minTx;
-      const txMax = dispW < layout.cw ? (layout.cw - dispW) / 2 : 0;
-      const tyMin = dispH < layout.ch ? (layout.ch - dispH) / 2 : minTy;
-      const tyMax = dispH < layout.ch ? (layout.ch - dispH) / 2 : 0;
+      const bLeftPx = pinBBox.minX * imgW * s;
+      const bRightPx = pinBBox.maxX * imgW * s;
+      const bTopPx = pinBBox.minY * imgH * s;
+      const bBottomPx = pinBBox.maxY * imgH * s;
+      const bWPx = bRightPx - bLeftPx;
+      const bHPx = bBottomPx - bTopPx;
+      const txCenter = (layout.cw - bWPx) / 2 - bLeftPx;
+      const tyCenter = (layout.ch - bHPx) / 2 - bTopPx;
+      const txMin = bWPx < layout.cw ? txCenter : layout.cw - bRightPx;
+      const txMax = bWPx < layout.cw ? txCenter : -bLeftPx;
+      const tyMin = bHPx < layout.ch ? tyCenter : layout.ch - bBottomPx;
+      const tyMax = bHPx < layout.ch ? tyCenter : -bTopPx;
       return { txMin, txMax, tyMin, tyMax };
     },
-    [imgW, imgH, layout.cw, layout.ch],
+    [imgW, imgH, layout.cw, layout.ch, pinBBox],
   );
+
+  /**
+   * pinBBox 가 변경돼서 현재 tx/ty 가 새 범위 밖이면 부드럽게 안으로 보정.
+   * 핀을 이미지 바깥으로 옮기거나 추가했을 때 viewport 가 자연스럽게 따라옴.
+   */
+  useEffect(() => {
+    if (layout.cw === 0 || imgW === 0) return;
+    const { txMin, txMax, tyMin, tyMax } = computeBounds(scale.value);
+    if (tx.value < txMin) tx.value = withTiming(txMin, { duration: 150 });
+    else if (tx.value > txMax) tx.value = withTiming(txMax, { duration: 150 });
+    if (ty.value < tyMin) ty.value = withTiming(tyMin, { duration: 150 });
+    else if (ty.value > tyMax) ty.value = withTiming(tyMax, { duration: 150 });
+  }, [pinBBox, imgW, imgH, layout.cw, layout.ch, computeBounds]);
 
   const pan = useMemo(
     () =>
@@ -147,12 +199,19 @@ export function MapCanvas({
         })
         .onUpdate((e) => {
           'worklet';
-          const dispW = imgW * scale.value;
-          const dispH = imgH * scale.value;
-          const txMin = dispW < layout.cw ? (layout.cw - dispW) / 2 : layout.cw - dispW;
-          const txMax = dispW < layout.cw ? (layout.cw - dispW) / 2 : 0;
-          const tyMin = dispH < layout.ch ? (layout.ch - dispH) / 2 : layout.ch - dispH;
-          const tyMax = dispH < layout.ch ? (layout.ch - dispH) / 2 : 0;
+          const s = scale.value;
+          const bLeftPx = bboxMinX.value * imgW * s;
+          const bRightPx = bboxMaxX.value * imgW * s;
+          const bTopPx = bboxMinY.value * imgH * s;
+          const bBottomPx = bboxMaxY.value * imgH * s;
+          const bWPx = bRightPx - bLeftPx;
+          const bHPx = bBottomPx - bTopPx;
+          const txCenter = (layout.cw - bWPx) / 2 - bLeftPx;
+          const tyCenter = (layout.ch - bHPx) / 2 - bTopPx;
+          const txMin = bWPx < layout.cw ? txCenter : layout.cw - bRightPx;
+          const txMax = bWPx < layout.cw ? txCenter : -bLeftPx;
+          const tyMin = bHPx < layout.ch ? tyCenter : layout.ch - bBottomPx;
+          const tyMax = bHPx < layout.ch ? tyCenter : -bTopPx;
           const nextTx = startTx.value + e.translationX;
           const nextTy = startTy.value + e.translationY;
           tx.value = nextTx < txMin ? txMin : nextTx > txMax ? txMax : nextTx;
@@ -161,11 +220,13 @@ export function MapCanvas({
     [imgW, imgH, layout.cw, layout.ch],
   );
 
-  // 캔버스 탭 — editable 모드에서만 활성. e.x/e.y 는 Animated.View 의 untransformed
-  // local 좌표 (= 이미지 좌표) 라서 그대로 imgW/imgH 로 정규화 가능.
+  // 캔버스 탭 — editable 모드에서만 활성. GestureDetector 가 viewport 전체에 걸려 있어
+  // e.x/e.y 는 viewport 좌표 → tx/ty/scale 로 보정해 image 정규화 좌표로 변환.
+  // 좌표 [0,1] 강제 없음 — 이미지 바깥 여백을 탭하면 음수/1초과 좌표가 핀에 저장됨.
+  // NaN/Infinity 만 차단 (JSON.stringify 시 null 로 직렬화돼 hydration 깨지는 문제 방지).
   const dispatchCanvasTap = useCallback(
     (norm: MapCoords) => {
-      if (norm.x < 0 || norm.x > 1 || norm.y < 0 || norm.y > 1) return;
+      if (!Number.isFinite(norm.x) || !Number.isFinite(norm.y)) return;
       onCanvasTap?.(norm);
     },
     [onCanvasTap],
@@ -180,7 +241,9 @@ export function MapCanvas({
           'worklet';
           if (!success) return;
           if (imgW === 0 || imgH === 0) return;
-          runOnJS(dispatchCanvasTap)({ x: e.x / imgW, y: e.y / imgH });
+          const ix = (e.x - tx.value) / scale.value / imgW;
+          const iy = (e.y - ty.value) / scale.value / imgH;
+          runOnJS(dispatchCanvasTap)({ x: ix, y: iy });
         }),
     [editable, imgW, imgH, dispatchCanvasTap],
   );
@@ -246,60 +309,63 @@ export function MapCanvas({
     >
       {imgW > 0 && (
         <GestureDetector gesture={composedGesture}>
-          <Animated.View
-            style={[
-              {
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                width: imgW,
-                height: imgH,
-                transformOrigin: 'top left' as any,
-              },
-              animatedStyle,
-            ]}
-          >
-            <RNImage
-              source={imgSource}
-              style={{ width: imgW, height: imgH }}
-              resizeMode="cover"
-            />
+          {/* 외곽 컨테이너 — viewport 전체. 이미지 바깥 여백을 탭해도 핀 배치 가능. */}
+          <Animated.View style={{ flex: 1 }}>
+            <Animated.View
+              style={[
+                {
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  width: imgW,
+                  height: imgH,
+                  transformOrigin: 'top left' as any,
+                },
+                animatedStyle,
+              ]}
+            >
+              <RNImage
+                source={imgSource}
+                style={{ width: imgW, height: imgH }}
+                resizeMode="cover"
+              />
 
-            {showCluster &&
-              clusters.map((c) => (
-                <PinAnchor key={c.id} coords={c.coords} imgW={imgW} imgH={imgH}>
-                  <MapPin
-                    category="cluster"
-                    labelLines={clusterLabel(c)}
-                    selected={selectedPinId === c.id}
-                    onPress={() => onPinPress?.(c)}
-                  />
-                </PinAnchor>
-              ))}
+              {showCluster &&
+                clusters.map((c) => (
+                  <PinAnchor key={c.id} coords={c.coords} imgW={imgW} imgH={imgH}>
+                    <MapPin
+                      category="cluster"
+                      labelLines={clusterLabel(c)}
+                      selected={selectedPinId === c.id}
+                      onPress={() => onPinPress?.(c)}
+                    />
+                  </PinAnchor>
+                ))}
 
-            {showFood &&
-              foodPins.map((p) => (
-                <PinAnchor key={p.id} coords={p.coords} imgW={imgW} imgH={imgH}>
-                  <MapPin
-                    category="food"
-                    labelLines={foodLabel(p)}
-                    selected={selectedPinId === p.id}
-                    onPress={() => onPinPress?.(p)}
-                  />
-                </PinAnchor>
-              ))}
+              {showFood &&
+                foodPins.map((p) => (
+                  <PinAnchor key={p.id} coords={p.coords} imgW={imgW} imgH={imgH}>
+                    <MapPin
+                      category="food"
+                      labelLines={foodLabel(p)}
+                      selected={selectedPinId === p.id}
+                      onPress={() => onPinPress?.(p)}
+                    />
+                  </PinAnchor>
+                ))}
 
-            {showFacility &&
-              facilityPins.map((p) => (
-                <PinAnchor key={p.id} coords={p.coords} imgW={imgW} imgH={imgH}>
-                  <MapPin
-                    category="facility"
-                    labelLines={facilityLabel(p)}
-                    selected={selectedPinId === p.id}
-                    onPress={() => onPinPress?.(p)}
-                  />
-                </PinAnchor>
-              ))}
+              {showFacility &&
+                facilityPins.map((p) => (
+                  <PinAnchor key={p.id} coords={p.coords} imgW={imgW} imgH={imgH}>
+                    <MapPin
+                      category="facility"
+                      labelLines={facilityLabel(p)}
+                      selected={selectedPinId === p.id}
+                      onPress={() => onPinPress?.(p)}
+                    />
+                  </PinAnchor>
+                ))}
+            </Animated.View>
           </Animated.View>
         </GestureDetector>
       )}

@@ -17,11 +17,11 @@ import { Platform, Pressable, Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import type { PinCategory } from '../../types/cluster';
 
-const PIN_WIDTH = 146;
-const BUBBLE_HEIGHT = 92;
-const BUBBLE_TAIL_HEIGHT = 10;
-const HEAD_HEIGHT = 40;
-const HEAD_WIDTH = 28;
+const PIN_WIDTH = 73;
+const BUBBLE_HEIGHT = 46;
+const BUBBLE_TAIL_HEIGHT = 5;
+const HEAD_HEIGHT = 20;
+const HEAD_WIDTH = 14;
 const TOTAL_HEIGHT = BUBBLE_HEIGHT + BUBBLE_TAIL_HEIGHT + HEAD_HEIGHT;
 
 const HEAD_CY = BUBBLE_HEIGHT + BUBBLE_TAIL_HEIGHT + HEAD_WIDTH / 2;
@@ -71,42 +71,42 @@ export function MapPin({ category, labelLines, onPress, selected }: MapPinProps)
           y={0}
           width={PIN_WIDTH}
           height={BUBBLE_HEIGHT}
-          rx={20}
-          ry={20}
+          rx={10}
+          ry={10}
           fill={`url(#${gradId})`}
         />
 
         {/* 말풍선 꼬리 (말풍선 → 핀 헤드 연결) */}
         <Path
-          d={`M ${PIN_WIDTH / 2 - 9} ${BUBBLE_HEIGHT}
+          d={`M ${PIN_WIDTH / 2 - 4.5} ${BUBBLE_HEIGHT}
               L ${PIN_WIDTH / 2} ${BUBBLE_HEIGHT + BUBBLE_TAIL_HEIGHT}
-              L ${PIN_WIDTH / 2 + 9} ${BUBBLE_HEIGHT} Z`}
+              L ${PIN_WIDTH / 2 + 4.5} ${BUBBLE_HEIGHT} Z`}
           fill={to}
         />
 
         {/* 핀 헤드 — teardrop (원 + 아래로 뻗는 꼬리) */}
         <Path
           d={`M ${PIN_WIDTH / 2} ${TOTAL_HEIGHT}
-              L ${PIN_WIDTH / 2 - HEAD_WIDTH / 2 + 2} ${HEAD_CY + 4}
-              A ${HEAD_WIDTH / 2} ${HEAD_WIDTH / 2} 0 1 1 ${PIN_WIDTH / 2 + HEAD_WIDTH / 2 - 2} ${HEAD_CY + 4}
+              L ${PIN_WIDTH / 2 - HEAD_WIDTH / 2 + 1} ${HEAD_CY + 2}
+              A ${HEAD_WIDTH / 2} ${HEAD_WIDTH / 2} 0 1 1 ${PIN_WIDTH / 2 + HEAD_WIDTH / 2 - 1} ${HEAD_CY + 2}
               Z`}
           fill={to}
         />
         <Circle cx={PIN_WIDTH / 2} cy={HEAD_CY} r={HEAD_WIDTH / 2} fill={to} />
-        <Circle cx={PIN_WIDTH / 2} cy={HEAD_CY} r={5} fill="#FFFFFF" />
+        <Circle cx={PIN_WIDTH / 2} cy={HEAD_CY} r={2.5} fill="#FFFFFF" />
 
         {/* 선택 표시 */}
         {selected ? (
           <Rect
-            x={1.5}
-            y={1.5}
-            width={PIN_WIDTH - 3}
-            height={BUBBLE_HEIGHT - 3}
-            rx={20}
-            ry={20}
+            x={0.75}
+            y={0.75}
+            width={PIN_WIDTH - 1.5}
+            height={BUBBLE_HEIGHT - 1.5}
+            rx={10}
+            ry={10}
             fill="none"
             stroke="#FFFFFF"
-            strokeWidth={3}
+            strokeWidth={1.5}
           />
         ) : null}
       </Svg>
@@ -116,8 +116,8 @@ export function MapPin({ category, labelLines, onPress, selected }: MapPinProps)
         pointerEvents="none"
         style={{
           position: 'absolute',
-          left: 12,
-          right: 12,
+          left: 6,
+          right: 6,
           top: 0,
           height: BUBBLE_HEIGHT,
           justifyContent: 'center',
@@ -134,8 +134,8 @@ export function MapPin({ category, labelLines, onPress, selected }: MapPinProps)
                 default: i === 0 ? 'Pretendard-SemiBold' : 'Pretendard-Regular',
               }),
               fontWeight: i === 0 ? '600' : '400',
-              fontSize: i === 0 ? 15 : 12,
-              lineHeight: i === 0 ? 20 : 16,
+              fontSize: i === 0 ? 11 : 9,
+              lineHeight: i === 0 ? 14 : 12,
               color: '#FFFFFF',
               textAlign: 'center',
             }}
