@@ -166,7 +166,7 @@ export function DesktopBackdropDecor() {
         <View style={{ flex: 1 }}>
           {/* 900:220 우상단 blob — 호가 mobile-content 우상단 코너에 접하도록
               영역 좌상단(= mobile-content 의 우상단)으로 OFFSET 만큼 밀어냄 */}
-          <View
+          {/* <View
             style={{
               position: 'absolute',
               left: -BLOB_TOP_RIGHT_CORNER_OFFSET,
@@ -176,8 +176,7 @@ export function DesktopBackdropDecor() {
             }}
           >
             <GradientBlob size={BLOB_TOP_RIGHT} rotate={180} reversed />
-          </View>
-
+          </View> */}
           {/* 900:215 우중앙 거대 blob — 일부 화면 밖으로 삐져나가는 게 의도.
               회전/위치는 BLOB_RIGHT_LARGE_ROTATE / *_NUDGE 로 분리해 미세 조정. */}
           <View
