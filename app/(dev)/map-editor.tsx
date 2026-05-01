@@ -688,22 +688,45 @@ function removePin(s: EditorState, id: string): EditorState {
   };
 }
 
+/**
+ * 선택된 핀이 속한 배열만 골라 갱신. 핀은 한 카테고리에만 존재하므로 다른 두 배열은
+ * 그대로 참조 유지 (불필요한 map 회피 + downstream useMemo 안정성 ↑).
+ *
+ * key/value 는 `Field` 컴포넌트가 카테고리별로 미리 좁혀서 호출하므로 동적 dispatch
+ * 가 안전. 컴파일 타임 type narrowing 까지 가려면 action 유니언이 필요한데, dev-only
+ * 에디터라 패턴 단순성을 우선.
+ */
 function updatePinField(
   s: EditorState,
   id: string,
   key: string,
   value: unknown,
 ): EditorState {
-  function patch<T extends { id: string }>(arr: T[]): T[] {
-    return arr.map((item) =>
-      item.id === id ? ({ ...item, [key]: value } as T) : item,
-    );
+  if (s.clusters.some((c) => c.id === id)) {
+    return {
+      ...s,
+      clusters: s.clusters.map((c) =>
+        c.id === id ? { ...c, [key]: value } : c,
+      ),
+    };
   }
-  return {
-    clusters: patch(s.clusters),
-    foodPins: patch(s.foodPins),
-    facilityPins: patch(s.facilityPins),
-  };
+  if (s.foodPins.some((p) => p.id === id)) {
+    return {
+      ...s,
+      foodPins: s.foodPins.map((p) =>
+        p.id === id ? { ...p, [key]: value } : p,
+      ),
+    };
+  }
+  if (s.facilityPins.some((p) => p.id === id)) {
+    return {
+      ...s,
+      facilityPins: s.facilityPins.map((p) =>
+        p.id === id ? { ...p, [key]: value } : p,
+      ),
+    };
+  }
+  return s;
 }
 
 function createDefaultPin(category: PinCategory): AnyPin {

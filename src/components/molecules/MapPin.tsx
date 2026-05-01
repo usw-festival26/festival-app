@@ -15,6 +15,7 @@
 import React from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import { Colors } from '@constants/colors';
 import type { PinCategory } from '../../types/cluster';
 
 const PIN_WIDTH = 73;
@@ -26,11 +27,15 @@ const TOTAL_HEIGHT = BUBBLE_HEIGHT + BUBBLE_TAIL_HEIGHT + HEAD_HEIGHT;
 
 const HEAD_CY = BUBBLE_HEIGHT + BUBBLE_TAIL_HEIGHT + HEAD_WIDTH / 2;
 
-/** 카테고리별 [from, to] 그라디언트 색상 */
+/**
+ * 카테고리별 [from, to] 그라디언트 색상.
+ * to 끝 색상은 `Colors.festival.pin*` 토큰과 일원화 (tailwind.config.js 와도 동기).
+ * from 시작 색상은 그라디언트 전용이라 토큰화 안 함.
+ */
 const GRADIENT_STOPS: Record<PinCategory, readonly [string, string]> = {
-  cluster: ['#FFBEBF', '#0D00FF'],
-  food: ['#FFE5C9', '#FF7A00'],
-  facility: ['#C7F5DB', '#22C55E'],
+  cluster: ['#FFBEBF', Colors.festival.pinCluster],
+  food: ['#FFE5C9', Colors.festival.pinFood],
+  facility: ['#C7F5DB', Colors.festival.pinFacility],
 };
 
 export interface MapPinProps {
