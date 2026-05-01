@@ -78,7 +78,8 @@ export function generateFacilityPinsTs(pins: FacilityPin[]): string {
         `  {
     id: '${escString(p.id)}',
     category: 'facility',
-    facilityId: '${escString(p.facilityId)}',
+    name: '${escString(p.name)}',
+    phone: '${escString(p.phone)}',
     coords: ${fmtCoords(p.coords)},
   }`,
     )

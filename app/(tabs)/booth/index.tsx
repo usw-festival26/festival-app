@@ -22,12 +22,21 @@ import { MapCategoryChips } from '../../../src/components/molecules/MapCategoryC
 import type { AnyPin } from '../../../src/components/organisms/MapCanvas';
 import { useBooths } from '../../../src/hooks/useBooths';
 import { useClusters } from '../../../src/hooks/useClusters';
-import { FACILITIES_DATA } from '../../../src/data/facilities';
 import { EVENTS_DATA } from '../../../src/data/events';
 import { FOOD_PINS_DATA } from '../../../src/data/foodPins';
 import { FACILITY_PINS_DATA } from '../../../src/data/facilityPins';
 import type { PinCategory } from '../../../src/types/cluster';
-import type { SheetCategory } from '../../../src/types/map';
+import type { Facility, SheetCategory } from '../../../src/types/map';
+
+/**
+ * 시트 표시용 Facility[] 는 FACILITY_PINS_DATA 에서 추출.
+ * 핀 = facility entity 라 별도 데이터 파일 불필요.
+ */
+const FACILITIES_FROM_PINS: Facility[] = FACILITY_PINS_DATA.map((p) => ({
+  id: p.id,
+  name: p.name,
+  phone: p.phone,
+}));
 
 export default function BoothMapScreen() {
   const router = useRouter();
@@ -114,7 +123,7 @@ export default function BoothMapScreen() {
         activeCategory={activeCategory}
         booths={visibleBooths}
         foodBooths={foodBooths}
-        facilities={FACILITIES_DATA}
+        facilities={FACILITIES_FROM_PINS}
         events={EVENTS_DATA}
         clusters={clusters}
         foodPins={FOOD_PINS_DATA}

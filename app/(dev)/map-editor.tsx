@@ -17,7 +17,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@constants/colors';
 import { BOOTHS_DATA } from '@data/booths';
 import { CLUSTERS_DATA } from '@data/clusters';
-import { FACILITIES_DATA } from '@data/facilities';
 import { FACILITY_PINS_DATA } from '@data/facilityPins';
 import { FOOD_PINS_DATA } from '@data/foodPins';
 import { MapCanvas, type AnyPin } from '@organisms/MapCanvas';
@@ -140,10 +139,6 @@ export default function MapEditorScreen() {
 
   const boothById = useMemo(
     () => new Map(BOOTHS_DATA.map((b) => [b.id, b])),
-    [],
-  );
-  const facilityById = useMemo(
-    () => new Map(FACILITIES_DATA.map((f) => [f.id, f])),
     [],
   );
 
@@ -302,7 +297,6 @@ export default function MapEditorScreen() {
           facilityPins={state.facilityPins}
           pinFilter={pinFilter}
           boothById={boothById}
-          facilityById={facilityById}
           onPinPress={handlePinPress}
           selectedPinId={selectedPinId}
           editable
@@ -555,11 +549,18 @@ function renderFields(
     );
   }
   return (
-    <Field
-      label="facilityId (FACILITIES_DATA 의 id)"
-      value={pin.facilityId}
-      onChange={(v) => onUpdate('facilityId', v)}
-    />
+    <>
+      <Field
+        label="시설명 (예: 본관 화장실)"
+        value={pin.name}
+        onChange={(v) => onUpdate('name', v)}
+      />
+      <Field
+        label="연락처 (예: 02-1234-5678, 빈 값 가능)"
+        value={pin.phone}
+        onChange={(v) => onUpdate('phone', v)}
+      />
+    </>
   );
 }
 
@@ -665,7 +666,8 @@ function createDefaultPin(category: PinCategory): AnyPin {
   return {
     id: `facility-pin-${stamp}`,
     category: 'facility',
-    facilityId: '',
+    name: '새 편의시설',
+    phone: '',
     coords: { x: 0.5, y: 0.5 },
   };
 }

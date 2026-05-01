@@ -38,11 +38,17 @@ export interface FoodPin extends Pinnable {
   description?: string;
 }
 
-/** 편의시설 핀 — Facility entity 참조. */
+/**
+ * 편의시설 핀 — entity 자체.
+ * 별도 FACILITIES_DATA 가 따로 있지 않고 핀이 곧 facility 엔트리다.
+ * 시트 표시는 FACILITY_PINS_DATA 에서 추출해 만든다.
+ */
 export interface FacilityPin extends Pinnable {
   category: 'facility';
-  /** FACILITIES_DATA 의 항목 id */
-  facilityId: string;
+  /** 시설명 (예: "본관 화장실", "정문 안내데스크") */
+  name: string;
+  /** 연락처 (예: "02-1234-5678"). 빈 문자열 가능. */
+  phone: string;
 }
 
 /** 핀 카테고리 ↔ 한글 레이블 */

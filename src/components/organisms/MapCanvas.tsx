@@ -40,7 +40,7 @@ import type {
   FoodPin,
   PinCategory,
 } from '../../types/cluster';
-import type { Facility, MapCoords } from '../../types/map';
+import type { MapCoords } from '../../types/map';
 
 export type AnyPin = BoothCluster | FoodPin | FacilityPin;
 
@@ -53,10 +53,8 @@ export interface MapCanvasProps {
   facilityPins: FacilityPin[];
   /** 카테고리 필터 — 'all' 이면 전체. cluster/food/facility 면 해당만 표시. */
   pinFilter?: 'all' | PinCategory;
-  /** 라벨 생성용 — booth.id → Booth */
+  /** 라벨 생성용 — booth.id → Booth (cluster 핀의 멤버 이름 표시) */
   boothById?: Map<string, Booth>;
-  /** 라벨 생성용 — facility.id → Facility */
-  facilityById?: Map<string, Facility>;
   /** 핀 클릭 핸들러 */
   onPinPress?: (pin: AnyPin) => void;
   /** 선택된 핀 id (에디터 또는 강조 표시용) */
@@ -84,7 +82,6 @@ export function MapCanvas({
   facilityPins,
   pinFilter = 'all',
   boothById,
-  facilityById,
   onPinPress,
   selectedPinId,
   editable,
@@ -234,10 +231,8 @@ export function MapCanvas({
     return [c.name, memberNames || `${c.boothIds.length}개 부스`, '더보기 >'];
   };
   const foodLabel = (p: FoodPin): string[] => [p.name];
-  const facilityLabel = (p: FacilityPin): string[] => {
-    const f = facilityById?.get(p.facilityId);
-    return f ? [f.name, f.phone] : [p.facilityId];
-  };
+  const facilityLabel = (p: FacilityPin): string[] =>
+    p.phone ? [p.name, p.phone] : [p.name];
 
   const showCluster = pinFilter === 'all' || pinFilter === 'cluster';
   const showFood = pinFilter === 'all' || pinFilter === 'food';

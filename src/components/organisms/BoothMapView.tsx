@@ -100,16 +100,11 @@ export function BoothMapView({
   const swipeStartY = useRef(0);
   const swipeDragX = useRef(new Animated.Value(0)).current;
 
-  // 핀 라벨 lookup — booth/foodBooth 합쳐서 id → Booth, facility id → Facility
+  // cluster 핀 라벨 lookup — booth/foodBooth 합쳐서 id → Booth
   const boothById = useMemo(() => {
     const merged = [...booths, ...foodBooths];
     return new Map(merged.map((b) => [b.id, b]));
   }, [booths, foodBooths]);
-
-  const facilityById = useMemo(
-    () => new Map(facilities.map((f) => [f.id, f])),
-    [facilities],
-  );
 
   const getExpandedHeight = () =>
     Math.max(containerHeightRef.current * EXPANDED_RATIO, 300);
@@ -234,7 +229,6 @@ export function BoothMapView({
         facilityPins={facilityPins}
         pinFilter={pinFilter}
         boothById={boothById}
-        facilityById={facilityById}
         onPinPress={onPinPress}
       />
 
