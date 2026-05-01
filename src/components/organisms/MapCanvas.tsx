@@ -20,7 +20,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { MapPin, MAP_PIN_DIMENSIONS } from '@molecules/MapPin';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  GestureResponderEvent,
   ImageSourcePropType,
   LayoutChangeEvent,
   Pressable,
@@ -29,6 +28,7 @@ import {
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -164,6 +164,35 @@ export function MapCanvas({
     [imgW, imgH, layout.cw, layout.ch],
   );
 
+  // 캔버스 탭 — editable 모드에서만 활성. e.x/e.y 는 Animated.View 의 untransformed
+  // local 좌표 (= 이미지 좌표) 라서 그대로 imgW/imgH 로 정규화 가능.
+  const dispatchCanvasTap = useCallback(
+    (norm: MapCoords) => {
+      if (norm.x < 0 || norm.x > 1 || norm.y < 0 || norm.y > 1) return;
+      onCanvasTap?.(norm);
+    },
+    [onCanvasTap],
+  );
+
+  const tap = useMemo(
+    () =>
+      Gesture.Tap()
+        .enabled(!!editable)
+        .maxDuration(300)
+        .onEnd((e, success) => {
+          'worklet';
+          if (!success) return;
+          if (imgW === 0 || imgH === 0) return;
+          runOnJS(dispatchCanvasTap)({ x: e.x / imgW, y: e.y / imgH });
+        }),
+    [editable, imgW, imgH, dispatchCanvasTap],
+  );
+
+  const composedGesture = useMemo(
+    () => (editable ? Gesture.Exclusive(tap, pan) : pan),
+    [editable, tap, pan],
+  );
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: tx.value },
@@ -221,7 +250,7 @@ export function MapCanvas({
       onLayout={onCanvasLayout}
     >
       {imgW > 0 && (
-        <GestureDetector gesture={pan}>
+        <GestureDetector gesture={composedGesture}>
           <Animated.View
             style={[
               {
@@ -235,31 +264,11 @@ export function MapCanvas({
               animatedStyle,
             ]}
           >
-            {editable ? (
-              <Pressable
-                onPress={(e: GestureResponderEvent) => {
-                  if (imgW === 0 || imgH === 0) return;
-                  const norm = {
-                    x: e.nativeEvent.locationX / imgW,
-                    y: e.nativeEvent.locationY / imgH,
-                  };
-                  onCanvasTap?.(norm);
-                }}
-                style={{ width: imgW, height: imgH }}
-              >
-                <RNImage
-                  source={imgSource}
-                  style={{ width: imgW, height: imgH }}
-                  resizeMode="cover"
-                />
-              </Pressable>
-            ) : (
-              <RNImage
-                source={imgSource}
-                style={{ width: imgW, height: imgH }}
-                resizeMode="cover"
-              />
-            )}
+            <RNImage
+              source={imgSource}
+              style={{ width: imgW, height: imgH }}
+              resizeMode="cover"
+            />
 
             {showCluster &&
               clusters.map((c) => (

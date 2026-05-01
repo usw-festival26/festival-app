@@ -34,6 +34,32 @@ import {
   TextInput,
   View,
 } from 'react-native';
+
+/**
+ * RN 의 Alert.alert 는 web 에서 콜백 버튼이 동작하지 않는다 (그냥 window.alert 로
+ * 바뀌어 onPress 가 절대 호출 안 됨). 그래서 confirm 은 web 에서는 window.confirm
+ * 으로, 네이티브에서는 Alert.alert 로 분기.
+ */
+function confirmDialog(title: string, message: string): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    if (typeof window === 'undefined') return Promise.resolve(false);
+    return Promise.resolve(window.confirm(`${title}\n\n${message}`));
+  }
+  return new Promise((resolve) => {
+    Alert.alert(title, message, [
+      { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+      { text: '확인', style: 'destructive', onPress: () => resolve(true) },
+    ]);
+  });
+}
+
+function infoDialog(title: string, message: string) {
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined') window.alert(`${title}\n\n${message}`);
+    return;
+  }
+  Alert.alert(title, message);
+}
 import type {
   BoothCluster,
   FacilityPin,
@@ -78,6 +104,11 @@ export default function MapEditorScreen() {
   const [hydrated, setHydrated] = useState(false);
   const [pinFilter, setPinFilter] = useState<'all' | PinCategory>('all');
   const [selectedPinId, setSelectedPinId] = useState<string | undefined>();
+  /**
+   * 이동 모드 — ON 일 때 지도 탭하면 선택된 핀이 그 좌표로 이동 후 자동 OFF.
+   * OFF 일 때 지도 탭은 무시 (실수로 핀이 움직이는 race 방지).
+   */
+  const [moveMode, setMoveMode] = useState(false);
 
   // hydrate from AsyncStorage
   useEffect(() => {
@@ -125,32 +156,30 @@ export default function MapEditorScreen() {
     );
   }, [state, selectedPinId]);
 
-  const handlePinPress = (pin: AnyPin) => setSelectedPinId(pin.id);
+  const handlePinPress = (pin: AnyPin) => {
+    setSelectedPinId(pin.id);
+    setMoveMode(false); // 다른 핀 선택 시 이동 모드 자동 해제
+  };
 
   const handleCanvasTap = (coords: MapCoords) => {
-    if (!selectedPinId) return;
+    if (!moveMode || !selectedPinId) return;
     setState((s) => moveSelectedPin(s, selectedPinId, coords));
+    setMoveMode(false);
   };
 
   const handleAddPin = (category: PinCategory) => {
     const newPin = createDefaultPin(category);
     setState((s) => addPin(s, newPin));
     setSelectedPinId(newPin.id);
+    setMoveMode(true); // 새 핀은 바로 위치 잡으라고 이동 모드 자동 ON
   };
 
-  const handleDeletePin = () => {
+  const handleDeletePin = async () => {
     if (!selectedPinId) return;
-    Alert.alert('핀 삭제', '이 핀을 정말 삭제할까요?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () => {
-          setState((s) => removePin(s, selectedPinId));
-          setSelectedPinId(undefined);
-        },
-      },
-    ]);
+    const ok = await confirmDialog('핀 삭제', '이 핀을 정말 삭제할까요?');
+    if (!ok) return;
+    setState((s) => removePin(s, selectedPinId));
+    setSelectedPinId(undefined);
   };
 
   const handleUpdateField = (key: string, value: unknown) => {
@@ -172,7 +201,7 @@ export default function MapEditorScreen() {
       target = 'src/data/facilityPins.ts';
     }
     await Clipboard.setStringAsync(ts);
-    Alert.alert(
+    infoDialog(
       '복사 완료',
       `클립보드에 복사되었습니다.\n${target} 파일 전체를 교체하세요.`,
     );
@@ -185,26 +214,18 @@ export default function MapEditorScreen() {
       state.facilityPins,
     );
     await Clipboard.setStringAsync(json);
-    Alert.alert('복사 완료', 'JSON 이 클립보드에 복사되었습니다.');
+    infoDialog('복사 완료', 'JSON 이 클립보드에 복사되었습니다.');
   };
 
-  const handleReset = () => {
-    Alert.alert(
+  const handleReset = async () => {
+    const ok = await confirmDialog(
       '초기화',
       'AsyncStorage 의 작업 내용을 버리고 src/data/* 의 factory 데이터로 되돌립니다.',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '초기화',
-          style: 'destructive',
-          onPress: async () => {
-            await AsyncStorage.removeItem(STORAGE_KEY);
-            setState(getFactoryState());
-            setSelectedPinId(undefined);
-          },
-        },
-      ],
     );
+    if (!ok) return;
+    await AsyncStorage.removeItem(STORAGE_KEY);
+    setState(getFactoryState());
+    setSelectedPinId(undefined);
   };
 
   return (
@@ -307,9 +328,26 @@ export default function MapEditorScreen() {
             x: {selectedPin.coords.x.toFixed(4)}, y: {selectedPin.coords.y.toFixed(4)}
           </Text>
           <Text style={{ fontSize: 11, color: '#999', marginBottom: 8 }}>
-            지도를 탭하면 이 핀이 그 위치로 이동합니다.
+            {moveMode
+              ? '🟦 이동 모드 ON — 지도를 탭하면 이 핀이 그 위치로 이동.'
+              : '"이동 모드" 켠 뒤 지도를 탭하면 이 위치로 이동합니다.'}
           </Text>
           {renderFields(selectedPin, handleUpdateField)}
+          <Pressable
+            onPress={() => setMoveMode((v) => !v)}
+            style={{
+              backgroundColor: moveMode ? Colors.festival.primary : '#3B82F6',
+              padding: 10,
+              borderRadius: 8,
+              marginTop: 6,
+            }}
+          >
+            <Text
+              style={{ color: '#FFF', textAlign: 'center', fontWeight: '600' }}
+            >
+              {moveMode ? '이동 모드 OFF' : '이동 모드 켜기'}
+            </Text>
+          </Pressable>
           <View style={{ flexDirection: 'row', gap: 6, marginTop: 6 }}>
             <Pressable
               onPress={handleDeletePin}
@@ -327,7 +365,10 @@ export default function MapEditorScreen() {
               </Text>
             </Pressable>
             <Pressable
-              onPress={() => setSelectedPinId(undefined)}
+              onPress={() => {
+                setSelectedPinId(undefined);
+                setMoveMode(false);
+              }}
               style={{
                 flex: 1,
                 backgroundColor: '#999',
