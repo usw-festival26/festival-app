@@ -48,5 +48,8 @@ yarn-error.*
 # Claude Code
 .claude/
 
+# 작업 메모 / 진행 기록 (untracked)
+docs/
+
 # logs
 *.log
