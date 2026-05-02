@@ -29,9 +29,9 @@ import { EventSheetContent } from './EventSheetContent';
 import { FacilitySheetContent } from './FacilitySheetContent';
 import { FoodSheetContent } from './FoodSheetContent';
 
-const FESTIVAL_MAP = require('../../../assets/images/festivalmap.jpg');
-const MAP_NATURAL_WIDTH = 1097;
-const MAP_NATURAL_HEIGHT = 1462;
+const FESTIVAL_MAP = require('../../../assets/images/메인 지도.jpg');
+const MAP_NATURAL_WIDTH = 1608;
+const MAP_NATURAL_HEIGHT = 3496;
 
 export interface BoothMapViewProps {
   expanded: boolean;
@@ -209,12 +209,12 @@ export function BoothMapView({
   const translateX =
     sheetWidth > 0
       ? Animated.add(
-          slideAnim.interpolate({
-            inputRange: [0, CATEGORIES.length - 1],
-            outputRange: [0, -(CATEGORIES.length - 1) * sheetWidth],
-          }),
-          swipeDragX,
-        )
+        slideAnim.interpolate({
+          inputRange: [0, CATEGORIES.length - 1],
+          outputRange: [0, -(CATEGORIES.length - 1) * sheetWidth],
+        }),
+        swipeDragX,
+      )
       : swipeDragX;
 
   return (

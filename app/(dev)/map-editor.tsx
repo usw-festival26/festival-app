@@ -13,12 +13,12 @@
  *  - 작업 중 상태는 AsyncStorage 에 자동 persist (key dev:mapEditor:v1)
  *  - "TS 출력" / "JSON" 으로 클립보드 복사, "초기화" 로 factory 데이터 복원
  */
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@constants/colors';
 import { BOOTHS_DATA } from '@data/booths';
 import { CLUSTERS_DATA } from '@data/clusters';
 import { FACILITY_PINS_DATA } from '@data/facilityPins';
 import { FOOD_PINS_DATA } from '@data/foodPins';
+import { Ionicons } from '@expo/vector-icons';
 import { MapCanvas, type AnyPin } from '@organisms/MapCanvas';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
@@ -33,6 +33,19 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import type {
+  BoothCluster,
+  FacilityPin,
+  FoodPin,
+  PinCategory,
+} from '../../src/types/cluster';
+import type { MapCoords } from '../../src/types/map';
+import {
+  generateClustersTs,
+  generateFacilityPinsTs,
+  generateFoodPinsTs,
+  generateJson,
+} from '../../src/utils/pinExport';
 
 /**
  * RN 의 Alert.alert 는 web 에서 콜백 버튼이 동작하지 않는다 (그냥 window.alert 로
@@ -59,21 +72,8 @@ function infoDialog(title: string, message: string) {
   }
   Alert.alert(title, message);
 }
-import type {
-  BoothCluster,
-  FacilityPin,
-  FoodPin,
-  PinCategory,
-} from '../../src/types/cluster';
-import type { MapCoords } from '../../src/types/map';
-import {
-  generateClustersTs,
-  generateFacilityPinsTs,
-  generateFoodPinsTs,
-  generateJson,
-} from '../../src/utils/pinExport';
 
-const FESTIVAL_MAP = require('../../assets/images/festivalmap.jpg');
+const FESTIVAL_MAP = require('../../assets/images/메인 지도.jpg');
 const STORAGE_KEY = 'dev:mapEditor:v1';
 
 interface EditorState {
@@ -195,7 +195,7 @@ export default function MapEditorScreen() {
   // persist
   useEffect(() => {
     if (!hydrated) return;
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => {});
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => { });
   }, [state, hydrated]);
 
   const boothById = useMemo(
@@ -351,8 +351,8 @@ export default function MapEditorScreen() {
       <View style={{ flex: 1 }}>
         <MapCanvas
           imgSource={FESTIVAL_MAP}
-          imgNaturalWidth={1097}
-          imgNaturalHeight={1462}
+          imgNaturalWidth={1608}
+          imgNaturalHeight={3496}
           clusters={state.clusters}
           foodPins={state.foodPins}
           facilityPins={state.facilityPins}
