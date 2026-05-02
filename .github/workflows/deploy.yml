@@ -32,6 +32,10 @@ jobs:
         run: npm run build:web
         env:
           EXPO_PUBLIC_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          # main(production) 외 모든 빌드(=develop push, PR preview)에 dev 도구 노출.
+          # EXPO_PUBLIC_* 는 빌드 타임에 번들에 박히므로 CF Pages 대시보드 env 가 아닌
+          # 여기서 주입해야 효과가 있음.
+          EXPO_PUBLIC_DEV_TOOLS: ${{ github.ref_name != 'main' && '1' || '' }}
 
       - name: Deploy to Cloudflare Pages
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
