@@ -16,6 +16,12 @@ import { MenuSection } from '@molecules/MenuSection';
 
 export interface BoothDetailProps {
   booth: Booth;
+  /**
+   * 부스 메뉴. API 모드에서는 부스 detail 응답이 메뉴를 포함하지 않으므로
+   * 호출 측이 useBoothMenus(boothId)로 따로 받아 전달한다.
+   * 미전달 시 booth.menuItems(하드코딩 fixture) 로 fallback.
+   */
+  menus?: BoothMenuItem[];
 }
 
 const CARD_WIDTH = 368;
@@ -36,9 +42,9 @@ function group(items: BoothMenuItem[]) {
   return { main, side, set };
 }
 
-export function BoothDetail({ booth }: BoothDetailProps) {
+export function BoothDetail({ booth, menus }: BoothDetailProps) {
   const router = useRouter();
-  const { main, side, set } = group(booth.menuItems ?? []);
+  const { main, side, set } = group(menus ?? booth.menuItems ?? []);
 
   const sections: { label: string; items: BoothMenuItem[] }[] = [
     { label: 'Main', items: main },

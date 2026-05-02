@@ -10,7 +10,7 @@ import { BackdropScreenTemplate } from '../../../src/components/templates/Backdr
 import { BoothDetail } from '../../../src/components/organisms/BoothDetail';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
 import { NetworkErrorState } from '../../../src/components/atoms/NetworkErrorState';
-import { useBoothById } from '../../../src/hooks/useBooths';
+import { useBoothById, useBoothMenus } from '../../../src/hooks/useBooths';
 import { AppButton } from '../../../src/components/atoms/AppButton';
 import { Colors } from '../../../src/constants/colors';
 
@@ -18,6 +18,8 @@ export default function MenuDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { booth, isLoading, error, retry } = useBoothById(id ?? '');
+  // 메뉴는 별도 엔드포인트(`/api/booths/{id}/menu`) → fetchBooth 응답에 포함되지 않음.
+  const { menus } = useBoothMenus(id ?? '');
 
   if (isLoading) {
     return (
@@ -50,7 +52,7 @@ export default function MenuDetailScreen() {
 
   return (
     <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
-      <BoothDetail booth={booth} />
+      <BoothDetail booth={booth} menus={menus} />
     </BackdropScreenTemplate>
   );
 }
