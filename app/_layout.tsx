@@ -9,6 +9,7 @@ import {
 } from '@expo-google-fonts/roboto';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
+import Head from 'expo-router/head';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
@@ -72,6 +73,14 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      {/*
+        웹 브라우저 탭 기본 제목.
+        per-route 제목은 (tabs)/_layout.tsx 의 Drawer.Screen options.title 에서 덮어씀.
+        favicon 은 app.json web.favicon (assets/images/VectorCircle.png) 으로 일원화.
+      */}
+      <Head>
+        <title>USW Festival 2026</title>
+      </Head>
       <MobileWeb>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
