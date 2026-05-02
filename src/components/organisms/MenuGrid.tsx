@@ -37,7 +37,8 @@ interface MenuBoothCardItemProps {
  */
 function MenuBoothCardItem({ booth, onPress }: MenuBoothCardItemProps) {
   const { menus } = useBoothMenus(booth.id);
-  const mainMenus = menus
+  // useBoothMenus 는 항상 array 를 반환하지만 hook 내부 변경 가능성 대비 방어 ?? [].
+  const mainMenus = (menus ?? [])
     .filter((m) => (m.menuCategory ?? 'main') === 'main')
     .map((m) => m.name)
     .join(', ');

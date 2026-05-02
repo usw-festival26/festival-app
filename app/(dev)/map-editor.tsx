@@ -192,10 +192,14 @@ export default function MapEditorScreen() {
       .finally(() => setHydrated(true));
   }, []);
 
-  // persist
+  // persist (debounced) — TextInput 키 입력마다 AsyncStorage 쓰기가 일어나면
+  // 디스크 IO 가 누적되니, 마지막 변경 후 500ms 정지하면 그때만 저장.
   useEffect(() => {
     if (!hydrated) return;
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => { });
+    const timer = setTimeout(() => {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => { });
+    }, 500);
+    return () => clearTimeout(timer);
   }, [state, hydrated]);
 
   const boothById = useMemo(
