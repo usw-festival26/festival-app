@@ -9,6 +9,7 @@ export { AboutSection, type AboutSectionProps } from './AboutSection';
 export { EventsSection } from './EventsSection';
 export { EventsList } from './EventsList';
 export { LineupSection } from './LineupSection';
+export { CardBannerSection } from './CardBannerSection';
 export { BoothMapView, type BoothMapViewProps } from './BoothMapView';
 export { BoothGrid, type BoothGridProps } from './BoothGrid';
 export { InformationContent, type InformationContentProps } from './InformationContent';
