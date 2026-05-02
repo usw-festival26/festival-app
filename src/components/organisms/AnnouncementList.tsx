@@ -39,9 +39,14 @@ export function AnnouncementList({ announcements, isLoading, error, onRetry }: A
     [announcements],
   );
 
-  // 백엔드 list 응답에는 content 가 없고 detail 응답에서만 채워진다(api/types.ts).
-  // expand 한 항목만 detail 을 lazy-fetch 해서 본문을 띄운다.
-  const expandedDetail = useAnnouncementById(expandedId ?? '');
+  // list 응답에 content 가 있으면 그대로 사용해 detail 페치를 건너뛴다(네트워크 1회 절약).
+  // 없으면 expand 한 항목만 detail 을 lazy-fetch.
+  const expandedItem = useMemo(
+    () => (expandedId ? sorted.find((i) => i.id === expandedId) ?? null : null),
+    [sorted, expandedId],
+  );
+  const needsDetailFetch = !!expandedItem && expandedItem.content === undefined;
+  const expandedDetail = useAnnouncementById(needsDetailFetch ? (expandedId ?? '') : '');
 
   return (
     <View style={{ paddingVertical: 24, paddingHorizontal: 16, gap: 18 }}>
