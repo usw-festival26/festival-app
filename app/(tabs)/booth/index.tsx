@@ -1,7 +1,7 @@
 /**
  * 지도 화면 - Figma 82:62 ~ 166:472, 1413:1008
  *
- * 상단: festivalmap.jpg + 핀 / 하단: 드래그 바텀시트 (booth/food/facility/event 가로 페이징)
+ * 상단: 메인 지도.png + 핀 / 하단: 드래그 바텀시트 (booth/food/facility/event 가로 페이징)
  *
  * 칩 ↔ 핀 필터 동기화
  *  - 시트 접힘(expanded=false)              → 핀 전부 표시

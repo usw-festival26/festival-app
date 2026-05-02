@@ -1,7 +1,7 @@
 /**
  * MapCategoryChips - 지도 화면 카테고리 칩 (Figma 920:3937)
  *
- * 4개 칩 (전체/부스/푸드/편의). 50×29 rounded-14.5, gap 25.
+ * 4개 칩 (전체/부스/F&B/편의). 50×29 rounded-14.5, gap 25.
  * '전체' 선택 시 시트 접힘. 나머지 선택 시 해당 카테고리로 시트 확장.
  *
  * 활성: bg #010070 + 흰 텍스트. 비활성: 흰 bg + 검정 border + 검정 텍스트 (Pretendard SemiBold 15).
@@ -15,7 +15,7 @@ export type MapChipKey = 'all' | 'booth' | 'food' | 'facility';
 const CHIP_OPTIONS: Array<{ key: MapChipKey; label: string }> = [
   { key: 'all', label: '전체' },
   { key: 'booth', label: '부스' },
-  { key: 'food', label: '푸드' },
+  { key: 'food', label: 'F&B' },
   { key: 'facility', label: '편의' },
 ];
 

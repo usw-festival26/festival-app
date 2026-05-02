@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://api.usw-festival.site",
+      "url": "http://api.usw-festival.site",
       "description": "Generated server url"
     }
   ],
