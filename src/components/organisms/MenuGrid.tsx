@@ -44,7 +44,8 @@ function MenuBoothCardItem({ booth, onPress }: MenuBoothCardItemProps) {
   return (
     <MenuBoothCard
       organizer={booth.organizer ?? booth.name}
-      mainMenu="메인메뉴"
+      // mainMenus 가 비어 있으면 라벨도 숨김 (메뉴 없는 카드에 "메인메뉴" 만 단독 표시되는 것 방지).
+      mainMenu={mainMenus ? '메인메뉴' : undefined}
       menuItems={mainMenus || undefined}
       imageUri={booth.imageUri}
       onPress={onPress}
