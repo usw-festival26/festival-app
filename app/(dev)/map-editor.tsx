@@ -14,8 +14,8 @@
  *  - "TS 출력" / "JSON" 으로 클립보드 복사, "초기화" 로 factory 데이터 복원
  */
 import { Colors } from '@constants/colors';
-import { BOOTHS_DATA } from '@data/booths';
 import { CLUSTERS_DATA } from '@data/clusters';
+import { useBooths } from '@hooks/useBooths';
 import { FACILITY_PINS_DATA } from '@data/facilityPins';
 import { FOOD_PINS_DATA } from '@data/foodPins';
 import { Ionicons } from '@expo/vector-icons';
@@ -222,9 +222,12 @@ export default function MapEditorScreen() {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => { });
   }, [state, hydrated]);
 
+  // 부스는 API/로컬 fixture 자동 분기되는 useBooths 를 통해 가져온다.
+  // 그래야 운영 모드에서 cluster 핀 라벨이 실제 API 부스명을 해석한다.
+  const { booths: allBooths } = useBooths();
   const boothById = useMemo(
-    () => new Map(BOOTHS_DATA.map((b) => [b.id, b])),
-    [],
+    () => new Map(allBooths.map((b) => [b.id, b])),
+    [allBooths],
   );
 
   /**

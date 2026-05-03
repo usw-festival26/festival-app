@@ -27,9 +27,9 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '@constants/colors';
-import { BOOTHS_DATA } from '@data/booths';
 import { CLUSTERS_DATA } from '@data/clusters';
-import type { BoothCategory } from '../../types/booth';
+import { useBooths } from '@hooks/useBooths';
+import type { Booth, BoothCategory } from '../../types/booth';
 import type { BoothCluster } from '../../types/cluster';
 
 const STORAGE_KEY = 'dev:mapEditor:v1';
@@ -102,6 +102,9 @@ export interface BoothListPanelProps {
 }
 
 export function BoothListPanel({ onClose, closeMode = 'close' }: BoothListPanelProps) {
+  // 부스 데이터는 useBooths 가 API/로컬 fixture 자동 분기 → 운영 모드에서 실제
+  // 백엔드 부스가 노출되도록 한다.
+  const { booths: allBooths } = useBooths();
   const [clusters, setClusters] = useState<BoothCluster[]>(() =>
     CLUSTERS_DATA.map((c) => ({ ...c })),
   );
@@ -149,8 +152,8 @@ export function BoothListPanel({ onClose, closeMode = 'close' }: BoothListPanelP
   }, [clusters]);
 
   /** 패널 자체 필터로 좁힌 부스 목록. 메인 에디터 핀 필터와 무관. */
-  const booths = useMemo(() => {
-    let list: typeof BOOTHS_DATA = BOOTHS_DATA;
+  const booths = useMemo<Booth[]>(() => {
+    let list: Booth[] = allBooths;
     if (categoryFilter !== 'all') {
       list = list.filter((b) => b.category === categoryFilter);
     }
@@ -166,15 +169,15 @@ export function BoothListPanel({ onClose, closeMode = 'close' }: BoothListPanelP
         (b.organizer?.toLowerCase().includes(q) ?? false) ||
         (b.college?.toLowerCase().includes(q) ?? false),
     );
-  }, [categoryFilter, collegeFilter, search]);
+  }, [allBooths, categoryFilter, collegeFilter, search]);
 
   const collegeOptions = useMemo(() => {
     const set = new Set<string>();
-    for (const b of BOOTHS_DATA) {
+    for (const b of allBooths) {
       if (b.college) set.add(b.college);
     }
     return Array.from(set);
-  }, []);
+  }, [allBooths]);
 
   const handleCopyBoothId = useCallback(async (boothId: string) => {
     await Clipboard.setStringAsync(boothId);
@@ -219,7 +222,7 @@ export function BoothListPanel({ onClose, closeMode = 'close' }: BoothListPanelP
           }}
         >
           <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '600' }}>
-            {booths.length} / {BOOTHS_DATA.length}
+            {booths.length} / {allBooths.length}
           </Text>
         </View>
         <Pressable
@@ -346,7 +349,7 @@ export function BoothListPanel({ onClose, closeMode = 'close' }: BoothListPanelP
 }
 
 interface BoothPanelRowProps {
-  booth: (typeof BOOTHS_DATA)[number];
+  booth: Booth;
   clusterName: string | undefined;
   onCopyId: () => void;
 }
