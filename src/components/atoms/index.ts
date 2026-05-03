@@ -8,6 +8,7 @@ export { DragHandle } from './DragHandle';
 export { DotPagination, type DotPaginationProps } from './DotPagination';
 export { RobotoBlackText, type RobotoBlackTextProps } from './RobotoBlackText';
 export { GradientBlob, type GradientBlobProps } from './GradientBlob';
+export { GradientPill, type GradientPillProps } from './GradientPill';
 export { NetworkErrorState, type NetworkErrorStateProps } from './NetworkErrorState';
 export { ScreenBackdrop, type ScreenBackdropProps, type ScreenBackdropVariant } from './ScreenBackdrop';
 export { NotificationBadge, type NotificationBadgeProps, type NotificationBadgeVariant } from './NotificationBadge';

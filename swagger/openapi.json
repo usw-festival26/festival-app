@@ -12,35 +12,6 @@
   ],
   "paths": {
     "/api/admin/notices/{id}": {
-      "get": {
-        "tags": [
-          "admin-notice-controller"
-        ],
-        "operationId": "getNotice",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/NoticeDetailResponse"
-                }
-              }
-            }
-          }
-        }
-      },
       "put": {
         "tags": [
           "admin-notice-controller"
@@ -666,37 +637,6 @@
         }
       }
     },
-    "/api/notices/{id}": {
-      "get": {
-        "tags": [
-          "notice-controller"
-        ],
-        "operationId": "getNotice_1",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/NoticeDetailResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/lost-items": {
       "get": {
         "tags": [
@@ -979,8 +919,23 @@
             "type": "string",
             "maxLength": 2048,
             "minLength": 0
+          },
+          "college": {
+            "type": "string",
+            "enum": [
+              "HUMANITIES",
+              "BUSINESS",
+              "LIFE",
+              "ICT",
+              "DESIGN",
+              "MUSIC",
+              "ENGINEERING"
+            ]
           }
-        }
+        },
+        "required": [
+          "college"
+        ]
       },
       "BoothDetailResponse": {
         "type": "object",
@@ -999,6 +954,21 @@
             "type": "string"
           },
           "notice": {
+            "type": "string"
+          },
+          "college": {
+            "type": "string",
+            "enum": [
+              "HUMANITIES",
+              "BUSINESS",
+              "LIFE",
+              "ICT",
+              "DESIGN",
+              "MUSIC",
+              "ENGINEERING"
+            ]
+          },
+          "collegeLabel": {
             "type": "string"
           }
         }
@@ -1089,6 +1059,18 @@
             "maxLength": 2048,
             "minLength": 0,
             "pattern": ".*\\S.*"
+          },
+          "college": {
+            "type": "string",
+            "enum": [
+              "HUMANITIES",
+              "BUSINESS",
+              "LIFE",
+              "ICT",
+              "DESIGN",
+              "MUSIC",
+              "ENGINEERING"
+            ]
           }
         }
       },
@@ -1139,6 +1121,9 @@
           "title": {
             "type": "string"
           },
+          "content": {
+            "type": "string"
+          },
           "pinned": {
             "type": "boolean"
           },
@@ -1180,6 +1165,21 @@
             "type": "string"
           },
           "imageUrl": {
+            "type": "string"
+          },
+          "college": {
+            "type": "string",
+            "enum": [
+              "HUMANITIES",
+              "BUSINESS",
+              "LIFE",
+              "ICT",
+              "DESIGN",
+              "MUSIC",
+              "ENGINEERING"
+            ]
+          },
+          "collegeLabel": {
             "type": "string"
           }
         }

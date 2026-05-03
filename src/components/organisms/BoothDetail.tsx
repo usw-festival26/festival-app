@@ -67,7 +67,9 @@ export function BoothDetail({ booth, menus }: BoothDetailProps) {
             <Ionicons name="chevron-back" size={24} color="#000000" />
           </Pressable>
           <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={styles.organizer}>{booth.organizer}</Text>
+            {/* Figma 135:134 — 카드 상단 가운데에 부스명(='○○○학부' 위치) 노출.
+                백엔드 booth.name 이 학부명(예: '컴퓨터소프트웨어학과') 으로 들어옴. */}
+            <Text style={styles.boothName}>{booth.name}</Text>
           </View>
           <View style={{ width: 28 }} />
         </View>
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  organizer: {
+  boothName: {
     fontFamily: PRETENDARD_SEMIBOLD,
     fontWeight: '600',
     fontSize: 15,

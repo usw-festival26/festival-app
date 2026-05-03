@@ -26,16 +26,20 @@ const TS_HEADER_NOTE = `/**
 
 export function generateClustersTs(clusters: BoothCluster[]): string {
   const items = clusters
-    .map(
-      (c) =>
-        `  {
-    id: '${escString(c.id)}',
-    category: 'cluster',
-    name: '${escString(c.name)}',
-    coords: ${fmtCoords(c.coords)},
-    boothIds: ${strList(c.boothIds)},
-  }`,
-    )
+    .map((c) => {
+      const lines = [
+        `    id: '${escString(c.id)}'`,
+        `    category: 'cluster'`,
+        `    name: '${escString(c.name)}'`,
+        // collegeKey 가 지정된 클러스터만 직렬화 — undefined 는 라인 자체 생략.
+        ...(c.collegeKey ? [`    collegeKey: '${c.collegeKey}'`] : []),
+        `    coords: ${fmtCoords(c.coords)}`,
+        `    boothIds: ${strList(c.boothIds)}`,
+      ];
+      return `  {
+${lines.join(',\n')},
+  }`;
+    })
     .join(',\n');
   return `${TS_HEADER_NOTE}
 import type { BoothCluster } from '../types/cluster';

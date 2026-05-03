@@ -230,6 +230,7 @@ export function BoothMapView({
         pinFilter={pinFilter}
         boothById={boothById}
         onPinPress={onPinPress}
+        expanded={expanded}
       />
 
       {/* 바텀시트 — 외곽 래퍼는 navy 로 채워 둥근 모서리 exclusion zone 으로 backdrop blob이 비치지 않게 한다. */}

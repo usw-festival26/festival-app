@@ -24,6 +24,7 @@ const MENU_ITEMS: DrawerMenuItem[] = [
   { label: '공지', route: '/(tabs)/announcements' },
   { label: '분실물', route: '/(tabs)/lost-found' },
   { label: '이벤트', route: '/(tabs)/events' },
+  { label: '굿즈샵', route: '/(tabs)/goods-shop' },
 ];
 
 export function DrawerContent({ navigation }: DrawerContentComponentProps) {
