@@ -8,6 +8,7 @@
  * CLUSTERS_DATA 자리에 주입할 예정 (현재는 하드코딩만).
  */
 import type { MapCoords } from './map';
+import type { BackendCollege } from '../api/types';
 
 /** 핀 카테고리 — 셰입은 동일하고 색만 분기한다. */
 export type PinCategory = 'cluster' | 'food' | 'facility';
@@ -24,7 +25,16 @@ export interface BoothCluster extends Pinnable {
   category: 'cluster';
   /** 단과대명 등 그룹명 (핀 첫 줄) */
   name: string;
-  /** 묶인 Booth.id 목록 — useBooths().booths 에서 조회 */
+  /**
+   * 이 클러스터가 자동으로 흡수할 부스의 단과대 enum.
+   * 백엔드가 booth.college 를 채우면 booth.collegeKey 와 일치하는 부스가 자동 귀속.
+   * 동아리/특수 그룹 등 단과대 enum 으로 표현 못 하는 클러스터는 undefined.
+   */
+  collegeKey?: BackendCollege;
+  /**
+   * 수동 등록 booth.id 목록 — collegeKey 매칭으로 잡히지 않는 케이스(동아리,
+   * 외부 운영진 booth 등) 의 fallback. useBooths().booths 에서 조회.
+   */
   boothIds: string[];
 }
 

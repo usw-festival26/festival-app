@@ -29,8 +29,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '@constants/colors';
 import { CLUSTERS_DATA } from '@data/clusters';
 import { useBooths } from '@hooks/useBooths';
+import { isClusterMember } from '@utils/clusterMembership';
+import type { BackendCollege } from '../../api/types';
 import type { Booth, BoothCategory } from '../../types/booth';
 import type { BoothCluster } from '../../types/cluster';
+
+/** AsyncStorage hydration 시 collegeKey enum 값 검증용. */
+const VALID_COLLEGE_KEYS: ReadonlyArray<BackendCollege> = [
+  'HUMANITIES',
+  'BUSINESS',
+  'LIFE',
+  'ICT',
+  'DESIGN',
+  'MUSIC',
+  'ENGINEERING',
+];
+
+function coerceCollegeKey(v: unknown): BackendCollege | undefined {
+  if (typeof v !== 'string') return undefined;
+  return (VALID_COLLEGE_KEYS as readonly string[]).includes(v)
+    ? (v as BackendCollege)
+    : undefined;
+}
 
 const STORAGE_KEY = 'dev:mapEditor:v1';
 
@@ -76,6 +96,7 @@ function clustersFromStorage(raw: string | null): BoothCluster[] {
         id: c.id as string,
         category: 'cluster' as const,
         name: typeof c.name === 'string' ? c.name : '',
+        collegeKey: coerceCollegeKey(c.collegeKey),
         coords: { x: 0, y: 0 },
         boothIds: Array.isArray(c.boothIds)
           ? (c.boothIds as unknown[]).filter((b): b is string => typeof b === 'string')
@@ -140,16 +161,22 @@ export function BoothListPanel({ onClose, closeMode = 'close' }: BoothListPanelP
     return () => window.removeEventListener('storage', handler);
   }, []);
 
-  /** boothId → 소속 cluster.name 역참조 맵. */
+  /**
+   * boothId → 소속 cluster.name 역참조 맵.
+   * isClusterMember 로 collegeKey/라벨/boothIds 매칭 모두 반영 — 백엔드가
+   * college enum 만 채워도 패널에서 부스 카드의 클러스터 표시가 self-heal.
+   */
   const clusterAssignmentByBoothId = useMemo(() => {
     const m = new Map<string, string>();
     for (const c of clusters) {
-      for (const bid of c.boothIds) {
-        if (!m.has(bid)) m.set(bid, c.name);
+      for (const b of allBooths) {
+        if (!m.has(b.id) && isClusterMember(c, b)) {
+          m.set(b.id, c.name);
+        }
       }
     }
     return m;
-  }, [clusters]);
+  }, [clusters, allBooths]);
 
   /** 패널 자체 필터로 좁힌 부스 목록. 메인 에디터 핀 필터와 무관. */
   const booths = useMemo<Booth[]>(() => {

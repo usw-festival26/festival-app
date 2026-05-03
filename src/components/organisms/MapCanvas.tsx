@@ -18,6 +18,7 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { MapPin, MAP_PIN_DIMENSIONS } from '@molecules/MapPin';
+import { isClusterMember } from '@utils/clusterMembership';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ImageSourcePropType,
@@ -330,19 +331,17 @@ export function MapCanvas({
     zoomTo(newScale);
   }, [expanded, layout.cw, layout.ch, zoomTo]);
 
-  // 핀 라벨 빌더
-  // 멤버 카운트를 표시할 땐 raw c.boothIds.length 가 아니라 실제로 boothById 에서
-  // 해석된 booth 의 개수를 쓴다. 이중-모드 호환을 위해 cluster.boothIds 가 다른
-  // 형식의 ID(예: 'booth-001' 로컬 fixture 와 '1' API)를 함께 가지면 raw length 가
-  // 실제 노출 booth 수와 어긋나 "N개 부스" 가 사용자에게 잘못 보일 수 있음.
+  // 핀 라벨 빌더 — boothById 전체에서 isClusterMember 로 멤버를 판별.
+  // 매칭 경로(collegeKey/라벨/boothIds) 가 visibleBooths 와 일원화돼 핀 라벨과
+  // 클릭 후 시트 카드 수가 항상 일치한다.
   const clusterLabel = (c: BoothCluster): string[] => {
-    const memberNames = c.boothIds
-      .map((id) => boothById?.get(id)?.name)
-      .filter((n): n is string => !!n);
-    if (memberNames.length === 0) {
-      return [c.name, '더보기 >'];
+    if (!boothById) return [c.name, '더보기 >'];
+    const memberSet = new Set<string>();
+    for (const b of boothById.values()) {
+      if (isClusterMember(c, b)) memberSet.add(b.name);
     }
-    return [c.name, memberNames.join(', '), '더보기 >'];
+    if (memberSet.size === 0) return [c.name, '더보기 >'];
+    return [c.name, Array.from(memberSet).join(', '), '더보기 >'];
   };
   const foodLabel = (p: FoodPin): string[] => [p.name];
   const facilityLabel = (p: FacilityPin): string[] =>

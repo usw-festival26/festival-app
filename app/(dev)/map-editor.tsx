@@ -40,6 +40,7 @@ import type {
   FoodPin,
   PinCategory,
 } from '../../src/types/cluster';
+import type { BackendCollege } from '../../src/api/types';
 import type { MapCoords } from '../../src/types/map';
 import {
   generateClustersTs,
@@ -90,6 +91,35 @@ const FILTER_LABELS: Record<'all' | PinCategory, string> = {
   facility: '편의',
 };
 
+/** cluster.collegeKey chip row 에 노출할 enum 목록 + "없음" 옵션. */
+const COLLEGE_KEY_OPTIONS: ReadonlyArray<{ key: BackendCollege | null; label: string }> = [
+  { key: null, label: '없음' },
+  { key: 'HUMANITIES', label: '인문' },
+  { key: 'BUSINESS', label: '경상' },
+  { key: 'LIFE', label: '라이프' },
+  { key: 'ICT', label: 'ICT' },
+  { key: 'DESIGN', label: '디자인' },
+  { key: 'MUSIC', label: '음악' },
+  { key: 'ENGINEERING', label: '공과' },
+];
+
+const VALID_COLLEGE_KEYS: ReadonlyArray<BackendCollege> = [
+  'HUMANITIES',
+  'BUSINESS',
+  'LIFE',
+  'ICT',
+  'DESIGN',
+  'MUSIC',
+  'ENGINEERING',
+];
+
+function coerceCollegeKey(v: unknown): BackendCollege | undefined {
+  if (typeof v !== 'string') return undefined;
+  return (VALID_COLLEGE_KEYS as readonly string[]).includes(v)
+    ? (v as BackendCollege)
+    : undefined;
+}
+
 function getFactoryState(): EditorState {
   return {
     clusters: CLUSTERS_DATA.map((c) => ({ ...c })),
@@ -135,6 +165,7 @@ function sanitizeEditorState(parsed: unknown): EditorState | null {
       id: c.id as string,
       category: 'cluster',
       name: typeof c.name === 'string' ? c.name : '',
+      collegeKey: coerceCollegeKey(c.collegeKey),
       coords: coerceCoords(c.coords),
       boothIds: Array.isArray(c.boothIds)
         ? (c.boothIds as unknown[]).filter((b): b is string => typeof b === 'string')
@@ -682,8 +713,46 @@ function renderFields(
           value={pin.name}
           onChange={(v) => onUpdate('name', v)}
         />
+        {/* collegeKey chip row — 백엔드 college enum 매칭 키. 한 번 지정하면
+            그 enum 의 부스가 자동 귀속. "없음" 클릭 시 undefined 로 unset. */}
+        <Text style={{ fontSize: 11, color: '#666', marginBottom: 4, marginTop: 2 }}>
+          collegeKey (백엔드 college enum, 자동 매칭 키)
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 4, paddingBottom: 6 }}
+        >
+          {COLLEGE_KEY_OPTIONS.map((opt) => {
+            const active = (pin.collegeKey ?? null) === opt.key;
+            return (
+              <Pressable
+                key={opt.label}
+                onPress={() => onUpdate('collegeKey', opt.key ?? undefined)}
+                style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 10,
+                  backgroundColor: active ? Colors.festival.primaryDark : '#FFFFFF',
+                  borderWidth: 1,
+                  borderColor: active ? Colors.festival.primaryDark : '#DDD',
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: active ? '#FFFFFF' : '#333',
+                    fontWeight: '600',
+                  }}
+                >
+                  {opt.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
         <Field
-          label="boothIds (콤마 구분)"
+          label="boothIds (콤마 구분, collegeKey 매칭 외 fallback)"
           value={pin.boothIds.join(', ')}
           onChange={(v) =>
             onUpdate(

@@ -100,6 +100,7 @@ export function mapBooth(raw: ApiBooth): Booth {
     name: raw.name,
     imageUri: raw.imageUrl,
     college: resolveCollegeLabel(raw.college, raw.collegeLabel),
+    collegeKey: raw.college ?? undefined,
   };
 }
 
@@ -111,6 +112,7 @@ export function mapBoothDetail(raw: ApiBoothDetail): Booth {
     imageUri: raw.imageUrl,
     notice: raw.notice,
     college: resolveCollegeLabel(raw.college, raw.collegeLabel),
+    collegeKey: raw.college ?? undefined,
   };
 }
 

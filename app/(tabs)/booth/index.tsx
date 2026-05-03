@@ -26,6 +26,7 @@ import { EVENTS_DATA } from '../../../src/data/events';
 import { FOOD_PINS_DATA } from '../../../src/data/foodPins';
 import { FACILITY_PINS_DATA } from '../../../src/data/facilityPins';
 import { Colors } from '../../../src/constants/colors';
+import { isClusterMember } from '../../../src/utils/clusterMembership';
 import type { PinCategory } from '../../../src/types/cluster';
 import type { Facility, SheetCategory } from '../../../src/types/map';
 
@@ -93,18 +94,14 @@ export default function BoothMapScreen() {
     }
   };
 
-  // 클러스터 필터 적용 — selectedClusterId 가 있으면 멤버 부스만.
-  // 매칭 우선순위: (1) booth.college === cluster.name → 백엔드가 college 컬럼을
-  // 채우면 자동 self-healing. (2) cluster.boothIds 에 booth.id 명시 → API 가
-  // college 를 아직 안 보낼 때의 fallback (clusters.ts 에서 운영자 수동 관리).
+  // 클러스터 필터 — selectedClusterId 가 있으면 isClusterMember 헬퍼로 좁힘.
+  // 매칭 우선순위(OR): collegeKey enum → cluster.name 라벨 → boothIds 수동.
+  // 백엔드가 college enum 만 채우면 자동 self-healing.
   const visibleBooths = (() => {
     if (!selectedClusterId) return nonFoodBooths;
     const cluster = clusters.find((c) => c.id === selectedClusterId);
     if (!cluster) return nonFoodBooths;
-    const memberSet = new Set(cluster.boothIds);
-    return nonFoodBooths.filter(
-      (b) => (b.college && b.college === cluster.name) || memberSet.has(b.id),
-    );
+    return nonFoodBooths.filter((b) => isClusterMember(cluster, b));
   })();
 
   const selectedClusterName = selectedClusterId
