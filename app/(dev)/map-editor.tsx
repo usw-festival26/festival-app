@@ -169,7 +169,30 @@ export default function MapEditorScreen() {
   const [state, setState] = useState<EditorState>(getFactoryState);
   const [hydrated, setHydrated] = useState(false);
   const [pinFilter, setPinFilter] = useState<'all' | PinCategory>('all');
+  /**
+   * 단과대 sub-filter — pinFilter==='cluster' 일 때만 노출되는 chip row 의 선택 상태.
+   * undefined = 전체 단과대 표시. 이름 일치(cluster.name) 기준.
+   */
+  const [selectedCollege, setSelectedCollege] = useState<string | undefined>();
   const [selectedPinId, setSelectedPinId] = useState<string | undefined>();
+  /**
+   * 부스 목록 패널을 새 창/별도 라우트로 띄운다.
+   * 웹: window.open 으로 popup 윈도우 → 메인 에디터 폭에 영향 없음.
+   * 네이티브: router.push 로 새 화면 (뒤로 가서 에디터 복귀).
+   */
+  const handleOpenBoothPanel = () => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const popup = window.open(
+        '/booth-list-panel',
+        'usw-booth-panel',
+        'width=420,height=860,resizable=yes,scrollbars=yes',
+      );
+      // 팝업 차단 등으로 실패하면 같은 탭에서 라우트로 폴백.
+      if (!popup) router.push('/(dev)/booth-list-panel' as never);
+      return;
+    }
+    router.push('/(dev)/booth-list-panel' as never);
+  };
   /**
    * 이동 모드 — ON 일 때 지도 탭하면 선택된 핀이 그 좌표로 이동 후 자동 OFF.
    * OFF 일 때 지도 탭은 무시 (실수로 핀이 움직이는 race 방지).
@@ -202,6 +225,30 @@ export default function MapEditorScreen() {
     () => new Map(BOOTHS_DATA.map((b) => [b.id, b])),
     [],
   );
+
+  /**
+   * 단과대 chip row 에 노출할 이름 목록 — 현재 state.clusters 의 name 유니크 추출.
+   * (booths.college 가 아니라 cluster.name 기준 — 에디터의 1차 source 가 클러스터 핀이므로.)
+   * 입력 순서를 보존하여 운영자가 의도한 단과대 정렬을 유지.
+   */
+  const collegeNames = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of state.clusters) {
+      if (c.name) set.add(c.name);
+    }
+    return Array.from(set);
+  }, [state.clusters]);
+
+  /**
+   * MapCanvas 에 넘기는 cluster 배열 — pinFilter==='cluster' + selectedCollege 일 때
+   * 그 단과대만 보여주고, 그 외에는 원본을 그대로 전달. 편의/푸드 핀은 영향 없음.
+   */
+  const visibleClusters = useMemo(() => {
+    if (pinFilter !== 'cluster') return state.clusters;
+    if (!selectedCollege) return state.clusters;
+    return state.clusters.filter((c) => c.name === selectedCollege);
+  }, [state.clusters, pinFilter, selectedCollege]);
+
 
   const selectedPin = useMemo<AnyPin | undefined>(() => {
     if (!selectedPinId) return undefined;
@@ -318,7 +365,24 @@ export default function MapEditorScreen() {
         >
           핀 에디터 (dev)
         </Text>
-        <View style={{ width: 28 }} />
+        <Pressable
+          onPress={handleOpenBoothPanel}
+          accessibilityLabel="부스 목록 패널을 새 창으로 열기"
+          style={{
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 6,
+            backgroundColor: Colors.festival.primaryDark,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+          }}
+        >
+          <Ionicons name="open-outline" size={14} color="#FFF" />
+          <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '600' }}>
+            부스 목록
+          </Text>
+        </Pressable>
       </View>
 
       {/* 카테고리 필터 + 추가 버튼 */}
@@ -347,13 +411,50 @@ export default function MapEditorScreen() {
         <AddButton label="+ 편" onPress={() => handleAddPin('facility')} />
       </View>
 
-      {/* 지도 */}
+      {/* 단과대 sub-filter — pinFilter==='cluster' 일 때만 노출.
+          가로 스크롤 chip row. "전체" 가 맨 앞, 이후 state.clusters 의 unique name 들. */}
+      {pinFilter === 'cluster' && collegeNames.length > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: 8,
+            paddingVertical: 6,
+            gap: 6,
+            alignItems: 'center',
+          }}
+          style={{
+            borderBottomWidth: 1,
+            borderColor: '#F0F0F0',
+            flexGrow: 0,
+          }}
+        >
+          <FilterChip
+            label="전체"
+            active={selectedCollege === undefined}
+            onPress={() => setSelectedCollege(undefined)}
+          />
+          {collegeNames.map((name) => (
+            <FilterChip
+              key={name}
+              label={name}
+              active={selectedCollege === name}
+              onPress={() =>
+                setSelectedCollege((cur) => (cur === name ? undefined : name))
+              }
+            />
+          ))}
+        </ScrollView>
+      ) : null}
+
+      {/* 지도 — 핀 선택 시 하단 편집 패널이 열리면서 viewport 가 줄어든다.
+          expanded={!!selectedPin} 으로 그 순간 자동 줌인 → 핀 미세 조정이 쉬워짐. */}
       <View style={{ flex: 1 }}>
         <MapCanvas
           imgSource={FESTIVAL_MAP}
           imgNaturalWidth={1608}
           imgNaturalHeight={3496}
-          clusters={state.clusters}
+          clusters={visibleClusters}
           foodPins={state.foodPins}
           facilityPins={state.facilityPins}
           pinFilter={pinFilter}
@@ -362,6 +463,7 @@ export default function MapEditorScreen() {
           selectedPinId={selectedPinId}
           editable
           onCanvasTap={handleCanvasTap}
+          expanded={!!selectedPin}
         />
       </View>
 
@@ -653,6 +755,7 @@ function Field({ label, value, onChange }: FieldProps) {
     </View>
   );
 }
+
 
 // ─── 상태 변환 함수 ────────────────────────────────────
 

@@ -40,6 +40,13 @@ export interface Booth {
   name: string;
   /** 운영 주체 (동아리, 학과 등) — 백엔드 미제공 시 undefined */
   organizer?: string;
+  /**
+   * 단과대명 (예: '지능형SW융합대학').
+   * organizer 가 학과 단위(예: '컴퓨터공학과')라면 college 는 그 상위 단과대.
+   * 백엔드(swagger BoothResponse)에 단과대 컬럼이 추가되면 매퍼에서 채운다.
+   * 동아리/총학생회 등 단과대에 속하지 않는 부스는 undefined.
+   */
+  college?: string;
   /** 부스 설명 — list 응답에는 없고 detail 에서만 채워짐 */
   description?: string;
   /** 위치 설명 — 백엔드 미제공 시 undefined */

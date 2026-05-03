@@ -10,10 +10,12 @@ import type { Booth, BoothCategory, BoothMenuItem } from '../types/booth';
 export interface UseBoothsOptions {
   category?: BoothCategory;
   searchQuery?: string;
+  /** 단과대명 정확 일치 필터. 부스 college 가 undefined 면 항상 제외. */
+  college?: string;
 }
 
 export function useBooths(options?: UseBoothsOptions) {
-  const { category, searchQuery } = options ?? {};
+  const { category, searchQuery, college } = options ?? {};
   const [apiData, setApiData] = useState<Booth[] | null>(null);
   const [isLoading, setIsLoading] = useState(config.isApiEnabled);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +44,7 @@ export function useBooths(options?: UseBoothsOptions) {
   const booths = useMemo(() => {
     return source.filter((booth) => {
       if (category && booth.category !== category) return false;
+      if (college && booth.college !== college) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         return (
@@ -52,7 +55,7 @@ export function useBooths(options?: UseBoothsOptions) {
       }
       return true;
     });
-  }, [source, category, searchQuery]);
+  }, [source, category, searchQuery, college]);
 
   return { data: booths, booths, isLoading, error, retry };
 }
@@ -134,4 +137,20 @@ export function useBoothMenus(boothId: string): {
   }, [apiData, boothId]);
 
   return { data: menus, menus, isLoading, error, retry };
+}
+
+/**
+ * 부스 데이터에서 단과대명 유니크 목록을 뽑아낸다.
+ * useBooths 의 source 와 동일하게 API/하드코딩 fallback 을 따른다.
+ * 정렬은 입력 등장 순서 (Set 삽입 순) 보존 — 운영자가 booths.ts 에서 의도한 순서대로 칩이 노출됨.
+ */
+export function useCollegeNames(): string[] {
+  const { booths } = useBooths();
+  return useMemo(() => {
+    const set = new Set<string>();
+    for (const b of booths) {
+      if (b.college) set.add(b.college);
+    }
+    return Array.from(set);
+  }, [booths]);
 }

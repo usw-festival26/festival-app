@@ -18,7 +18,7 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { MapPin, MAP_PIN_DIMENSIONS } from '@molecules/MapPin';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ImageSourcePropType,
   LayoutChangeEvent,
@@ -67,12 +67,21 @@ export interface MapCanvasProps {
   editable?: boolean;
   /** 이미지 영역 탭 시 정규화 좌표(0~1) 반환. editable=true 일 때만 활성. */
   onCanvasTap?: (coords: MapCoords) => void;
+  /**
+   * 외부 컨테이너가 줄어든 상태(예: 바텀시트 펼침 / 에디터 패널 열림).
+   * true 가 되면 viewport 중심을 기준으로 자동 zoom-in,
+   * false 로 돌아오면 그만큼 zoom-out 한다. 사용자의 수동 줌 위에 multiplicative 로
+   * 얹어 상대 줌 비율은 보존.
+   */
+  expanded?: boolean;
 }
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2.5;
 const ZOOM_STEP = 0.25;
 const ZOOM_INITIAL = 1;
+/** expanded 토글 시 적용할 줌 배수 — 줄어든 viewport 만큼 시각적으로 보정. */
+const EXPANDED_ZOOM_FACTOR = 1.4;
 
 export function MapCanvas({
   imgSource,
@@ -87,6 +96,7 @@ export function MapCanvas({
   selectedPinId,
   editable,
   onCanvasTap,
+  expanded,
 }: MapCanvasProps) {
   const aspect = imgNaturalHeight / imgNaturalWidth;
 
@@ -136,10 +146,16 @@ export function MapCanvas({
     bboxMaxY.value = pinBBox.maxY;
   }, [pinBBox]);
 
-  // layout / 이미지 크기 결정 시 초기 위치 (이미지를 viewport 가운데 정렬)
-  // bbox 변경에는 반응하지 않음 — 사용자가 팬한 위치를 보존.
+  // 최초 layout 결정 시 1회만 초기 위치 (이미지를 viewport 가운데 정렬).
+  // 이후 layout 변경(예: 바텀시트 펼침으로 ch 가 줄어드는 애니메이션 프레임)에는 반응하지
+  // 않는다 — 그렇지 않으면 사용자의 수동 줌/팬 + expanded 자동 줌인까지 매 프레임 리셋됨.
+  // 후속 viewport 변화로 인한 tx/ty 가 bounds 를 벗어나는 경우는 아래 bbox/layout effect
+  // 에서 withTiming clamp 가 부드럽게 보정한다.
+  const didInitialLayoutRef = useRef(false);
   useEffect(() => {
+    if (didInitialLayoutRef.current) return;
     if (layout.cw === 0 || layout.ch === 0 || imgW === 0) return;
+    didInitialLayoutRef.current = true;
     scale.value = ZOOM_INITIAL;
     tx.value = 0;
     ty.value = imgH < layout.ch ? (layout.ch - imgH) / 2 : 0;
@@ -285,6 +301,34 @@ export function MapCanvas({
 
   const zoomIn = () => zoomTo(Math.min(scaleState + ZOOM_STEP, ZOOM_MAX));
   const zoomOut = () => zoomTo(Math.max(scaleState - ZOOM_STEP, ZOOM_MIN));
+
+  /**
+   * expanded 토글 시 자동 줌인/줌아웃.
+   *
+   * 초기 mount 는 prevExpandedRef === null 로 식별해 zoom 호출을 건너뛴다(첫 렌더에서
+   * scale 이 갑자기 튀는 걸 방지). layout 이 아직 안 잡힌 사이 expanded 가 바뀌면 ref
+   * 도 업데이트하지 않고 보류 → layout 이 들어오면 그때 한 번 줌이 동작한다.
+   *
+   * Multiplicative factor (1.4x) — 사용자가 수동 줌인 한 상태에서 토글해도 상대 비율
+   * 보존(예: 1.5 → 펼침 2.1 → 접힘 1.5). 누적 부동소수 오차는 보통 무시 가능.
+   */
+  const prevExpandedRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    const next = expanded ?? false;
+    if (prevExpandedRef.current === null) {
+      prevExpandedRef.current = next;
+      return;
+    }
+    if (prevExpandedRef.current === next) return;
+    if (layout.cw === 0 || layout.ch === 0) return;
+    prevExpandedRef.current = next;
+    const factor = next ? EXPANDED_ZOOM_FACTOR : 1 / EXPANDED_ZOOM_FACTOR;
+    const newScale = Math.max(
+      ZOOM_MIN,
+      Math.min(scale.value * factor, ZOOM_MAX),
+    );
+    zoomTo(newScale);
+  }, [expanded, layout.cw, layout.ch, zoomTo]);
 
   // 핀 라벨 빌더
   const clusterLabel = (c: BoothCluster): string[] => {
