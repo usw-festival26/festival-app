@@ -89,6 +89,9 @@ export function BoothDetail({ booth, menus }: BoothDetailProps) {
           </View>
 
           <View style={{ flex: 1, paddingTop: 15 }}>
+            {booth.college ? (
+              <Text style={styles.collegeLabel}>{booth.college}</Text>
+            ) : null}
             <Text style={styles.sideTitle}>부스 안내</Text>
             <Text style={styles.sideBody}>{booth.description}</Text>
           </View>
@@ -153,6 +156,13 @@ const styles = StyleSheet.create({
     color: '#000000',
     textAlign: 'center',
     lineHeight: 22,
+  },
+  collegeLabel: {
+    fontFamily: PRETENDARD_SEMIBOLD,
+    fontWeight: '600',
+    fontSize: 11,
+    color: '#0D00FF',
+    marginBottom: 4,
   },
   sideTitle: {
     fontFamily: PRETENDARD_SEMIBOLD,
