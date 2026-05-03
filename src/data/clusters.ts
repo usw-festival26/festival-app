@@ -1,6 +1,12 @@
 /**
  * 핀 에디터(/map-editor) 에서 export 한 데이터.
  * 이 파일을 통째로 교체해도 무방.
+ *
+ * boothIds 형식 주의: 백엔드 API 의 booth.id 는 number 를 stringify 한 값(예: '1')
+ * 이고, 로컬 fixture(BOOTHS_DATA) 는 'booth-001' 형식이다. cluster.boothIds 는
+ * 두 형식을 모두 포함시켜 API/로컬 어느 모드에서도 매칭이 되도록 한다.
+ * (장기적으로는 booth.college === cluster.name 매칭이 1순위가 되며 boothIds 는
+ *  fallback 으로만 사용 — booth/index.tsx 의 visibleBooths 참조.)
  */
 import type { BoothCluster } from '../types/cluster';
 
@@ -10,7 +16,8 @@ export const CLUSTERS_DATA: BoothCluster[] = [
     category: 'cluster',
     name: '지능형SW융합대학',
     coords: { x: 0.2861, y: 0.5597 },
-    boothIds: ['booth-001'],
+    // API: 1=컴퓨터소프트웨어학과, 2=데이터과학부, 3=AI데이터과학부, 4=정보통신학부
+    boothIds: ['booth-001', '1', '2', '3', '4'],
   },
   {
     id: 'cluster-business',

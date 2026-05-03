@@ -44,7 +44,7 @@ export function BackdropScreenTemplate({
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: screenBg }}
-      edges={['top']}
+      edges={['top', 'bottom']}
     >
       <View style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
         <ScreenBackdrop variant={backdropVariant} />

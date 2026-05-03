@@ -10,8 +10,9 @@
  * 웹은 storage 이벤트로 cross-window 동기화한다 (BoothListPanel 내부 처리).
  */
 import React from 'react';
-import { Platform, View } from 'react-native';
+import { Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BoothListPanel } from '../../src/components/dev/BoothListPanel';
 
 export default function BoothListPanelScreen() {
@@ -35,8 +36,11 @@ export default function BoothListPanelScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: '#FAFAFA' }}
+      edges={['top', 'bottom']}
+    >
       <BoothListPanel onClose={handleClose} closeMode={isPopup ? 'close' : 'back'} />
-    </View>
+    </SafeAreaView>
   );
 }

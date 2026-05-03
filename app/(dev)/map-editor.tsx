@@ -33,6 +33,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type {
   BoothCluster,
   FacilityPin,
@@ -332,7 +333,10 @@ export default function MapEditorScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+      edges={['top', 'bottom']}
+    >
       {/* Header */}
       <View
         style={{
@@ -572,7 +576,7 @@ export default function MapEditorScreen() {
         <ActionButton label="JSON" onPress={handleExportJson} />
         <ActionButton label="초기화" onPress={handleReset} variant="danger" />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
