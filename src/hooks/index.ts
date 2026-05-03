@@ -7,3 +7,4 @@ export { useLineup } from './useLineup';
 export { useHorizontalDrag } from './useHorizontalDrag';
 export { useEvents } from './useEvents';
 export { useClusters } from './useClusters';
+export { useGoodsShop } from './useGoodsShop';
