@@ -17,7 +17,8 @@ export const CLUSTERS_DATA: BoothCluster[] = [
     name: '지능형SW융합대학',
     coords: { x: 0.2861, y: 0.5597 },
     // API: 1=컴퓨터소프트웨어학과, 2=데이터과학부, 3=AI데이터과학부, 4=정보통신학부
-    boothIds: ['booth-001', '1', '2', '3', '4'],
+    // (로컬 fixture booth-001 은 college 필드 매칭으로 잡히므로 boothIds 에 중복 포함 안 함.)
+    boothIds: ['1', '2', '3', '4'],
   },
   {
     id: 'cluster-business',

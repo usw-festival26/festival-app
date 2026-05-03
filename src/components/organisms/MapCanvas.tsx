@@ -331,12 +331,18 @@ export function MapCanvas({
   }, [expanded, layout.cw, layout.ch, zoomTo]);
 
   // 핀 라벨 빌더
+  // 멤버 카운트를 표시할 땐 raw c.boothIds.length 가 아니라 실제로 boothById 에서
+  // 해석된 booth 의 개수를 쓴다. 이중-모드 호환을 위해 cluster.boothIds 가 다른
+  // 형식의 ID(예: 'booth-001' 로컬 fixture 와 '1' API)를 함께 가지면 raw length 가
+  // 실제 노출 booth 수와 어긋나 "N개 부스" 가 사용자에게 잘못 보일 수 있음.
   const clusterLabel = (c: BoothCluster): string[] => {
     const memberNames = c.boothIds
       .map((id) => boothById?.get(id)?.name)
-      .filter((n): n is string => !!n)
-      .join(', ');
-    return [c.name, memberNames || `${c.boothIds.length}개 부스`, '더보기 >'];
+      .filter((n): n is string => !!n);
+    if (memberNames.length === 0) {
+      return [c.name, '더보기 >'];
+    }
+    return [c.name, memberNames.join(', '), '더보기 >'];
   };
   const foodLabel = (p: FoodPin): string[] => [p.name];
   const facilityLabel = (p: FacilityPin): string[] =>
