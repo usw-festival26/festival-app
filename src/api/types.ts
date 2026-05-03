@@ -6,9 +6,9 @@
  */
 
 // ── 공지 (Notices) ──────────────────────────────────────────
-// 목록(NoticeResponse) 스키마상 content 미포함이지만 백엔드가 응답에 함께
-// 내려주는 운영 케이스가 존재 → optional 로 받아 매퍼가 있으면 채운다.
-// 목록에 content 가 있으면 상세 페치 없이 즉시 본문을 펼칠 수 있다.
+// swagger(2026-05) 에서 NoticeResponse 가 content 를 정식 필드로 포함하면서
+// /api/notices/{id} 단일 조회 엔드포인트가 제거됐다. 따라서 ApiNoticeDetail 은
+// 더 이상 필요 없고 ApiNotice 한 타입으로 list/detail 모두 커버한다.
 
 export interface ApiNotice {
   noticeId: number;
@@ -16,10 +16,6 @@ export interface ApiNotice {
   pinned: boolean;
   createdAt: string;
   content?: string;
-}
-
-export interface ApiNoticeDetail extends ApiNotice {
-  content: string;
 }
 
 // ── 분실물 (Lost Items) ─────────────────────────────────────
@@ -40,11 +36,25 @@ export interface ApiLostItemDetail extends ApiLostItem {
 }
 
 // ── 부스 (Booths) ───────────────────────────────────────────
+// 백엔드 BoothResponse / BoothDetailResponse 양쪽 모두 college (enum) +
+// collegeLabel (한글, 선택) 을 내려준다. enum 은 안정적, label 은 운영 변경에 따라
+// 갱신될 수 있어 둘 다 받아두고 매퍼에서 라벨 우선순위 결정 (resolveCollegeLabel 참조).
+
+export type BackendCollege =
+  | 'HUMANITIES'
+  | 'BUSINESS'
+  | 'LIFE'
+  | 'ICT'
+  | 'DESIGN'
+  | 'MUSIC'
+  | 'ENGINEERING';
 
 export interface ApiBooth {
   boothId: number;
   name: string;
   imageUrl: string;
+  college?: BackendCollege;
+  collegeLabel?: string;
 }
 
 export interface ApiBoothDetail extends ApiBooth {

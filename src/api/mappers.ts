@@ -12,27 +12,17 @@ import type { LostFoundItem, LostFoundStatus, LostFoundCategory } from '../types
 import type { Booth, BoothMenuItem } from '../types/booth';
 import type {
   ApiNotice,
-  ApiNoticeDetail,
   ApiLostItem,
   ApiLostItemDetail,
   ApiBooth,
   ApiBoothDetail,
   ApiMenu,
 } from './types';
+import { resolveCollegeLabel } from '../data/collegeLabels';
 
 // ── 공지 ────────────────────────────────────────────────────
 
 export function mapNotice(raw: ApiNotice): Announcement {
-  return {
-    id: String(raw.noticeId),
-    title: raw.title,
-    content: raw.content,
-    publishedAt: raw.createdAt,
-    isPinned: raw.pinned,
-  };
-}
-
-export function mapNoticeDetail(raw: ApiNoticeDetail): Announcement {
   return {
     id: String(raw.noticeId),
     title: raw.title,
@@ -109,6 +99,7 @@ export function mapBooth(raw: ApiBooth): Booth {
     id: String(raw.boothId),
     name: raw.name,
     imageUri: raw.imageUrl,
+    college: resolveCollegeLabel(raw.college, raw.collegeLabel),
   };
 }
 
@@ -119,6 +110,7 @@ export function mapBoothDetail(raw: ApiBoothDetail): Booth {
     description: raw.description,
     imageUri: raw.imageUrl,
     notice: raw.notice,
+    college: resolveCollegeLabel(raw.college, raw.collegeLabel),
   };
 }
 

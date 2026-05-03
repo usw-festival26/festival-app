@@ -11,7 +11,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["getNotice"];
+        get?: never;
         put: operations["updateNotice"];
         post?: never;
         delete: operations["deleteNotice"];
@@ -196,22 +196,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/notices/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getNotice_1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/lost-items": {
         parameters: {
             query?: never;
@@ -336,6 +320,8 @@ export interface components {
             name?: string;
             description?: string;
             imageUrl?: string;
+            /** @enum {string} */
+            college: "HUMANITIES" | "BUSINESS" | "LIFE" | "ICT" | "DESIGN" | "MUSIC" | "ENGINEERING";
         };
         BoothDetailResponse: {
             /** Format: int64 */
@@ -344,6 +330,9 @@ export interface components {
             description?: string;
             imageUrl?: string;
             notice?: string;
+            /** @enum {string} */
+            college?: "HUMANITIES" | "BUSINESS" | "LIFE" | "ICT" | "DESIGN" | "MUSIC" | "ENGINEERING";
+            collegeLabel?: string;
         };
         BoothMenuCreateRequest: {
             name?: string;
@@ -371,6 +360,8 @@ export interface components {
             name?: string;
             description?: string;
             imageUrl?: string;
+            /** @enum {string} */
+            college?: "HUMANITIES" | "BUSINESS" | "LIFE" | "ICT" | "DESIGN" | "MUSIC" | "ENGINEERING";
         };
         BoothMenuUpdateRequest: {
             name?: string;
@@ -386,6 +377,7 @@ export interface components {
             /** Format: int64 */
             noticeId?: number;
             title?: string;
+            content?: string;
             pinned?: boolean;
             /** Format: date-time */
             createdAt?: string;
@@ -403,6 +395,9 @@ export interface components {
             boothId?: number;
             name?: string;
             imageUrl?: string;
+            /** @enum {string} */
+            college?: "HUMANITIES" | "BUSINESS" | "LIFE" | "ICT" | "DESIGN" | "MUSIC" | "ENGINEERING";
+            collegeLabel?: string;
         };
         BoothMenuResponse: {
             /** Format: int64 */
@@ -422,28 +417,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    getNotice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["NoticeDetailResponse"];
-                };
-            };
-        };
-    };
     updateNotice: {
         parameters: {
             query?: never;
@@ -899,28 +872,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["NoticeResponse"][];
-                };
-            };
-        };
-    };
-    getNotice_1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["NoticeDetailResponse"];
                 };
             };
         };

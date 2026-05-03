@@ -3,7 +3,6 @@ import type { Announcement } from '../types/announcement';
 import type { LostFoundItem } from '../types/lostFound';
 import type {
   ApiNotice,
-  ApiNoticeDetail,
   ApiLostItem,
   ApiLostItemDetail,
   ApiBooth,
@@ -14,7 +13,6 @@ import { apiClient } from './client';
 import { ApiError } from './errors';
 import {
   mapNotice,
-  mapNoticeDetail,
   mapLostItem,
   mapLostItemDetail,
   mapBooth,
@@ -71,12 +69,9 @@ export async function fetchAnnouncements(): Promise<Announcement[]> {
   assertArray(data, '/api/notices');
   return (data as ApiNotice[]).map(mapNotice);
 }
-
-export async function fetchAnnouncement(id: string): Promise<Announcement> {
-  const data = await apiClient.get<ApiNoticeDetail>(`/api/notices/${encodeURIComponent(id)}`);
-  assertObject(data, '/api/notices/:id', ['noticeId', 'title', 'content']);
-  return mapNoticeDetail(data as ApiNoticeDetail);
-}
+// 단일 공지 상세 fetch 는 swagger(2026-05) 에서 /api/notices/{id} 엔드포인트가 제거되며
+// 사라짐. NoticeResponse list 가 content 까지 내려오므로 useAnnouncementById 는 list
+// 에서 find 만 한다.
 
 // ── 분실물 ──────────────────────────────────────────────────
 
