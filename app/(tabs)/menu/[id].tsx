@@ -53,7 +53,7 @@ export default function MenuDetailScreen() {
   }
 
   return (
-    <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
+    <BackdropScreenTemplate title="메뉴" backdropVariant="menu">
       <BoothDetail booth={booth} menus={menusLoading ? undefined : menus} />
     </BackdropScreenTemplate>
   );
