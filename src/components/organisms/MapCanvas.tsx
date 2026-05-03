@@ -18,7 +18,7 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { MapPin, MAP_PIN_DIMENSIONS } from '@molecules/MapPin';
-import { isClusterMember } from '@utils/clusterMembership';
+import { buildClusterIndex, findClustersForBooth } from '@utils/clusterMembership';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ImageSourcePropType,
@@ -84,6 +84,13 @@ const ZOOM_INITIAL = 1;
 /** expanded 토글 시 적용할 줌 배수 — 줄어든 viewport 만큼 시각적으로 보정. */
 const EXPANDED_ZOOM_FACTOR = 1.4;
 
+/**
+ * clusterLabel lookup 실패 시 fallback. module-level 상수라 동일 reference 가
+ * 유지되며, MapPin 이 향후 React.memo 로 감싸지더라도 referential equality 가
+ * 깨지지 않는다 (정상 흐름에서는 도달하지 않는 방어용).
+ */
+const FALLBACK_CLUSTER_LABEL: string[] = ['', '더보기 >'];
+
 export function MapCanvas({
   imgSource,
   imgNaturalWidth,
@@ -134,6 +141,14 @@ export function MapCanvas({
   const scale = useSharedValue(ZOOM_INITIAL);
   const startTx = useSharedValue(0);
   const startTy = useSharedValue(0);
+  /**
+   * 사용자 의도 줌 레벨 (base) — expanded 분율 적용 전 값.
+   * expanded 토글은 이 base 위에 EXPANDED_ZOOM_FACTOR 를 곱해 displayed scale 을
+   * 만든다. base 자체는 expanded 토글로 변하지 않으므로 토글 반복으로 인한
+   * 부동소수 누적 drift 가 발생하지 않는다(예: 1 → 펼침 1.4 → 접힘 1 (정확)).
+   * 사용자가 zoomTo 로 직접 변경하면 그때만 base 가 (newDisplayed / factor) 로 갱신.
+   */
+  const baseScaleRef = useRef(ZOOM_INITIAL);
   // worklet 안에서 bbox 를 읽기 위한 sharedValue. JS 의 pinBBox 변경 시 useEffect 로 동기화.
   const bboxMinX = useSharedValue(0);
   const bboxMaxX = useSharedValue(1);
@@ -157,6 +172,7 @@ export function MapCanvas({
     if (didInitialLayoutRef.current) return;
     if (layout.cw === 0 || layout.ch === 0 || imgW === 0) return;
     didInitialLayoutRef.current = true;
+    baseScaleRef.current = ZOOM_INITIAL;
     scale.value = ZOOM_INITIAL;
     tx.value = 0;
     ty.value = imgH < layout.ch ? (layout.ch - imgH) / 2 : 0;
@@ -279,8 +295,12 @@ export function MapCanvas({
     ],
   }));
 
-  // 줌 — viewport 중심점이 같은 이미지 좌표를 가리키도록 tx/ty 보정
-  const zoomTo = useCallback(
+  /**
+   * 내부 줌 적용 — scale/tx/ty 만 animate. baseScaleRef 는 변경 안 함.
+   * zoomTo (사용자 호출) 와 expanded 토글 effect 가 공유.
+   * viewport 중심점이 같은 이미지 좌표를 가리키도록 tx/ty 보정.
+   */
+  const applyZoom = useCallback(
     (newScale: number) => {
       const cx = layout.cw / 2;
       const cy = layout.ch / 2;
@@ -300,6 +320,18 @@ export function MapCanvas({
     [computeBounds, layout.cw, layout.ch],
   );
 
+  // 사용자 호출 — newScale 은 "보이는" displayed 줌. expanded 분율을 거꾸로 적용해
+  // base 를 환산. 이로써 사용자가 expanded 상태에서 줌을 바꿔도 base 가 일관된 의미
+  // (= 접혔을 때 보일 줌) 으로 기록되며, expanded 토글 반복 시 drift 가 없다.
+  const zoomTo = useCallback(
+    (newScale: number) => {
+      const factor = expanded ? EXPANDED_ZOOM_FACTOR : 1;
+      baseScaleRef.current = newScale / factor;
+      applyZoom(newScale);
+    },
+    [applyZoom, expanded],
+  );
+
   const zoomIn = () => zoomTo(Math.min(scaleState + ZOOM_STEP, ZOOM_MAX));
   const zoomOut = () => zoomTo(Math.max(scaleState - ZOOM_STEP, ZOOM_MIN));
 
@@ -310,8 +342,8 @@ export function MapCanvas({
    * scale 이 갑자기 튀는 걸 방지). layout 이 아직 안 잡힌 사이 expanded 가 바뀌면 ref
    * 도 업데이트하지 않고 보류 → layout 이 들어오면 그때 한 번 줌이 동작한다.
    *
-   * Multiplicative factor (1.4x) — 사용자가 수동 줌인 한 상태에서 토글해도 상대 비율
-   * 보존(예: 1.5 → 펼침 2.1 → 접힘 1.5). 누적 부동소수 오차는 보통 무시 가능.
+   * 타겟은 항상 baseScaleRef × factor — scale.value (animated mid-frame value) 를
+   * 곱하지 않아 토글 반복 / 애니메이션 진행 중 토글 시에도 누적 drift 없음.
    */
   const prevExpandedRef = useRef<boolean | null>(null);
   useEffect(() => {
@@ -323,26 +355,53 @@ export function MapCanvas({
     if (prevExpandedRef.current === next) return;
     if (layout.cw === 0 || layout.ch === 0) return;
     prevExpandedRef.current = next;
-    const factor = next ? EXPANDED_ZOOM_FACTOR : 1 / EXPANDED_ZOOM_FACTOR;
-    const newScale = Math.max(
+    const factor = next ? EXPANDED_ZOOM_FACTOR : 1;
+    const target = Math.max(
       ZOOM_MIN,
-      Math.min(scale.value * factor, ZOOM_MAX),
+      Math.min(baseScaleRef.current * factor, ZOOM_MAX),
     );
-    zoomTo(newScale);
-  }, [expanded, layout.cw, layout.ch, zoomTo]);
+    applyZoom(target);
+  }, [expanded, layout.cw, layout.ch, applyZoom]);
 
-  // 핀 라벨 빌더 — boothById 전체에서 isClusterMember 로 멤버를 판별.
-  // 매칭 경로(collegeKey/라벨/boothIds) 가 visibleBooths 와 일원화돼 핀 라벨과
-  // 클릭 후 시트 카드 수가 항상 일치한다.
-  const clusterLabel = (c: BoothCluster): string[] => {
-    if (!boothById) return [c.name, '더보기 >'];
-    const memberSet = new Set<string>();
-    for (const b of boothById.values()) {
-      if (isClusterMember(c, b)) memberSet.add(b.name);
+  /**
+   * 클러스터 핀 라벨 — booths 를 1회 순회하며 인덱스 lookup 으로 매칭 cluster 를
+   * 찾아 멤버명을 누적. 기존 O(C × B × K) (clusters × booths × includes) 를
+   * O(C + B) 평탄화. clusters / boothById 변경 시에만 재계산 → 줌/팬 리렌더
+   * 영향 없음.
+   */
+  const clusterLabels = useMemo(() => {
+    const memberNamesByClusterId = new Map<string, string[]>();
+    if (boothById) {
+      const index = buildClusterIndex(clusters);
+      for (const b of boothById.values()) {
+        const matched = findClustersForBooth(index, b);
+        for (const c of matched) {
+          const arr = memberNamesByClusterId.get(c.id);
+          if (arr) arr.push(b.name);
+          else memberNamesByClusterId.set(c.id, [b.name]);
+        }
+      }
     }
-    if (memberSet.size === 0) return [c.name, '더보기 >'];
-    return [c.name, Array.from(memberSet).join(', '), '더보기 >'];
-  };
+    const labels = new Map<string, string[]>();
+    for (const c of clusters) {
+      const names = memberNamesByClusterId.get(c.id);
+      if (!names || names.length === 0) {
+        labels.set(c.id, [c.name, '더보기 >']);
+      } else {
+        labels.set(c.id, [c.name, names.join(', '), '더보기 >']);
+      }
+    }
+    return labels;
+  }, [clusters, boothById]);
+
+  // 정상 흐름에서는 clusterLabels 가 모든 cluster 항목을 포함하므로 fallback
+  // 도달 안 함. 다만 향후 호출 측이 다른 reference 의 cluster 를 넘기더라도
+  // referential equality 가 유지되도록 module-level 상수로 둔다.
+  const clusterLabel = useCallback(
+    (c: BoothCluster): string[] =>
+      clusterLabels.get(c.id) ?? FALLBACK_CLUSTER_LABEL,
+    [clusterLabels],
+  );
   const foodLabel = (p: FoodPin): string[] => [p.name];
   const facilityLabel = (p: FacilityPin): string[] =>
     p.phone ? [p.name, p.phone] : [p.name];
