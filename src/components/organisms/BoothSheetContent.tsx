@@ -2,14 +2,17 @@
  * BoothSheetContent - 지도 바텀시트: 부스 2열 그리드
  *
  * Figma 166:93
+ *
+ * filterLabel: 클러스터(단과대 그룹) 핀으로 필터링됐을 때 단과대명을 헤더로 노출하고
+ * "전체" 버튼으로 필터 해제. 없으면 일반 "부스" 헤더.
  */
-import React from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
 import { AppText } from '@atoms/AppText';
-import { BoothCard } from '@molecules/BoothCard';
 import { NetworkErrorState } from '@atoms/NetworkErrorState';
 import { Colors } from '@constants/colors';
+import { BoothCard } from '@molecules/BoothCard';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import type { Booth } from '../../types/booth';
 
 export interface BoothSheetContentProps {
@@ -17,9 +20,20 @@ export interface BoothSheetContentProps {
   isLoading?: boolean;
   error?: string | null;
   onRetry?: () => void;
+  /** 클러스터 핀으로 필터링된 경우 단과대명. */
+  filterLabel?: string;
+  /** 필터 해제 콜백. */
+  onClearFilter?: () => void;
 }
 
-export function BoothSheetContent({ booths, isLoading, error, onRetry }: BoothSheetContentProps) {
+export function BoothSheetContent({
+  booths,
+  isLoading,
+  error,
+  onRetry,
+  filterLabel,
+  onClearFilter,
+}: BoothSheetContentProps) {
   const router = useRouter();
 
   // 2열 그리드를 위해 짝수 인덱스끼리 묶기
@@ -30,7 +44,20 @@ export function BoothSheetContent({ booths, isLoading, error, onRetry }: BoothSh
 
   return (
     <View>
-      <AppText className="text-xl font-black text-center mb-4">부스</AppText>
+      {filterLabel ? (
+        <View className="flex-row items-center justify-center gap-2 mb-4 px-4">
+          <AppText className="text-xl font-black">{filterLabel}</AppText>
+          {onClearFilter ? (
+            <Pressable onPress={onClearFilter} className="active:opacity-70">
+              <AppText className="text-xs text-festival-muted underline">
+                전체 보기
+              </AppText>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : (
+        <AppText className="text-xl font-black text-center mb-4">부스</AppText>
+      )}
       {isLoading ? (
         <View className="py-6 items-center">
           <ActivityIndicator size="small" color={Colors.festival.primaryDark} />

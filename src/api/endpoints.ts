@@ -1,7 +1,6 @@
 import type { Booth, BoothMenuItem } from '../types/booth';
 import type { Announcement } from '../types/announcement';
 import type { LostFoundItem } from '../types/lostFound';
-import type { InformationSection } from '../types/information';
 import type {
   ApiNotice,
   ApiNoticeDetail,
@@ -93,12 +92,5 @@ export async function fetchLostFoundItem(id: string): Promise<LostFoundItem> {
   return mapLostItemDetail(data as ApiLostItemDetail);
 }
 
-// ── 기타 정보 ───────────────────────────────────────────────
-// TODO: 백엔드 스펙 미정. swagger 에 information 엔드포인트 없음.
-// API 활성 시 404 → useInformation 이 빈 배열 + error 반환 (Timetable 과 동일).
-
-export async function fetchInformation(): Promise<InformationSection[]> {
-  const data = await apiClient.get<InformationSection[]>('/api/information');
-  assertArray(data, '/api/information');
-  return data;
-}
+// 추가정보는 백엔드 스펙 미정 (swagger 에 endpoint 없음) → src/data/information.ts
+// 의 하드코딩 데이터만 사용 (Timetable 과 동일 패턴).

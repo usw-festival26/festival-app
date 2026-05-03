@@ -19,6 +19,16 @@ export const MAP_FILTER_LABELS: Record<MapFilterCategory, string> = {
   event: '행사',
 };
 
+/**
+ * 지도 좌표 — 정규화(0~1) 형식.
+ * x = 가로 비율, y = 세로 비율 (이미지 좌상단 = (0, 0)).
+ * 이미지 해상도가 바뀌어도 핀 데이터를 유지하기 위해 픽셀이 아닌 비율로 저장한다.
+ */
+export interface MapCoords {
+  x: number;
+  y: number;
+}
+
 /** 편의시설 정보 */
 export interface Facility {
   id: string;

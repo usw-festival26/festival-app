@@ -6,12 +6,16 @@
  */
 
 // ── 공지 (Notices) ──────────────────────────────────────────
+// 목록(NoticeResponse) 스키마상 content 미포함이지만 백엔드가 응답에 함께
+// 내려주는 운영 케이스가 존재 → optional 로 받아 매퍼가 있으면 채운다.
+// 목록에 content 가 있으면 상세 페치 없이 즉시 본문을 펼칠 수 있다.
 
 export interface ApiNotice {
   noticeId: number;
   title: string;
   pinned: boolean;
   createdAt: string;
+  content?: string;
 }
 
 export interface ApiNoticeDetail extends ApiNotice {

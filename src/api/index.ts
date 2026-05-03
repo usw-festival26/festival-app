@@ -9,7 +9,6 @@ export {
   fetchAnnouncement,
   fetchLostFoundItems,
   fetchLostFoundItem,
-  fetchInformation,
 } from './endpoints';
 export type {
   ApiNotice,

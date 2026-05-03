@@ -10,7 +10,7 @@ import { BackdropScreenTemplate } from '../../../src/components/templates/Backdr
 import { BoothDetail } from '../../../src/components/organisms/BoothDetail';
 import { EmptyState } from '../../../src/components/molecules/EmptyState';
 import { NetworkErrorState } from '../../../src/components/atoms/NetworkErrorState';
-import { useBoothById } from '../../../src/hooks/useBooths';
+import { useBoothById, useBoothMenus } from '../../../src/hooks/useBooths';
 import { AppButton } from '../../../src/components/atoms/AppButton';
 import { Colors } from '../../../src/constants/colors';
 
@@ -18,6 +18,10 @@ export default function BoothDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { booth, isLoading, error, retry } = useBoothById(id ?? '');
+  // 메뉴는 별도 엔드포인트(`/api/booths/{id}/menu`) → fetchBooth 응답에 포함되지 않음.
+  // 로딩 중에는 undefined 를 넘겨 BoothDetail 의 `menus ?? booth.menuItems ?? []`
+  // 폴백 체인이 작동하도록 한다 (로컬 fixture 모드에선 즉시 메뉴 표시).
+  const { menus, isLoading: menusLoading } = useBoothMenus(id ?? '');
 
   if (isLoading) {
     return (
@@ -50,7 +54,7 @@ export default function BoothDetailScreen() {
 
   return (
     <BackdropScreenTemplate title="메뉴" backdropVariant="booth-detail">
-      <BoothDetail booth={booth} />
+      <BoothDetail booth={booth} menus={menusLoading ? undefined : menus} />
     </BackdropScreenTemplate>
   );
 }

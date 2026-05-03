@@ -26,6 +26,7 @@ export function mapNotice(raw: ApiNotice): Announcement {
   return {
     id: String(raw.noticeId),
     title: raw.title,
+    content: raw.content,
     publishedAt: raw.createdAt,
     isPinned: raw.pinned,
   };
