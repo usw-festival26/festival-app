@@ -134,6 +134,14 @@ export function MapCanvas({
   const scale = useSharedValue(ZOOM_INITIAL);
   const startTx = useSharedValue(0);
   const startTy = useSharedValue(0);
+  /**
+   * 사용자 의도 줌 레벨 (base) — expanded 분율 적용 전 값.
+   * expanded 토글은 이 base 위에 EXPANDED_ZOOM_FACTOR 를 곱해 displayed scale 을
+   * 만든다. base 자체는 expanded 토글로 변하지 않으므로 토글 반복으로 인한
+   * 부동소수 누적 drift 가 발생하지 않는다(예: 1 → 펼침 1.4 → 접힘 1 (정확)).
+   * 사용자가 zoomTo 로 직접 변경하면 그때만 base 가 (newDisplayed / factor) 로 갱신.
+   */
+  const baseScaleRef = useRef(ZOOM_INITIAL);
   // worklet 안에서 bbox 를 읽기 위한 sharedValue. JS 의 pinBBox 변경 시 useEffect 로 동기화.
   const bboxMinX = useSharedValue(0);
   const bboxMaxX = useSharedValue(1);
@@ -157,6 +165,7 @@ export function MapCanvas({
     if (didInitialLayoutRef.current) return;
     if (layout.cw === 0 || layout.ch === 0 || imgW === 0) return;
     didInitialLayoutRef.current = true;
+    baseScaleRef.current = ZOOM_INITIAL;
     scale.value = ZOOM_INITIAL;
     tx.value = 0;
     ty.value = imgH < layout.ch ? (layout.ch - imgH) / 2 : 0;
@@ -279,8 +288,12 @@ export function MapCanvas({
     ],
   }));
 
-  // 줌 — viewport 중심점이 같은 이미지 좌표를 가리키도록 tx/ty 보정
-  const zoomTo = useCallback(
+  /**
+   * 내부 줌 적용 — scale/tx/ty 만 animate. baseScaleRef 는 변경 안 함.
+   * zoomTo (사용자 호출) 와 expanded 토글 effect 가 공유.
+   * viewport 중심점이 같은 이미지 좌표를 가리키도록 tx/ty 보정.
+   */
+  const applyZoom = useCallback(
     (newScale: number) => {
       const cx = layout.cw / 2;
       const cy = layout.ch / 2;
@@ -300,6 +313,18 @@ export function MapCanvas({
     [computeBounds, layout.cw, layout.ch],
   );
 
+  // 사용자 호출 — newScale 은 "보이는" displayed 줌. expanded 분율을 거꾸로 적용해
+  // base 를 환산. 이로써 사용자가 expanded 상태에서 줌을 바꿔도 base 가 일관된 의미
+  // (= 접혔을 때 보일 줌) 으로 기록되며, expanded 토글 반복 시 drift 가 없다.
+  const zoomTo = useCallback(
+    (newScale: number) => {
+      const factor = expanded ? EXPANDED_ZOOM_FACTOR : 1;
+      baseScaleRef.current = newScale / factor;
+      applyZoom(newScale);
+    },
+    [applyZoom, expanded],
+  );
+
   const zoomIn = () => zoomTo(Math.min(scaleState + ZOOM_STEP, ZOOM_MAX));
   const zoomOut = () => zoomTo(Math.max(scaleState - ZOOM_STEP, ZOOM_MIN));
 
@@ -310,8 +335,8 @@ export function MapCanvas({
    * scale 이 갑자기 튀는 걸 방지). layout 이 아직 안 잡힌 사이 expanded 가 바뀌면 ref
    * 도 업데이트하지 않고 보류 → layout 이 들어오면 그때 한 번 줌이 동작한다.
    *
-   * Multiplicative factor (1.4x) — 사용자가 수동 줌인 한 상태에서 토글해도 상대 비율
-   * 보존(예: 1.5 → 펼침 2.1 → 접힘 1.5). 누적 부동소수 오차는 보통 무시 가능.
+   * 타겟은 항상 baseScaleRef × factor — scale.value (animated mid-frame value) 를
+   * 곱하지 않아 토글 반복 / 애니메이션 진행 중 토글 시에도 누적 drift 없음.
    */
   const prevExpandedRef = useRef<boolean | null>(null);
   useEffect(() => {
@@ -323,26 +348,44 @@ export function MapCanvas({
     if (prevExpandedRef.current === next) return;
     if (layout.cw === 0 || layout.ch === 0) return;
     prevExpandedRef.current = next;
-    const factor = next ? EXPANDED_ZOOM_FACTOR : 1 / EXPANDED_ZOOM_FACTOR;
-    const newScale = Math.max(
+    const factor = next ? EXPANDED_ZOOM_FACTOR : 1;
+    const target = Math.max(
       ZOOM_MIN,
-      Math.min(scale.value * factor, ZOOM_MAX),
+      Math.min(baseScaleRef.current * factor, ZOOM_MAX),
     );
-    zoomTo(newScale);
-  }, [expanded, layout.cw, layout.ch, zoomTo]);
+    applyZoom(target);
+  }, [expanded, layout.cw, layout.ch, applyZoom]);
 
-  // 핀 라벨 빌더 — boothById 전체에서 isClusterMember 로 멤버를 판별.
-  // 매칭 경로(collegeKey/라벨/boothIds) 가 visibleBooths 와 일원화돼 핀 라벨과
-  // 클릭 후 시트 카드 수가 항상 일치한다.
-  const clusterLabel = (c: BoothCluster): string[] => {
-    if (!boothById) return [c.name, '더보기 >'];
-    const memberSet = new Set<string>();
-    for (const b of boothById.values()) {
-      if (isClusterMember(c, b)) memberSet.add(b.name);
+  /**
+   * 클러스터 핀 라벨 — clusters × booths O(C*B) 매칭이라 매 렌더 재계산 비용이
+   * 큼. clusters / boothById 가 바뀔 때만 1회 계산해 Map 으로 메모이즈한 뒤
+   * 핀 렌더에서 lookup 만 한다 (지도 줌/팬으로 발생하는 빈번한 리렌더에 최적).
+   */
+  const clusterLabels = useMemo(() => {
+    const labels = new Map<string, string[]>();
+    for (const c of clusters) {
+      if (!boothById) {
+        labels.set(c.id, [c.name, '더보기 >']);
+        continue;
+      }
+      const memberSet = new Set<string>();
+      for (const b of boothById.values()) {
+        if (isClusterMember(c, b)) memberSet.add(b.name);
+      }
+      if (memberSet.size === 0) {
+        labels.set(c.id, [c.name, '더보기 >']);
+      } else {
+        labels.set(c.id, [c.name, Array.from(memberSet).join(', '), '더보기 >']);
+      }
     }
-    if (memberSet.size === 0) return [c.name, '더보기 >'];
-    return [c.name, Array.from(memberSet).join(', '), '더보기 >'];
-  };
+    return labels;
+  }, [clusters, boothById]);
+
+  const clusterLabel = useCallback(
+    (c: BoothCluster): string[] =>
+      clusterLabels.get(c.id) ?? [c.name, '더보기 >'],
+    [clusterLabels],
+  );
   const foodLabel = (p: FoodPin): string[] => [p.name];
   const facilityLabel = (p: FacilityPin): string[] =>
     p.phone ? [p.name, p.phone] : [p.name];
