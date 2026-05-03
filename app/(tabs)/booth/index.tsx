@@ -25,6 +25,7 @@ import { useClusters } from '../../../src/hooks/useClusters';
 import { EVENTS_DATA } from '../../../src/data/events';
 import { FOOD_PINS_DATA } from '../../../src/data/foodPins';
 import { FACILITY_PINS_DATA } from '../../../src/data/facilityPins';
+import { Colors } from '../../../src/constants/colors';
 import type { PinCategory } from '../../../src/types/cluster';
 import type { Facility, SheetCategory } from '../../../src/types/map';
 
@@ -109,6 +110,7 @@ export default function BoothMapScreen() {
     <BackdropScreenTemplate
       title="지도"
       backdropVariant="booth"
+      screenBg={Colors.festival.bright}
       headerSubHeader={
         <MapCategoryChips
           expanded={expanded}
