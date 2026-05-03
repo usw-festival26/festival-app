@@ -18,7 +18,7 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { MapPin, MAP_PIN_DIMENSIONS } from '@molecules/MapPin';
-import { isClusterMember } from '@utils/clusterMembership';
+import { buildClusterIndex, findClustersForBooth } from '@utils/clusterMembership';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ImageSourcePropType,
@@ -83,6 +83,13 @@ const ZOOM_STEP = 0.25;
 const ZOOM_INITIAL = 1;
 /** expanded 토글 시 적용할 줌 배수 — 줄어든 viewport 만큼 시각적으로 보정. */
 const EXPANDED_ZOOM_FACTOR = 1.4;
+
+/**
+ * clusterLabel lookup 실패 시 fallback. module-level 상수라 동일 reference 가
+ * 유지되며, MapPin 이 향후 React.memo 로 감싸지더라도 referential equality 가
+ * 깨지지 않는다 (정상 흐름에서는 도달하지 않는 방어용).
+ */
+const FALLBACK_CLUSTER_LABEL: string[] = ['', '더보기 >'];
 
 export function MapCanvas({
   imgSource,
@@ -357,33 +364,42 @@ export function MapCanvas({
   }, [expanded, layout.cw, layout.ch, applyZoom]);
 
   /**
-   * 클러스터 핀 라벨 — clusters × booths O(C*B) 매칭이라 매 렌더 재계산 비용이
-   * 큼. clusters / boothById 가 바뀔 때만 1회 계산해 Map 으로 메모이즈한 뒤
-   * 핀 렌더에서 lookup 만 한다 (지도 줌/팬으로 발생하는 빈번한 리렌더에 최적).
+   * 클러스터 핀 라벨 — booths 를 1회 순회하며 인덱스 lookup 으로 매칭 cluster 를
+   * 찾아 멤버명을 누적. 기존 O(C × B × K) (clusters × booths × includes) 를
+   * O(C + B) 평탄화. clusters / boothById 변경 시에만 재계산 → 줌/팬 리렌더
+   * 영향 없음.
    */
   const clusterLabels = useMemo(() => {
+    const memberNamesByClusterId = new Map<string, string[]>();
+    if (boothById) {
+      const index = buildClusterIndex(clusters);
+      for (const b of boothById.values()) {
+        const matched = findClustersForBooth(index, b);
+        for (const c of matched) {
+          const arr = memberNamesByClusterId.get(c.id);
+          if (arr) arr.push(b.name);
+          else memberNamesByClusterId.set(c.id, [b.name]);
+        }
+      }
+    }
     const labels = new Map<string, string[]>();
     for (const c of clusters) {
-      if (!boothById) {
-        labels.set(c.id, [c.name, '더보기 >']);
-        continue;
-      }
-      const memberSet = new Set<string>();
-      for (const b of boothById.values()) {
-        if (isClusterMember(c, b)) memberSet.add(b.name);
-      }
-      if (memberSet.size === 0) {
+      const names = memberNamesByClusterId.get(c.id);
+      if (!names || names.length === 0) {
         labels.set(c.id, [c.name, '더보기 >']);
       } else {
-        labels.set(c.id, [c.name, Array.from(memberSet).join(', '), '더보기 >']);
+        labels.set(c.id, [c.name, names.join(', '), '더보기 >']);
       }
     }
     return labels;
   }, [clusters, boothById]);
 
+  // 정상 흐름에서는 clusterLabels 가 모든 cluster 항목을 포함하므로 fallback
+  // 도달 안 함. 다만 향후 호출 측이 다른 reference 의 cluster 를 넘기더라도
+  // referential equality 가 유지되도록 module-level 상수로 둔다.
   const clusterLabel = useCallback(
     (c: BoothCluster): string[] =>
-      clusterLabels.get(c.id) ?? [c.name, '더보기 >'],
+      clusterLabels.get(c.id) ?? FALLBACK_CLUSTER_LABEL,
     [clusterLabels],
   );
   const foodLabel = (p: FoodPin): string[] => [p.name];
