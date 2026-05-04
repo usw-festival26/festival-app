@@ -1,9 +1,13 @@
 /**
  * 공지사항 데이터 접근 훅
+ *
+ * 백엔드 NoticeResponse 가 list 응답에 content 를 포함하도록 변경되면서
+ * (swagger 2026-05 기준) /api/notices/{id} 상세 엔드포인트가 제거됐다.
+ * useAnnouncementById 는 list 결과를 그대로 lookup 만 한다.
  */
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { config } from '@config/env';
-import { fetchAnnouncements, fetchAnnouncement } from '@api/endpoints';
+import { fetchAnnouncements } from '@api/endpoints';
 import { ANNOUNCEMENTS_DATA } from '@data/announcements';
 import type { Announcement } from '../types/announcement';
 
@@ -45,6 +49,10 @@ export function useAnnouncements() {
   return { data: announcements, announcements, isLoading, error, retry };
 }
 
+/**
+ * 단일 공지 lookup — 더 이상 별도 detail 엔드포인트가 없으므로 list 결과에서 find.
+ * useAnnouncements 를 내부에서 사용해 list 페치를 공유한다 (의존 쿼리 없음).
+ */
 export function useAnnouncementById(id: string): {
   data: Announcement | undefined;
   announcement: Announcement | undefined;
@@ -52,46 +60,10 @@ export function useAnnouncementById(id: string): {
   error: string | null;
   retry: () => void;
 } {
-  const [apiData, setApiData] = useState<Announcement | null>(null);
-  const [isLoading, setIsLoading] = useState(config.isApiEnabled);
-  const [error, setError] = useState<string | null>(null);
-  // request 식별자: id 가 빠르게 바뀌어도 가장 최신 요청의 응답만 state 에 반영.
-  const requestIdRef = useRef(0);
-
-  const retry = useCallback(() => {
-    if (!config.isApiEnabled) return;
-    // 빈 id 면 fetch 하지 않음. AnnouncementList 에서 expandedId 가 null 일 때
-    // 안전하게 호출할 수 있도록 한다. 직전에 다른 id 로 in-flight 요청이 떠 있을 수
-    // 있으므로 requestId 를 bump 해 그 응답이 state 를 덮지 못하게 무효화한다.
-    if (!id) {
-      requestIdRef.current++;
-      setApiData(null);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
-    const requestId = ++requestIdRef.current;
-    setApiData(null);
-    setError(null);
-    setIsLoading(true);
-    fetchAnnouncement(id)
-      .then((d) => { if (requestId === requestIdRef.current) setApiData(d); })
-      .catch((e: Error) => { if (requestId === requestIdRef.current) setError(e.message); })
-      .finally(() => { if (requestId === requestIdRef.current) setIsLoading(false); });
-  }, [id]);
-
-  useEffect(() => {
-    retry();
-    return () => { requestIdRef.current++; };
-  }, [retry]);
-
+  const { announcements, isLoading, error, retry } = useAnnouncements();
   const announcement = useMemo(() => {
     if (!id) return undefined;
-    // 직전 id 의 응답이 새 id 로 바뀐 직후 잠깐 살아남아 stale 상세를 노출하는 것을 막는다.
-    if (apiData?.id === id) return apiData;
-    if (config.isApiEnabled) return undefined;
-    return ANNOUNCEMENTS_DATA.find((a) => a.id === id);
-  }, [apiData, id]);
-
+    return announcements.find((a) => a.id === id);
+  }, [announcements, id]);
   return { data: announcement, announcement, isLoading, error, retry };
 }

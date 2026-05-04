@@ -9,6 +9,7 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../molecules/ScreenHeader';
 import { ScreenBackdrop, type ScreenBackdropVariant } from '../atoms/ScreenBackdrop';
+import { Colors } from '../../constants/colors';
 
 export interface BackdropScreenTemplateProps {
   title: string;
@@ -20,6 +21,11 @@ export interface BackdropScreenTemplateProps {
   headerTextColor?: string;
   /** 헤더 상단 바 아래, 같은 배경 안에 들어가는 보조 영역(예: 지도 카테고리 칩). */
   headerSubHeader?: React.ReactNode;
+  /**
+   * 화면(SafeAreaView) 배경 hex. ScreenBackdrop blob 들이 이 색 위에 그려진다.
+   * 기본값은 festival.primary-dark (네이비). 지도 화면 등 별도 톤이 필요하면 override.
+   */
+  screenBg?: string;
   children: React.ReactNode;
 }
 
@@ -32,10 +38,14 @@ export function BackdropScreenTemplate({
   headerBg = '#FFFFFF',
   headerTextColor = '#000000',
   headerSubHeader,
+  screenBg = Colors.festival.primaryDark,
   children,
 }: BackdropScreenTemplateProps) {
   return (
-    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: screenBg }}
+      edges={['top', 'bottom']}
+    >
       <View style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
         <ScreenBackdrop variant={backdropVariant} />
 

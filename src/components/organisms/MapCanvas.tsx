@@ -18,7 +18,8 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { MapPin, MAP_PIN_DIMENSIONS } from '@molecules/MapPin';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { buildClusterIndex, findClustersForBooth } from '@utils/clusterMembership';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ImageSourcePropType,
   LayoutChangeEvent,
@@ -67,12 +68,28 @@ export interface MapCanvasProps {
   editable?: boolean;
   /** 이미지 영역 탭 시 정규화 좌표(0~1) 반환. editable=true 일 때만 활성. */
   onCanvasTap?: (coords: MapCoords) => void;
+  /**
+   * 외부 컨테이너가 줄어든 상태(예: 바텀시트 펼침 / 에디터 패널 열림).
+   * true 가 되면 viewport 중심을 기준으로 자동 zoom-in,
+   * false 로 돌아오면 그만큼 zoom-out 한다. 사용자의 수동 줌 위에 multiplicative 로
+   * 얹어 상대 줌 비율은 보존.
+   */
+  expanded?: boolean;
 }
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2.5;
 const ZOOM_STEP = 0.25;
 const ZOOM_INITIAL = 1;
+/** expanded 토글 시 적용할 줌 배수 — 줄어든 viewport 만큼 시각적으로 보정. */
+const EXPANDED_ZOOM_FACTOR = 1.4;
+
+/**
+ * clusterLabel lookup 실패 시 fallback. module-level 상수라 동일 reference 가
+ * 유지되며, MapPin 이 향후 React.memo 로 감싸지더라도 referential equality 가
+ * 깨지지 않는다 (정상 흐름에서는 도달하지 않는 방어용).
+ */
+const FALLBACK_CLUSTER_LABEL: string[] = ['', '더보기 >'];
 
 export function MapCanvas({
   imgSource,
@@ -87,6 +104,7 @@ export function MapCanvas({
   selectedPinId,
   editable,
   onCanvasTap,
+  expanded,
 }: MapCanvasProps) {
   const aspect = imgNaturalHeight / imgNaturalWidth;
 
@@ -123,6 +141,14 @@ export function MapCanvas({
   const scale = useSharedValue(ZOOM_INITIAL);
   const startTx = useSharedValue(0);
   const startTy = useSharedValue(0);
+  /**
+   * 사용자 의도 줌 레벨 (base) — expanded 분율 적용 전 값.
+   * expanded 토글은 이 base 위에 EXPANDED_ZOOM_FACTOR 를 곱해 displayed scale 을
+   * 만든다. base 자체는 expanded 토글로 변하지 않으므로 토글 반복으로 인한
+   * 부동소수 누적 drift 가 발생하지 않는다(예: 1 → 펼침 1.4 → 접힘 1 (정확)).
+   * 사용자가 zoomTo 로 직접 변경하면 그때만 base 가 (newDisplayed / factor) 로 갱신.
+   */
+  const baseScaleRef = useRef(ZOOM_INITIAL);
   // worklet 안에서 bbox 를 읽기 위한 sharedValue. JS 의 pinBBox 변경 시 useEffect 로 동기화.
   const bboxMinX = useSharedValue(0);
   const bboxMaxX = useSharedValue(1);
@@ -136,10 +162,17 @@ export function MapCanvas({
     bboxMaxY.value = pinBBox.maxY;
   }, [pinBBox]);
 
-  // layout / 이미지 크기 결정 시 초기 위치 (이미지를 viewport 가운데 정렬)
-  // bbox 변경에는 반응하지 않음 — 사용자가 팬한 위치를 보존.
+  // 최초 layout 결정 시 1회만 초기 위치 (이미지를 viewport 가운데 정렬).
+  // 이후 layout 변경(예: 바텀시트 펼침으로 ch 가 줄어드는 애니메이션 프레임)에는 반응하지
+  // 않는다 — 그렇지 않으면 사용자의 수동 줌/팬 + expanded 자동 줌인까지 매 프레임 리셋됨.
+  // 후속 viewport 변화로 인한 tx/ty 가 bounds 를 벗어나는 경우는 아래 bbox/layout effect
+  // 에서 withTiming clamp 가 부드럽게 보정한다.
+  const didInitialLayoutRef = useRef(false);
   useEffect(() => {
+    if (didInitialLayoutRef.current) return;
     if (layout.cw === 0 || layout.ch === 0 || imgW === 0) return;
+    didInitialLayoutRef.current = true;
+    baseScaleRef.current = ZOOM_INITIAL;
     scale.value = ZOOM_INITIAL;
     tx.value = 0;
     ty.value = imgH < layout.ch ? (layout.ch - imgH) / 2 : 0;
@@ -262,8 +295,12 @@ export function MapCanvas({
     ],
   }));
 
-  // 줌 — viewport 중심점이 같은 이미지 좌표를 가리키도록 tx/ty 보정
-  const zoomTo = useCallback(
+  /**
+   * 내부 줌 적용 — scale/tx/ty 만 animate. baseScaleRef 는 변경 안 함.
+   * zoomTo (사용자 호출) 와 expanded 토글 effect 가 공유.
+   * viewport 중심점이 같은 이미지 좌표를 가리키도록 tx/ty 보정.
+   */
+  const applyZoom = useCallback(
     (newScale: number) => {
       const cx = layout.cw / 2;
       const cy = layout.ch / 2;
@@ -283,17 +320,88 @@ export function MapCanvas({
     [computeBounds, layout.cw, layout.ch],
   );
 
+  // 사용자 호출 — newScale 은 "보이는" displayed 줌. expanded 분율을 거꾸로 적용해
+  // base 를 환산. 이로써 사용자가 expanded 상태에서 줌을 바꿔도 base 가 일관된 의미
+  // (= 접혔을 때 보일 줌) 으로 기록되며, expanded 토글 반복 시 drift 가 없다.
+  const zoomTo = useCallback(
+    (newScale: number) => {
+      const factor = expanded ? EXPANDED_ZOOM_FACTOR : 1;
+      baseScaleRef.current = newScale / factor;
+      applyZoom(newScale);
+    },
+    [applyZoom, expanded],
+  );
+
   const zoomIn = () => zoomTo(Math.min(scaleState + ZOOM_STEP, ZOOM_MAX));
   const zoomOut = () => zoomTo(Math.max(scaleState - ZOOM_STEP, ZOOM_MIN));
 
-  // 핀 라벨 빌더
-  const clusterLabel = (c: BoothCluster): string[] => {
-    const memberNames = c.boothIds
-      .map((id) => boothById?.get(id)?.name)
-      .filter((n): n is string => !!n)
-      .join(', ');
-    return [c.name, memberNames || `${c.boothIds.length}개 부스`, '더보기 >'];
-  };
+  /**
+   * expanded 토글 시 자동 줌인/줌아웃.
+   *
+   * 초기 mount 는 prevExpandedRef === null 로 식별해 zoom 호출을 건너뛴다(첫 렌더에서
+   * scale 이 갑자기 튀는 걸 방지). layout 이 아직 안 잡힌 사이 expanded 가 바뀌면 ref
+   * 도 업데이트하지 않고 보류 → layout 이 들어오면 그때 한 번 줌이 동작한다.
+   *
+   * 타겟은 항상 baseScaleRef × factor — scale.value (animated mid-frame value) 를
+   * 곱하지 않아 토글 반복 / 애니메이션 진행 중 토글 시에도 누적 drift 없음.
+   */
+  const prevExpandedRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    const next = expanded ?? false;
+    if (prevExpandedRef.current === null) {
+      prevExpandedRef.current = next;
+      return;
+    }
+    if (prevExpandedRef.current === next) return;
+    if (layout.cw === 0 || layout.ch === 0) return;
+    prevExpandedRef.current = next;
+    const factor = next ? EXPANDED_ZOOM_FACTOR : 1;
+    const target = Math.max(
+      ZOOM_MIN,
+      Math.min(baseScaleRef.current * factor, ZOOM_MAX),
+    );
+    applyZoom(target);
+  }, [expanded, layout.cw, layout.ch, applyZoom]);
+
+  /**
+   * 클러스터 핀 라벨 — booths 를 1회 순회하며 인덱스 lookup 으로 매칭 cluster 를
+   * 찾아 멤버명을 누적. 기존 O(C × B × K) (clusters × booths × includes) 를
+   * O(C + B) 평탄화. clusters / boothById 변경 시에만 재계산 → 줌/팬 리렌더
+   * 영향 없음.
+   */
+  const clusterLabels = useMemo(() => {
+    const memberNamesByClusterId = new Map<string, string[]>();
+    if (boothById) {
+      const index = buildClusterIndex(clusters);
+      for (const b of boothById.values()) {
+        const matched = findClustersForBooth(index, b);
+        for (const c of matched) {
+          const arr = memberNamesByClusterId.get(c.id);
+          if (arr) arr.push(b.name);
+          else memberNamesByClusterId.set(c.id, [b.name]);
+        }
+      }
+    }
+    const labels = new Map<string, string[]>();
+    for (const c of clusters) {
+      const names = memberNamesByClusterId.get(c.id);
+      if (!names || names.length === 0) {
+        labels.set(c.id, [c.name, '더보기 >']);
+      } else {
+        labels.set(c.id, [c.name, names.join(', '), '더보기 >']);
+      }
+    }
+    return labels;
+  }, [clusters, boothById]);
+
+  // 정상 흐름에서는 clusterLabels 가 모든 cluster 항목을 포함하므로 fallback
+  // 도달 안 함. 다만 향후 호출 측이 다른 reference 의 cluster 를 넘기더라도
+  // referential equality 가 유지되도록 module-level 상수로 둔다.
+  const clusterLabel = useCallback(
+    (c: BoothCluster): string[] =>
+      clusterLabels.get(c.id) ?? FALLBACK_CLUSTER_LABEL,
+    [clusterLabels],
+  );
   const foodLabel = (p: FoodPin): string[] => [p.name];
   const facilityLabel = (p: FacilityPin): string[] =>
     p.phone ? [p.name, p.phone] : [p.name];

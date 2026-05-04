@@ -25,7 +25,7 @@ export default function MenuDetailScreen() {
 
   if (isLoading) {
     return (
-      <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
+      <BackdropScreenTemplate title="메뉴" backdropVariant="menu">
         <View className="items-center py-16">
           <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
         </View>
@@ -35,7 +35,7 @@ export default function MenuDetailScreen() {
 
   if (error) {
     return (
-      <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
+      <BackdropScreenTemplate title="메뉴" backdropVariant="menu">
         <NetworkErrorState onRetry={retry} />
       </BackdropScreenTemplate>
     );
@@ -43,7 +43,7 @@ export default function MenuDetailScreen() {
 
   if (!booth) {
     return (
-      <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
+      <BackdropScreenTemplate title="메뉴" backdropVariant="menu">
         <EmptyState message="부스를 찾을 수 없습니다." />
         <View className="items-center">
           <AppButton onPress={() => router.back()}>돌아가기</AppButton>
@@ -53,7 +53,7 @@ export default function MenuDetailScreen() {
   }
 
   return (
-    <BackdropScreenTemplate title="메뉴" backdropVariant="menu" leftAction="back">
+    <BackdropScreenTemplate title="메뉴" backdropVariant="menu">
       <BoothDetail booth={booth} menus={menusLoading ? undefined : menus} />
     </BackdropScreenTemplate>
   );
