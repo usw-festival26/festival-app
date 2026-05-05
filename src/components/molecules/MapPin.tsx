@@ -1,42 +1,105 @@
 /**
- * MapPin - 지도 위 핀포인트 (Figma 1960:731 기반)
+ * MapPin - 지도 위 핀포인트 (Figma 2096:801).
+ *
+ * SVG 자체를 import 하지 않고 path 데이터만 그대로 옮겨와 react-native-svg 로
+ * 인라인 렌더한다. 이유: Figma export SVG 가 `<filter>`, `<mask>` 를 포함해
+ * react-native-svg-transformer 가 변환에 실패한다 (Identifier 'Svg' has already
+ * been declared 류 SyntaxError). 경로/그라디언트는 `assets/images/pins/*.svg`
+ * 파일 내용 그대로 — Figma 디자이너가 export 한 픽셀과 동일하다.
  *
  * 구조 (위에서부터):
+ *           ⬤        마커 (티어드롭, 카테고리별 그라디언트)
+ *                    ↕ MARKER_GAP
  *   ┌──────────────┐
- *   │  Label 1     │  말풍선 (rounded rect, 그라디언트)
- *   │  Label 2     │
- *   │  Label 3     │
- *   └──────▽──────┘  말풍선 꼬리
- *           ⬤        핀 헤드 (circle + downward teardrop)
- *           ▼        앵커 포인트 (이 위치가 coords 와 일치)
+ *   │  Title       │  말풍선 (옅은 파스텔 + 흰색 stroke)
+ *   │  Subtitle    │
+ *   │       더보기› │
+ *   └──────▽──────┘  말풍선 tail (아래 방향, anchor)
  *
- * 카테고리(cluster/food/facility) 별로 셰입은 동일하고 그라디언트 색상만 분기.
+ * labelLines 슬롯
+ * - cluster: [name, members, '더보기 >']
+ * - food:    [name]
+ * - facility:[name(, phone)]
+ *
+ * anchor: 말풍선 tail 끝.
  */
 import React from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
-import { Colors } from '@constants/colors';
+import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import type { PinCategory } from '../../types/cluster';
 
-const PIN_WIDTH = 73;
-const BUBBLE_HEIGHT = 46;
-const BUBBLE_TAIL_HEIGHT = 5;
-const HEAD_HEIGHT = 20;
-const HEAD_WIDTH = 14;
-const TOTAL_HEIGHT = BUBBLE_HEIGHT + BUBBLE_TAIL_HEIGHT + HEAD_HEIGHT;
-
-const HEAD_CY = BUBBLE_HEIGHT + BUBBLE_TAIL_HEIGHT + HEAD_WIDTH / 2;
-
 /**
- * 카테고리별 [from, to] 그라디언트 색상.
- * to 끝 색상은 `Colors.festival.pin*` 토큰과 일원화 (tailwind.config.js 와도 동기).
- * from 시작 색상은 그라디언트 전용이라 토큰화 안 함.
+ * 핀 전체 비례 — 1.0 = Figma 원본 (마커 37×40, 말풍선 146×121).
+ * SVG path 데이터·gradient 좌표는 viewBox 원본 그대로, 렌더 width/height 만 줄여
+ * 마커·말풍선·텍스트가 동시에 따라간다. 이 값만 만지면 전체 사이즈 조절.
  */
-const GRADIENT_STOPS: Record<PinCategory, readonly [string, string]> = {
-  cluster: ['#FFBEBF', Colors.festival.pinCluster],
-  food: ['#FFE5C9', Colors.festival.pinFood],
-  facility: ['#C7F5DB', Colors.festival.pinFacility],
+const PIN_SCALE = 0.60;
+
+// === 마커 viewBox 원본 (path/gradient 좌표계) ===
+// 티어드롭 외곽 path — 세 색 모두 동일.
+const MARKER_PATH =
+  'M 18.2861 0 C 26.1759 0.000137096 32.5713 6.39634 32.5713 14.2861 C 32.5712 20.2695 28.8927 25.3926 23.6738 27.5195 L 22.6152 29.3535 C 20.6907 32.6867 15.8796 32.6868 13.9551 29.3535 L 12.8955 27.5186 C 7.67793 25.391 4.0001 20.2686 4 14.2861 C 4 6.39626 10.3963 0 18.2861 0 Z';
+const MARKER_VB_W = 37;
+const MARKER_VB_H = 40;
+const MARKER_VB_VISIBLE_BOTTOM = 32; // 티어드롭 tail tip y (그림자 제외)
+const MARKER_DOT_CX = 18.4924;
+const MARKER_DOT_CY = 14.4929;
+const MARKER_DOT_R = 4.469;
+
+// 그라디언트 (좌상→우하): SVG 의 linearGradient x1/y1=28.03/28.23 → x2/y2=6.25/7.12
+// 즉 (1,1) → (~0,~0) 정규화 ≈ from 우하 to 좌상.
+const MARKER_GRADIENT: Record<PinCategory, readonly [string, string]> = {
+  cluster: ['#0D00FF', '#FFBEBF'], // 파랑 핀 아이콘.svg
+  food: ['#FF514E', '#FFBEBF'], // 빨강 핀 아이콘.svg
+  facility: ['#00A75C', '#D7FF87'], // 초록 핀 아이콘.svg
 };
+
+// === 말풍선 viewBox 원본 ===
+// 빨강은 viewBox 가 146×120 으로 1px 짧지만 비례 맞추면 시각차 없음 — 통일.
+const BUBBLE_VB_W = 146;
+const BUBBLE_VB_H = 121;
+const BUBBLE_VB_BODY_H = 106.481;
+const BUBBLE_VB_TAIL_TIP_Y = 120;
+// 외곽 path — 둥근 사각형 (radius 20) + 하단 가운데 tail.
+const BUBBLE_PATH =
+  'M 126 0 C 137.046 0 146 8.9543 146 20 V 86.4814 C 146 97.527 137.046 106.481 126 106.481 H 82.9639 L 76.9062 117.78 C 75.0209 121.297 69.9791 121.297 68.0938 117.78 L 62.0361 106.481 H 20 C 8.9544 106.481 0.0002 97.527 0 86.4814 V 20 C 0 8.9543 8.9543 0 20 0 H 126 Z';
+
+const BUBBLE_FILL: Record<PinCategory, string> = {
+  cluster: '#FEF2FF', // 파랑핀.svg
+  food: '#FFE5E5', // 빨강핀.svg
+  facility: '#EBFFF3', // 초록 핀.svg
+};
+
+// === 렌더 치수 (PIN_SCALE 적용) ===
+const MARKER_W = MARKER_VB_W * PIN_SCALE;
+const MARKER_H = MARKER_VB_H * PIN_SCALE;
+const MARKER_VISIBLE_BOTTOM = MARKER_VB_VISIBLE_BOTTOM * PIN_SCALE;
+const BUBBLE_W = BUBBLE_VB_W * PIN_SCALE;
+const BUBBLE_H = BUBBLE_VB_H * PIN_SCALE;
+const BUBBLE_BODY_H = BUBBLE_VB_BODY_H * PIN_SCALE;
+const BUBBLE_TAIL_TIP_X = BUBBLE_W / 2;
+const BUBBLE_TAIL_TIP_Y = BUBBLE_VB_TAIL_TIP_Y * PIN_SCALE;
+const MARKER_GAP = 8 * PIN_SCALE;
+const PIN_WIDTH = BUBBLE_W;
+const TOTAL_HEIGHT = MARKER_VISIBLE_BOTTOM + MARKER_GAP + BUBBLE_H;
+
+// === 텍스트 (PIN_SCALE 적용) ===
+const TITLE_FONT = 15 * PIN_SCALE;
+const TITLE_LH = 18 * PIN_SCALE;
+const SUB_FONT = 12 * PIN_SCALE;
+const SUB_LH = 14 * PIN_SCALE;
+const SUB_MARGIN_TOP = 6 * PIN_SCALE;
+const TEXT_PAD_H = 16 * PIN_SCALE;
+const TEXT_PAD_V = 14 * PIN_SCALE;
+
+const PRETENDARD_SEMIBOLD = Platform.select({
+  web: 'Pretendard Variable',
+  default: 'Pretendard-SemiBold',
+});
+const PRETENDARD_REGULAR = Platform.select({
+  web: 'Pretendard Variable',
+  default: 'Pretendard-Regular',
+});
 
 export interface MapPinProps {
   category: PinCategory;
@@ -47,119 +110,177 @@ export interface MapPinProps {
    */
   labelLines: string[];
   onPress?: () => void;
-  /** 에디터에서 선택된 핀 표시용 흰 외곽선 */
+  /** 에디터에서 선택된 핀 강조 — 살짝 확대 */
   selected?: boolean;
 }
 
 export function MapPin({ category, labelLines, onPress, selected }: MapPinProps) {
-  const [from, to] = GRADIENT_STOPS[category];
-  const gradId = `pinGrad-${category}`;
+  const [gradFrom, gradTo] = MARKER_GRADIENT[category];
+  const bubbleFill = BUBBLE_FILL[category];
+  const gradId = `mapPinMarker-${category}`;
+
+  const lines = labelLines.slice(0, 3);
+  const moreIdx = lines.findIndex((l) => l.trim().startsWith('더보기'));
+  const moreLine = moreIdx >= 0 ? lines[moreIdx] : null;
+  const otherLines = moreIdx >= 0 ? lines.slice(0, moreIdx) : lines;
+  const title = otherLines[0];
+  const subtitle = otherLines[1];
 
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={labelLines.join(' ')}
-      style={{ width: PIN_WIDTH, height: TOTAL_HEIGHT }}
+      accessibilityLabel={lines.join(' ')}
+      style={{
+        width: PIN_WIDTH,
+        height: TOTAL_HEIGHT,
+        transform: selected ? [{ scale: 1.08 }] : undefined,
+      }}
     >
-      <Svg width={PIN_WIDTH} height={TOTAL_HEIGHT}>
-        <Defs>
-          <LinearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor={from} />
-            <Stop offset="1" stopColor={to} />
-          </LinearGradient>
-        </Defs>
-
-        {/* 말풍선 본체 */}
-        <Rect
-          x={0}
-          y={0}
-          width={PIN_WIDTH}
-          height={BUBBLE_HEIGHT}
-          rx={10}
-          ry={10}
-          fill={`url(#${gradId})`}
-        />
-
-        {/* 말풍선 꼬리 (말풍선 → 핀 헤드 연결) */}
-        <Path
-          d={`M ${PIN_WIDTH / 2 - 4.5} ${BUBBLE_HEIGHT}
-              L ${PIN_WIDTH / 2} ${BUBBLE_HEIGHT + BUBBLE_TAIL_HEIGHT}
-              L ${PIN_WIDTH / 2 + 4.5} ${BUBBLE_HEIGHT} Z`}
-          fill={to}
-        />
-
-        {/* 핀 헤드 — teardrop (원 + 아래로 뻗는 꼬리) */}
-        <Path
-          d={`M ${PIN_WIDTH / 2} ${TOTAL_HEIGHT}
-              L ${PIN_WIDTH / 2 - HEAD_WIDTH / 2 + 1} ${HEAD_CY + 2}
-              A ${HEAD_WIDTH / 2} ${HEAD_WIDTH / 2} 0 1 1 ${PIN_WIDTH / 2 + HEAD_WIDTH / 2 - 1} ${HEAD_CY + 2}
-              Z`}
-          fill={to}
-        />
-        <Circle cx={PIN_WIDTH / 2} cy={HEAD_CY} r={HEAD_WIDTH / 2} fill={to} />
-        <Circle cx={PIN_WIDTH / 2} cy={HEAD_CY} r={2.5} fill="#FFFFFF" />
-
-        {/* 선택 표시 */}
-        {selected ? (
-          <Rect
-            x={0.75}
-            y={0.75}
-            width={PIN_WIDTH - 1.5}
-            height={BUBBLE_HEIGHT - 1.5}
-            rx={10}
-            ry={10}
-            fill="none"
-            stroke="#FFFFFF"
-            strokeWidth={1.5}
-          />
-        ) : null}
-      </Svg>
-
-      {/* 텍스트 오버레이 — 말풍선 영역 안 */}
+      {/* 마커 (상단 가운데) */}
       <View
-        pointerEvents="none"
         style={{
           position: 'absolute',
-          left: 6,
-          right: 6,
           top: 0,
-          height: BUBBLE_HEIGHT,
-          justifyContent: 'center',
+          left: (PIN_WIDTH - MARKER_W) / 2,
+          width: MARKER_W,
+          height: MARKER_H,
+          // RN shadow (iOS) + elevation (Android) — Figma 의 filter dropShadow 대체
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 2,
+          elevation: 3,
         }}
       >
-        {labelLines.slice(0, 3).map((line, i) => (
-          <Text
-            key={i}
-            numberOfLines={1}
-            ellipsizeMode="tail"
+        <Svg width={MARKER_W} height={MARKER_H} viewBox={`0 0 ${MARKER_VB_W} ${MARKER_VB_H}`}>
+          <Defs>
+            <LinearGradient
+              id={gradId}
+              x1={28.0259}
+              y1={28.2337}
+              x2={6.25217}
+              y2={7.12257}
+              gradientUnits="userSpaceOnUse"
+            >
+              <Stop offset="0" stopColor={gradFrom} />
+              <Stop offset="1" stopColor={gradTo} />
+            </LinearGradient>
+          </Defs>
+          <Path
+            d={MARKER_PATH}
+            fill={`url(#${gradId})`}
+            stroke="#FFFFFF"
+            strokeWidth={1}
+          />
+          <Circle cx={MARKER_DOT_CX} cy={MARKER_DOT_CY} r={MARKER_DOT_R} fill="#FFFFFF" />
+        </Svg>
+      </View>
+
+      {/* 말풍선 + 텍스트 */}
+      <View
+        style={{
+          position: 'absolute',
+          top: MARKER_VISIBLE_BOTTOM + MARKER_GAP,
+          left: 0,
+          width: BUBBLE_W,
+          height: BUBBLE_H,
+        }}
+      >
+        <Svg width={BUBBLE_W} height={BUBBLE_H} viewBox={`0 0 ${BUBBLE_VB_W} ${BUBBLE_VB_H}`}>
+          <Path d={BUBBLE_PATH} fill={bubbleFill} stroke="#FFFFFF" strokeWidth={1} />
+        </Svg>
+
+        {/* 텍스트 오버레이 — 본문 영역 (tail 제외) */}
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: BUBBLE_W,
+            height: BUBBLE_BODY_H,
+            paddingHorizontal: TEXT_PAD_H,
+            paddingVertical: TEXT_PAD_V,
+          }}
+        >
+          {/* 제목 + 부제 */}
+          <View
             style={{
-              fontFamily: Platform.select({
-                web: 'Pretendard Variable',
-                default: i === 0 ? 'Pretendard-SemiBold' : 'Pretendard-Regular',
-              }),
-              fontWeight: i === 0 ? '600' : '400',
-              fontSize: i === 0 ? 11 : 9,
-              lineHeight: i === 0 ? 14 : 12,
-              color: '#FFFFFF',
-              textAlign: 'center',
+              flex: moreLine ? 0 : 1,
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            {line}
-          </Text>
-        ))}
+            {title ? (
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{
+                  fontFamily: PRETENDARD_SEMIBOLD,
+                  fontWeight: '600',
+                  fontSize: TITLE_FONT,
+                  lineHeight: TITLE_LH,
+                  color: '#000000',
+                  textAlign: 'center',
+                }}
+              >
+                {title}
+              </Text>
+            ) : null}
+            {subtitle ? (
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{
+                  fontFamily: PRETENDARD_REGULAR,
+                  fontWeight: '400',
+                  fontSize: SUB_FONT,
+                  lineHeight: SUB_LH,
+                  color: '#000000',
+                  textAlign: 'center',
+                  marginTop: SUB_MARGIN_TOP,
+                }}
+              >
+                {subtitle}
+              </Text>
+            ) : null}
+          </View>
+
+          {/* 더보기 (오른쪽 하단) */}
+          {moreLine ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'flex-end',
+                alignItems: 'flex-end',
+              }}
+            >
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontFamily: PRETENDARD_REGULAR,
+                  fontWeight: '400',
+                  fontSize: SUB_FONT,
+                  lineHeight: SUB_LH,
+                  color: '#000000',
+                  textAlign: 'right',
+                }}
+              >
+                {moreLine}
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </View>
     </Pressable>
   );
 }
 
-/**
- * 핀 배치 시 좌표가 핀의 어느 지점을 가리키는지 — 핀 헤드 끝(말풍선 아래 마커 tip).
- * 부모는 left = coords.x * imgW - anchorX, top = coords.y * imgH - anchorY 로 배치.
- */
+/** 핀 anchor — 좌표가 가리키는 정확한 지점 = 말풍선 tail 끝. */
 export const MAP_PIN_DIMENSIONS = {
   width: PIN_WIDTH,
   height: TOTAL_HEIGHT,
-  anchorX: PIN_WIDTH / 2,
-  anchorY: TOTAL_HEIGHT,
+  anchorX: BUBBLE_TAIL_TIP_X,
+  anchorY: MARKER_VISIBLE_BOTTOM + MARKER_GAP + BUBBLE_TAIL_TIP_Y,
 } as const;
