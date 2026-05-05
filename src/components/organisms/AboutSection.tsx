@@ -92,7 +92,7 @@ export function AboutSection({ title = 'About Us' }: AboutSectionProps) {
                     color: '#FFFFFF',
                   }}
                 >
-                  Imformation
+                  Information
                 </Text>
               </View>
             </Pressable>
