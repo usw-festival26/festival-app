@@ -50,6 +50,22 @@ Timetable, booths, announcements, and lost-found data are in `src/data/*.ts` as 
 - **Language**: Code in English, UI labels and comments in Korean.
 - **Path aliases**: `@components/*`, `@atoms/*`, `@molecules/*`, `@organisms/*`, `@types/*`, `@data/*`, `@hooks/*`, `@constants/*`, `@utils/*` defined in `tsconfig.json`.
 
+## 삭제·파괴적 작업 규칙
+
+`rm`, `git reset --hard`, `git push --force`, `git branch -D`, AsyncStorage clear 등 **되돌릴 수 없는 작업은 가역적 방식 우선**.
+
+- **`rm` 대신 `.trash/` 로 mv** — 프로젝트 루트 `.trash/` 가 표준 휴지통(.gitignore 등록). Git Bash 의 `rm` 은 Windows Recycle Bin 을 우회해 hard delete 라 사용자 업로드 파일 영구 손실 위험. 실제 사례: `assets/images/artist/` 사진 8장 영구 손실.
+   ```bash
+   # Bad
+   rm assets/images/foo.jpg
+
+   # Good
+   mv assets/images/foo.jpg .trash/foo_$(date +%Y%m%d_%H%M%S).jpg
+   ```
+- **2개 이상 한꺼번에 삭제** 또는 **사용자 업로드 자산** 삭제 직전 — auto mode 라도 사용자에게 "지울 파일 N개: ... — 맞나요?" 한 번 더 확인.
+- **Git 파괴 작업** — 사용자 명시 요청 후에만. 시작 전 현재 hash 기록 / stash 백업.
+- 사용자가 `.trash/` 를 주기적으로 비워야 하지만, 그 전까지는 즉시 회수 가능.
+
 ## Figma 에셋 작업 규칙
 
 Figma asset URL (`https://www.figma.com/api/mcp/asset/...`) 또는 `get_screenshot` 의 raw 이미지를 절대 직접 fetch/download 하지 말 것 — 인증이 필요해서 400 으로 깨지고, 그 응답이 모델 입력으로 들어가면 conversation 이 터진다.
