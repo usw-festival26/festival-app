@@ -8,13 +8,18 @@
  * 클릭 가능. URL 이 비어 있으면 라벨만 표시.
  */
 import React from 'react';
-import { View, Text, Pressable, Linking } from 'react-native';
-import { RobotoBlackText } from '@atoms/RobotoBlackText';
+import { View, Text, Image, Pressable, Linking } from 'react-native';
 import { CONTACT_INFO } from '@data/contact';
 
 const MUTED_DARK = '#515151';
 const MUTED = '#7D7D7D';
 const HAIRLINE = '#BFBFBF';
+
+// 미드나잇 가로 로고 — intrinsic 1696×729 (≈ 2.326 비율).
+const LOGO_SOURCE = require('../../../assets/images/logo/미드나잇로고_가로.png');
+const LOGO_ASPECT_RATIO = 1696 / 729;
+const LOGO_HEIGHT = 23;
+const LOGO_WIDTH = Math.round(LOGO_HEIGHT * LOGO_ASPECT_RATIO);
 
 const LABEL = { color: MUTED_DARK, fontFamily: 'Pretendard-SemiBold', fontWeight: '600' as const };
 const VALUE = { color: MUTED, fontFamily: 'Pretendard-Regular' };
@@ -41,9 +46,12 @@ export function Footer() {
       }}
     >
       <View style={{ marginBottom: 6 }}>
-        <RobotoBlackText size={20} lineHeight={23} color="#000000">
-          LOGO
-        </RobotoBlackText>
+        <Image
+          source={LOGO_SOURCE}
+          style={{ width: LOGO_WIDTH, height: LOGO_HEIGHT }}
+          resizeMode="contain"
+          accessibilityLabel="미드나잇 로고"
+        />
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>

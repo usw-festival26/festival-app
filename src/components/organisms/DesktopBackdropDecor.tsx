@@ -20,7 +20,15 @@ import { Colors } from '@constants/colors';
 import { FESTIVAL_INFO } from '@constants/festival';
 import { CONTACT_INFO } from '@data/contact';
 import React from 'react';
-import { Linking, Text, View } from 'react-native';
+import { Image, Linking, Text, View } from 'react-native';
+
+// 미드나잇 가로 로고 — Roboto Black 48 'MIDNIGHT' 텍스트 자리 대체.
+// intrinsic 1696×729 (≈ 2.326). react-native-web 호환 위해 하드코딩.
+// 로고 파일 교체 시 IHDR width/height 로 BRAND_LOGO_ASPECT_RATIO 갱신.
+const BRAND_LOGO_SOURCE = require('../../../assets/images/logo/미드나잇로고_가로.png');
+const BRAND_LOGO_ASPECT_RATIO = 1696 / 729;
+const BRAND_LOGO_HEIGHT = 52;
+const BRAND_LOGO_WIDTH = Math.round(BRAND_LOGO_HEIGHT * BRAND_LOGO_ASPECT_RATIO);
 
 // mobile-content 폭 (global.css 의 max-width 와 동기화)
 const MOBILE_CONTENT_WIDTH = 402;
@@ -137,16 +145,12 @@ export function DesktopBackdropDecor() {
               >
                 {FESTIVAL_INFO.tagline}
               </Text>
-              <Text
-                style={{
-                  fontFamily: 'Roboto_900Black',
-                  fontSize: 48,
-                  lineHeight: 52,
-                  color: Colors.festival.logoPurple,
-                }}
-              >
-                {FESTIVAL_INFO.brand}
-              </Text>
+              <Image
+                source={BRAND_LOGO_SOURCE}
+                style={{ width: BRAND_LOGO_WIDTH, height: BRAND_LOGO_HEIGHT }}
+                resizeMode="contain"
+                accessibilityLabel={FESTIVAL_INFO.brand}
+              />
             </View>
 
             {/* 900:218 — 학교/단체명 (Pretendard SemiBold 15) */}

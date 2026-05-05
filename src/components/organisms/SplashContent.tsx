@@ -7,7 +7,7 @@
  * 트랜지션: 터치 → blur(web) + scale + lavender wash, ease-out-expo, 620ms
  */
 import React, { useEffect, useState } from 'react';
-import { Pressable, View, StyleSheet, Platform, Text, AccessibilityInfo } from 'react-native';
+import { Pressable, View, StyleSheet, Platform, Image, AccessibilityInfo } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -218,24 +218,27 @@ export function SplashContent({ onPress }: SplashContentProps) {
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={styles.root}
-      className="bg-festival-primary-dark"
+      className="bg-festival-primary-light"
     >
       <Animated.View style={containerStyle}>
         {BLOBS.map((spec) => (
           <DriftBlob key={spec.gradientId} spec={spec} drift={drift} />
         ))}
 
-        {/* MAIN / LOGO — 920:3826 (x:54, y:360, w:294, h:154)
-            AppText는 variant=body 기본값이 fontSize 16/color #000을 강제 주입하므로
-            여기서는 RN <Text>를 직접 사용. */}
+        {/* 미드나잇 로고 — 920:3826 자리 (x:54, y:360, w:294, h:154).
+            정방형 PNG 를 contain 으로 가운데 정렬 → 약 154×154 로 표시. */}
         <View pointerEvents="none" style={styles.logoWrap}>
-          <Text style={styles.logoText}>MAIN</Text>
-          <Text style={styles.logoText}>LOGO</Text>
+          <Image
+            source={require('../../../assets/images/logo/미드나잇로고.png')}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="contain"
+            accessibilityLabel="미드나잇 로고"
+          />
         </View>
 
         {/* 터치 안내 — 920:3827 (y:761) */}
         <View pointerEvents="none" style={styles.hintWrap}>
-          <AppText className="text-[12px] text-white text-center font-pretendard">
+          <AppText className="text-[12px] text-festival-primary-dark text-center font-pretendard">
             화면을 터치해주세요
           </AppText>
         </View>
@@ -270,15 +273,6 @@ const styles = StyleSheet.create({
     height: 154,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoText: {
-    fontFamily: Platform.select({ web: 'Roboto', default: 'Roboto_900Black' }),
-    fontWeight: '900',
-    fontSize: 48,
-    lineHeight: 40,
-    letterSpacing: 0,
-    color: '#E0DCFF',
-    textAlign: 'center',
   },
 
   hintWrap: {

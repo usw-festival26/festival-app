@@ -6,11 +6,19 @@
  * subHeader(지도 칩 등)가 주어지면 header bg 가 아래로 확장되어 하나의 라운드 컨테이너로 묶인다.
  */
 import React from 'react';
-import { View, Pressable } from 'react-native';
+import { View, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { RobotoBlackText } from '../atoms/RobotoBlackText';
+
+// 우측 로고 — 미드나잇로고_가로.png intrinsic 1696×729 (= aspect ratio ≈ 2.326).
+// react-native-web 에 Image.resolveAssetSource 가 없어 하드코딩.
+// 로고 파일 교체 시 IHDR 의 width/height 로 LOGO_ASPECT_RATIO 갱신.
+const LOGO_SOURCE = require('../../../assets/images/logo/미드나잇로고_가로.png');
+const LOGO_ASPECT_RATIO = 1696 / 729;
+const LOGO_HEIGHT = 23;
+const LOGO_WIDTH = Math.round(LOGO_HEIGHT * LOGO_ASPECT_RATIO);
 
 export interface ScreenHeaderProps {
   title?: string;
@@ -119,8 +127,9 @@ export function ScreenHeader({
           </View>
         ) : null}
 
-        {/* LOGO — 어느 화면에서도 탭하면 홈으로 이동.
-            Drawer 내비게이션과 동일하게 router.replace 로 동작시켜 탭 사이 이동을 일치시킨다. */}
+        {/* 로고 — 어느 화면에서도 탭하면 홈으로 이동. 이전 텍스트 'LOGO' 자리.
+            rightLabel prop 은 legacy public API 안정성 위해 그대로 두지만 현재
+            rendering 에선 사용하지 않는다 (이미지 로고로 통일). */}
         <Pressable
           onPress={() => router.replace('/(tabs)/home')}
           accessibilityRole="button"
@@ -128,9 +137,11 @@ export function ScreenHeader({
           style={{ position: 'absolute', right: 24, top: 23 }}
           className="active:opacity-70"
         >
-          <RobotoBlackText size={20} lineHeight={23} color={textColor}>
-            {rightLabel}
-          </RobotoBlackText>
+          <Image
+            source={LOGO_SOURCE}
+            style={{ width: LOGO_WIDTH, height: LOGO_HEIGHT }}
+            resizeMode="contain"
+          />
         </Pressable>
       </View>
 
