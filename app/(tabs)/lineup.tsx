@@ -19,7 +19,7 @@ export default function LineupScreen() {
       headerBg="#FFFFFF"
       headerTextColor="#000000"
     >
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingTop: 18, paddingHorizontal: 16, paddingBottom: 24 }}>
         <LineupList artists={data} />
       </ScrollView>
     </BackdropScreenTemplate>

@@ -79,7 +79,7 @@ export default function RootLayout() {
         favicon 은 app.json web.favicon (assets/images/VectorCircle.png) 으로 일원화.
       */}
       <Head>
-        <title>USW Festival 2026</title>
+        <title>2026년 수원대학교 대동제</title>
       </Head>
       <MobileWeb>
         <Stack screenOptions={{ headerShown: false }}>

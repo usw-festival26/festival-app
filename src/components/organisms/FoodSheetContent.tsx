@@ -46,6 +46,7 @@ export function FoodSheetContent({ booths, isLoading, error, onRetry }: FoodShee
                   title={item.name}
                   time={item.location}
                   about={item.description}
+                  imageUri={item.imageUri}
                   onPress={() => router.push(`/(tabs)/booth/${item.id}`)}
                 />
               ))}

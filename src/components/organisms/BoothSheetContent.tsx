@@ -74,6 +74,7 @@ export function BoothSheetContent({
                   title={item.name}
                   time={item.location}
                   about={item.description}
+                  imageUri={item.imageUri}
                   onPress={() => router.push(`/(tabs)/booth/${item.id}`)}
                 />
               ))}

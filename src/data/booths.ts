@@ -67,7 +67,7 @@ export const BOOTHS_DATA: Booth[] = [
     id: 'booth-005',
     name: '굿즈샵',
     organizer: '총학생회',
-    description: 'USW 축제 공식 굿즈를 판매합니다.',
+    description: '2026년 수원대학교 대동제 공식 굿즈를 판매합니다.',
     location: 'A구역 5번',
     category: 'merchandise',
     menuItems: [

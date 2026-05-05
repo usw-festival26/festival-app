@@ -11,6 +11,7 @@
  * 맵 자체(이미지/팬/줌/핀 렌더)는 MapCanvas 가 담당. 줌 +/− 버튼은 캔버스 빌트인.
  */
 import { DragHandle } from '@atoms/DragHandle';
+import { Colors } from '@constants/colors';
 import { MapCanvas, type AnyPin } from '@organisms/MapCanvas';
 import React, { useEffect, useMemo, useRef } from 'react';
 import {
@@ -233,11 +234,13 @@ export function BoothMapView({
         expanded={expanded}
       />
 
-      {/* 바텀시트 — 외곽 래퍼는 navy 로 채워 둥근 모서리 exclusion zone 으로 backdrop blob이 비치지 않게 한다. */}
+      {/* 바텀시트 — 외곽 래퍼는 지도 이미지(메인 지도.jpg)의 외곽 배경색(festival.bright)
+          으로 채운다. 둥근 모서리 exclusion zone 이 지도 바닥 영역과 자연스럽게 이어지고,
+          backdrop blob 이 비치는 것도 동시에 막는다. */}
       <Animated.View
         style={{
           height: sheetAnim,
-          backgroundColor: '#010070',
+          backgroundColor: Colors.festival.bright,
         }}
         onLayout={onSheetLayout}
       >
