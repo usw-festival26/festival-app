@@ -7,7 +7,7 @@
  *
  * 구조:
  *   MAIN row (화면 전체)
- *   ├── 좌측 영역 (flex:1) — 좌측 blob + 콘텐츠 그룹(USW 2026 + 학교명 + MAIN LOGO)
+ *   ├── 좌측 영역 (flex:1) — 좌측 blob + 콘텐츠 그룹(대동제 타이틀 + 학교명 + MAIN LOGO)
  *   ├── 가운데 placeholder (width 402 = mobile-content 폭)
  *   └── 우측 영역 (flex:1) — 우상단/우중앙 blob
  *   FOOTER row (하단 고정)
@@ -17,6 +17,7 @@
  */
 import { GradientBlob } from '@atoms/GradientBlob';
 import { Colors } from '@constants/colors';
+import { FESTIVAL_INFO } from '@constants/festival';
 import { CONTACT_INFO } from '@data/contact';
 import React from 'react';
 import { Linking, Text, View } from 'react-native';
@@ -87,7 +88,7 @@ export function DesktopBackdropDecor() {
             <GradientBlob size={BLOB_LEFT_CENTER} rotate={-90} />
           </View>
 
-          {/* 콘텐츠 그룹: USW 2026 Festival + 학교명 + MAIN LOGO */}
+          {/* 콘텐츠 그룹: 2026년 수원대학교 대동제 + 학교명 + MAIN LOGO */}
           <View
             style={{
               width: CONTENT_GROUP_WIDTH,
@@ -95,13 +96,13 @@ export function DesktopBackdropDecor() {
               position: 'relative',
             }}
           >
-            {/* 900:217 — USW 2026 Festival (Roboto Black 32) */}
+            {/* 900:217 — 2026년 수원대학교 대동제 (Pretendard Black 32, 한글) */}
             <View style={{ position: 'absolute', left: TEXT_INSET, top: 0 }}>
-              {['USW', '2026', 'Festival'].map((line) => (
+              {['2026년', '수원대학교', '대동제'].map((line) => (
                 <Text
                   key={line}
                   style={{
-                    fontFamily: 'Roboto_900Black',
+                    fontFamily: 'Pretendard-Black',
                     fontSize: 32,
                     lineHeight: 45,
                     color: Colors.festival.text,
@@ -112,8 +113,8 @@ export function DesktopBackdropDecor() {
               ))}
             </View>
 
-            {/* 900:219 — MAIN LOGO (Roboto Black 48, 보라)
-                USW 2026 Festival / 학교명과 같은 좌측 정렬축(TEXT_INSET) 으로 묶어
+            {/* 900:219 자리 — 슬로건 + 영문 브랜드 (이전 MAIN/LOGO placeholder 자리).
+                대동제 타이틀 / 학교명과 같은 좌측 정렬축(TEXT_INSET) 으로 묶어
                 한 컬럼처럼 보이게 한다. (Figma 의 박스 가운데 정렬은 1920 폭에서만
                 자연스럽고, flex 폭에서는 시각 중심이 어긋나 보였음) */}
             <View
@@ -125,19 +126,27 @@ export function DesktopBackdropDecor() {
                 justifyContent: 'center',
               }}
             >
-              {['MAIN', 'LOGO'].map((line) => (
-                <Text
-                  key={line}
-                  style={{
-                    fontFamily: 'Roboto_900Black',
-                    fontSize: 48,
-                    lineHeight: 40,
-                    color: Colors.festival.logoPurple,
-                  }}
-                >
-                  {line}
-                </Text>
-              ))}
+              <Text
+                style={{
+                  fontFamily: 'Pretendard-SemiBold',
+                  fontSize: 18,
+                  lineHeight: 26,
+                  color: Colors.festival.text,
+                  marginBottom: 10,
+                }}
+              >
+                {FESTIVAL_INFO.tagline}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Roboto_900Black',
+                  fontSize: 48,
+                  lineHeight: 52,
+                  color: Colors.festival.logoPurple,
+                }}
+              >
+                {FESTIVAL_INFO.brand}
+              </Text>
             </View>
 
             {/* 900:218 — 학교/단체명 (Pretendard SemiBold 15) */}
