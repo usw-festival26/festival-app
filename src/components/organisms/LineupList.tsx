@@ -5,10 +5,10 @@
  * 카드별 tail 위치가 번갈아 바뀐다: 짝수 index → 좌하 각짐(텍스트 우측),
  * 홀수 index → 우하 각짐(텍스트 좌측).
  */
-import React from 'react';
-import { View, Platform } from 'react-native';
 import { AppText } from '@atoms/AppText';
 import { ArtistCard } from '@molecules/ArtistCard';
+import React from 'react';
+import { Platform, View } from 'react-native';
 import type { Artist } from '../../types/lineup';
 
 export interface LineupListProps {
@@ -31,7 +31,7 @@ export function LineupList({ artists }: LineupListProps) {
           marginBottom: 32,
         }}
       >
-        Festival Lineup!
+        Festival Lineup
       </AppText>
 
       <View style={{ gap: 40, alignItems: 'center' }}>
