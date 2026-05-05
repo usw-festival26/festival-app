@@ -49,3 +49,16 @@ Timetable, booths, announcements, and lost-found data are in `src/data/*.ts` as 
 - **Barrel exports**: Each directory has `index.ts`. Import from the barrel, not individual files.
 - **Language**: Code in English, UI labels and comments in Korean.
 - **Path aliases**: `@components/*`, `@atoms/*`, `@molecules/*`, `@organisms/*`, `@types/*`, `@data/*`, `@hooks/*`, `@constants/*`, `@utils/*` defined in `tsconfig.json`.
+
+## Figma 에셋 작업 규칙
+
+Figma asset URL (`https://www.figma.com/api/mcp/asset/...`) 또는 `get_screenshot` 의 raw 이미지를 절대 직접 fetch/download 하지 말 것 — 인증이 필요해서 400 으로 깨지고, 그 응답이 모델 입력으로 들어가면 conversation 이 터진다.
+
+워크플로:
+1. **사양만 필요한 경우** — `get_design_context` 또는 `get_metadata` 만 호출. 색상·치수·레이아웃은 이걸로 충분.
+2. **이미지 자체가 필요한 경우** — `assets/images/<topic>/` 에 이미 다운로드돼 있는지 먼저 확인. 있으면 그걸 사용.
+3. **없으면** — 사용자에게 "<file> 을 `assets/images/<topic>/` 에 다운로드해 달라" 고 명시적으로 요청. 직접 fetch 하지 말 것.
+
+SVG 사용 두 갈래:
+- 단순한 `<path>` SVG (필터/마스크 없음) — `react-native-svg-transformer` 가 처리하므로 `import Foo from '...svg'` 로 그냥 import.
+- Figma export SVG (`<filter>`, `<mask>` 포함) — transformer 가 `Identifier 'Svg' has already been declared` SyntaxError 로 깨진다. 이 경우 SVG 의 `<path d>`, `<linearGradient>` stops, fill 색만 뽑아서 `react-native-svg` (Svg/Path/Defs/LinearGradient/Stop) 로 인라인 렌더하고, `<filter>` 는 RN `shadowColor`/`elevation` 으로 대체. 예: `src/components/molecules/MapPin.tsx`.
