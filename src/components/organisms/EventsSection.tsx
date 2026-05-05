@@ -38,7 +38,7 @@ export function EventsSection() {
             fontWeight: '900',
             fontSize: 20,
             lineHeight: 23,
-            color: '#FFFFFF',
+            color: '#010070',
             letterSpacing: 0,
           }}
         >
@@ -56,13 +56,13 @@ export function EventsSection() {
               fontFamily: PRETENDARD_REGULAR,
               fontWeight: '400',
               fontSize: 12,
-              color: '#FFFFFF',
+              color: '#010070',
               opacity: 0.9,
             }}
           >
             더보기
           </Text>
-          <Ionicons name="chevron-forward" size={12} color="#FFFFFF" style={{ opacity: 0.9 }} />
+          <Ionicons name="chevron-forward" size={12} color="#010070" style={{ opacity: 0.9 }} />
         </Pressable>
       </View>
 

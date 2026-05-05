@@ -36,7 +36,7 @@ export function DrawerContent({ navigation }: DrawerContentComponentProps) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-festival-lavender" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-festival-nav" edges={['top', 'bottom']}>
       <View className="flex-1 px-[16px] pt-[20px]">
         <Pressable
           onPress={() => navigation.dispatch(DrawerActions.closeDrawer())}

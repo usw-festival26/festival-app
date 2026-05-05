@@ -16,7 +16,11 @@ module.exports = {
       colors: {
         festival: {
           'primary-dark': '#010070',
-          primary: '#0D00FF',
+          primary: '#0068FF',
+          'primary-light': '#C3EDFF',
+          'secondary-from': '#A5FFF3',
+          'secondary-to': '#0068FF',
+          nav: '#70D4FF',
           lavender: '#E0DCFF',
           pink: '#FFBEBF',
           bright: '#FEF2FF',
@@ -27,7 +31,7 @@ module.exports = {
           'muted-dark': '#515151',
           'error-red': '#FF3B30',
           'logo-purple': '#9B5A9A',
-          'pin-cluster': '#0D00FF',
+          'pin-cluster': '#0068FF',
           'pin-food': '#FF7A00',
           'pin-facility': '#22C55E',
         },

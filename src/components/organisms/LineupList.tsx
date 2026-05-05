@@ -26,7 +26,7 @@ export function LineupList({ artists }: LineupListProps) {
           fontWeight: '900',
           fontSize: 32,
           lineHeight: 45,
-          color: '#FFFFFF',
+          color: '#010070',
           textAlign: 'center',
           marginBottom: 32,
         }}
@@ -48,7 +48,7 @@ export function LineupList({ artists }: LineupListProps) {
         style={{
           fontFamily: 'Pretendard-Black',
           fontSize: 22,
-          color: '#FFFFFF',
+          color: '#010070',
           marginTop: 32,
         }}
       >

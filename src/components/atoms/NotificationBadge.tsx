@@ -51,8 +51,8 @@ export function NotificationBadge({ label, variant = 'notification' }: Notificat
       >
         <Defs>
           <LinearGradient id={gradId} x1="0.97" y1="0.60" x2="0.03" y2="0.40">
-            <Stop offset="0.135" stopColor="#0D00FF" stopOpacity="0.4" />
-            <Stop offset="0.846" stopColor="#FFBEBF" stopOpacity="0.4" />
+            <Stop offset="0.135" stopColor="#A5FFF3" stopOpacity="0.4" />
+            <Stop offset="0.846" stopColor="#0068FF" stopOpacity="0.4" />
           </LinearGradient>
         </Defs>
         <Rect x={0} y={0} width="100%" height="100%" fill={`url(#${gradId})`} />

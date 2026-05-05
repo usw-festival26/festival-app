@@ -48,8 +48,9 @@ const MARKER_DOT_R = 4.469;
 
 // 그라디언트 (좌상→우하): SVG 의 linearGradient x1/y1=28.03/28.23 → x2/y2=6.25/7.12
 // 즉 (1,1) → (~0,~0) 정규화 ≈ from 우하 to 좌상.
+// cluster 는 새 secondary 팔레트(#A5FFF3 → #0068FF) 적용 — 브랜드 통일.
 const MARKER_GRADIENT: Record<PinCategory, readonly [string, string]> = {
-  cluster: ['#0D00FF', '#FFBEBF'], // 파랑 핀 아이콘.svg
+  cluster: ['#A5FFF3', '#0068FF'],
   food: ['#FF514E', '#FFBEBF'], // 빨강 핀 아이콘.svg
   facility: ['#00A75C', '#D7FF87'], // 초록 핀 아이콘.svg
 };

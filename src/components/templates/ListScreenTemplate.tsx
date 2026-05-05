@@ -19,7 +19,7 @@ export interface ListScreenTemplateProps {
 
 export function ListScreenTemplate({ title, children, showHeader = true }: ListScreenTemplateProps) {
   return (
-    <SafeAreaView className="flex-1 bg-festival-primary-dark" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-festival-primary-light" edges={['top']}>
       {showHeader && <ScreenHeader title={title} />}
       <View className="flex-1">{children}</View>
     </SafeAreaView>
