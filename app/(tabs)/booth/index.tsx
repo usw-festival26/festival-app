@@ -136,6 +136,11 @@ export default function BoothMapScreen() {
         onPinPress={handlePinPress}
         selectedClusterName={selectedClusterName}
         onClearClusterFilter={() => setSelectedClusterId(undefined)}
+        onSelectCluster={(id) => {
+          // 단과대 카드 탭 = cluster pin 탭과 동일한 효과 (시트 펼침은 이미 켜져 있음)
+          setSelectedClusterId(id);
+          setActiveCategory('booth');
+        }}
         isLoading={isLoading}
         error={error}
         onRetry={retry}

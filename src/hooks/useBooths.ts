@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { config } from '@config/env';
 import { fetchBooths, fetchBooth, fetchMenusByBooth } from '@api/endpoints';
 import { BOOTHS_DATA } from '@data/booths';
+import { COLLEGE_ORDER } from '@data/collegeLabels';
 import type { Booth, BoothCategory, BoothMenuItem } from '../types/booth';
 
 export interface UseBoothsOptions {
@@ -142,15 +143,23 @@ export function useBoothMenus(boothId: string): {
 /**
  * 부스 데이터에서 단과대명 유니크 목록을 뽑아낸다.
  * useBooths 의 source 와 동일하게 API/하드코딩 fallback 을 따른다.
- * 정렬은 입력 등장 순서 (Set 삽입 순) 보존 — 운영자가 booths.ts 에서 의도한 순서대로 칩이 노출됨.
+ * 결과는 COLLEGE_ORDER 순서 — useBooths 도 같은 순서로 정렬되므로 칩 ↔ 그리드
+ * 순서가 일치한다. collegeKey 가 없는 부스는 라벨 추출에서 제외.
  */
 export function useCollegeNames(): string[] {
   const { booths } = useBooths();
   return useMemo(() => {
-    const set = new Set<string>();
+    // collegeKey 별로 첫 라벨 한 개씩 모은 뒤 COLLEGE_ORDER 순서로 출력.
+    const labelByKey = new Map<string, string>();
     for (const b of booths) {
-      if (b.college) set.add(b.college);
+      if (!b.collegeKey || !b.college) continue;
+      if (!labelByKey.has(b.collegeKey)) labelByKey.set(b.collegeKey, b.college);
     }
-    return Array.from(set);
+    const out: string[] = [];
+    for (const key of COLLEGE_ORDER) {
+      const label = labelByKey.get(key);
+      if (label) out.push(label);
+    }
+    return out;
   }, [booths]);
 }

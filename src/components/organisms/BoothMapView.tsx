@@ -55,6 +55,12 @@ export interface BoothMapViewProps {
   selectedClusterName?: string;
   /** 클러스터 필터 해제 콜백 — 시트 상단 "전체 보기" 버튼 등에서 사용 */
   onClearClusterFilter?: () => void;
+  /**
+   * 단과대 카드 그리드(시트 부스 페이지에서 클러스터 미선택 상태) 에서 카드 탭 시
+   * 부모가 selectedClusterId 를 set 하도록 하는 콜백. 미전달이면 카드 그리드는
+   * 노출되지 않고 기존 부스 그리드 fallback.
+   */
+  onSelectCluster?: (clusterId: string) => void;
   isLoading?: boolean;
   error?: string | null;
   onRetry?: () => void;
@@ -81,6 +87,7 @@ export function BoothMapView({
   onPinPress,
   selectedClusterName,
   onClearClusterFilter,
+  onSelectCluster,
   isLoading,
   error,
   onRetry,
@@ -292,6 +299,8 @@ export function BoothMapView({
                       onRetry={onRetry}
                       filterLabel={selectedClusterName}
                       onClearFilter={onClearClusterFilter}
+                      clusters={clusters}
+                      onSelectCluster={onSelectCluster}
                     />
                     <View className="h-6" />
                   </ScrollView>

@@ -1,19 +1,28 @@
 /**
- * 메뉴 목록 화면 - Figma 135:310
+ * 메뉴 진입 — 단과대 카드 그리드 (Figma 미정).
  *
- * 라우트 파일은 템플릿/훅/organism 만 연결. 그리드 구성 로직은 MenuGrid 내부에서 처리.
+ * 카드 1장 = 단과대 1개 (CLUSTERS_DATA 기준 7개), 탭 시 `/menu/college/<KEY>` 로
+ * 이동해 그 단과대의 부스 그리드 노출.
  */
 import React from 'react';
+import { useRouter } from 'expo-router';
 import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
-import { MenuGrid } from '../../../src/components/organisms/MenuGrid';
-import { useBooths } from '../../../src/hooks/useBooths';
+import { CollegeGrid } from '../../../src/components/organisms/CollegeGrid';
+import { useClusters } from '../../../src/hooks/useClusters';
 
 export default function MenuListScreen() {
-  const { booths, isLoading, error, retry } = useBooths();
+  const { clusters } = useClusters();
+  const router = useRouter();
 
   return (
     <BackdropScreenTemplate title="메뉴" backdropVariant="menu">
-      <MenuGrid booths={booths} isLoading={isLoading} error={error} onRetry={retry} />
+      <CollegeGrid
+        clusters={clusters}
+        onPressCollege={(c) => {
+          if (!c.collegeKey) return; // 동아리/특수 그룹 — 단과대 라우트 없음
+          router.push(`/(tabs)/menu/college/${c.collegeKey}` as never);
+        }}
+      />
     </BackdropScreenTemplate>
   );
 }

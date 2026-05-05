@@ -24,7 +24,7 @@ export const CLUSTERS_DATA: BoothCluster[] = [
   {
     id: 'cluster-business',
     category: 'cluster',
-    name: '공과대학',
+    name: '혁신공과대학',
     collegeKey: 'ENGINEERING',
     coords: { x: 0.3756, y: 0.8901 },
     boothIds: ['booth-002'],
@@ -32,7 +32,7 @@ export const CLUSTERS_DATA: BoothCluster[] = [
   {
     id: 'cluster-pe',
     category: 'cluster',
-    name: '경상대학',
+    name: '경영공학대학',
     collegeKey: 'BUSINESS',
     coords: { x: 0.2886, y: 0.7091 },
     boothIds: ['booth-003'],
@@ -48,7 +48,7 @@ export const CLUSTERS_DATA: BoothCluster[] = [
   {
     id: 'cluster-1777595166098',
     category: 'cluster',
-    name: '미술대학',
+    name: '디자인앤아트대학',
     collegeKey: 'DESIGN',
     coords: { x: 0.5995, y: 0.9106 },
     boothIds: [],
@@ -64,7 +64,7 @@ export const CLUSTERS_DATA: BoothCluster[] = [
   {
     id: 'cluster-1777611164386',
     category: 'cluster',
-    name: '음악대학',
+    name: '음악테크놀로지대학',
     collegeKey: 'MUSIC',
     coords: { x: 0.7139, y: 0.5037 },
     boothIds: [],
