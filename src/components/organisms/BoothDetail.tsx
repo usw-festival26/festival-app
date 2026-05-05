@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { Booth, BoothMenuItem } from '../../types/booth';
 import { MenuSection } from '@molecules/MenuSection';
+import { safeImageSource } from '@utils/imageSource';
 
 export interface BoothDetailProps {
   booth: Booth;
@@ -45,6 +46,7 @@ function group(items: BoothMenuItem[]) {
 export function BoothDetail({ booth, menus }: BoothDetailProps) {
   const router = useRouter();
   const { main, side, set } = group(menus ?? booth.menuItems ?? []);
+  const thumbSource = safeImageSource(booth.imageUri);
 
   const sections: { label: string; items: BoothMenuItem[] }[] = [
     { label: 'Main', items: main },
@@ -77,9 +79,9 @@ export function BoothDetail({ booth, menus }: BoothDetailProps) {
         {/* 썸네일(좌) + 부스 안내(우) */}
         <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 17, marginTop: 10 }}>
           <View style={styles.thumb}>
-            {booth.imageUri ? (
+            {thumbSource ? (
               <Image
-                source={{ uri: booth.imageUri }}
+                source={thumbSource}
                 style={{ width: '100%', height: '100%' }}
                 resizeMode="cover"
               />

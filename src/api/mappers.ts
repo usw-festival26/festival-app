@@ -19,6 +19,7 @@ import type {
   ApiMenu,
 } from './types';
 import { resolveCollegeLabel } from '../data/collegeLabels';
+import { sanitizeImageUri } from '../utils/imageSource';
 
 // ── 공지 ────────────────────────────────────────────────────
 
@@ -76,7 +77,7 @@ export function mapLostItem(raw: ApiLostItem): LostFoundItem {
     id: String(raw.lostItemId),
     title: raw.name,
     status: mapLostStatus(raw.status),
-    imageUri: raw.imageUrl,
+    imageUri: sanitizeImageUri(raw.imageUrl),
     category: mapLostCategory(raw.category),
   };
 }
@@ -87,7 +88,7 @@ export function mapLostItemDetail(raw: ApiLostItemDetail): LostFoundItem {
     title: raw.name,
     description: raw.description,
     status: mapLostStatus(raw.status),
-    imageUri: raw.imageUrl,
+    imageUri: sanitizeImageUri(raw.imageUrl),
     category: mapLostCategory(raw.category),
   };
 }
@@ -98,7 +99,7 @@ export function mapBooth(raw: ApiBooth): Booth {
   return {
     id: String(raw.boothId),
     name: raw.name,
-    imageUri: raw.imageUrl,
+    imageUri: sanitizeImageUri(raw.imageUrl),
     college: resolveCollegeLabel(raw.college, raw.collegeLabel),
     collegeKey: raw.college ?? undefined,
   };
@@ -109,7 +110,7 @@ export function mapBoothDetail(raw: ApiBoothDetail): Booth {
     id: String(raw.boothId),
     name: raw.name,
     description: raw.description,
-    imageUri: raw.imageUrl,
+    imageUri: sanitizeImageUri(raw.imageUrl),
     notice: raw.notice,
     college: resolveCollegeLabel(raw.college, raw.collegeLabel),
     collegeKey: raw.college ?? undefined,
@@ -124,6 +125,6 @@ export function mapMenu(raw: ApiMenu): BoothMenuItem {
     name: raw.name,
     price: raw.price,
     isAvailable: raw.status === '판매 중',
-    imageUri: raw.imageUrl,
+    imageUri: sanitizeImageUri(raw.imageUrl),
   };
 }

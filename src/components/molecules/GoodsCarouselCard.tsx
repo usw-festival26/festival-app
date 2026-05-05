@@ -9,6 +9,7 @@
  */
 import React from 'react';
 import { View, Image } from 'react-native';
+import { safeImageSource } from '@utils/imageSource';
 import type { GoodsItem } from '../../types/goods';
 
 export interface GoodsCarouselCardProps {
@@ -25,6 +26,7 @@ export function GoodsCarouselCard({
   width = DEFAULT_W,
   height = DEFAULT_H,
 }: GoodsCarouselCardProps) {
+  const imageSource = safeImageSource(item.imageUri);
   return (
     <View
       style={{
@@ -38,9 +40,9 @@ export function GoodsCarouselCard({
       }}
       accessibilityLabel={`${item.title} 상품 카드`}
     >
-      {item.imageUri ? (
+      {imageSource ? (
         <Image
-          source={{ uri: item.imageUri }}
+          source={imageSource}
           style={{ width: '100%', height: '100%' }}
           resizeMode="cover"
           accessibilityLabel={item.title}

@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, Pressable, Image } from 'react-native';
 import { AppText } from '../atoms/AppText';
+import { safeImageSource } from '@utils/imageSource';
 
 export interface MenuBoothCardProps {
   organizer: string;
@@ -17,12 +18,13 @@ export interface MenuBoothCardProps {
 }
 
 export function MenuBoothCard({ organizer, mainMenu, menuItems, imageUri, onPress }: MenuBoothCardProps) {
+  const imageSource = safeImageSource(imageUri);
   return (
     <Pressable onPress={onPress} className="flex-1 mx-[13px] mb-[25px] bg-festival-card rounded-card p-3 active:opacity-70">
       {/* 이미지 영역 (Figma 부스 사진 자리) — 흰 배경 + 1px 검정 테두리 */}
       <View className="bg-white border border-black border-solid rounded-[12px] h-[140px] mb-2 overflow-hidden">
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+        {imageSource ? (
+          <Image source={imageSource} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
         ) : null}
       </View>
       <AppText

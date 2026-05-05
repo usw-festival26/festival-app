@@ -8,6 +8,7 @@
 import React from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { AppText } from '../atoms/AppText';
+import { safeImageSource } from '@utils/imageSource';
 
 export interface BoothCardProps {
   title: string;
@@ -18,13 +19,14 @@ export interface BoothCardProps {
 }
 
 export function BoothCard({ title, time, about, imageUri, onPress }: BoothCardProps) {
+  const imageSource = safeImageSource(imageUri);
   return (
     <Pressable onPress={onPress} className="flex-1 mx-2 mb-5 active:opacity-70">
       <AppText className="text-[15px] font-semibold text-black mb-1">{title}</AppText>
       <View className="bg-festival-lavender rounded-card h-[109px] mb-1 overflow-hidden">
-        {imageUri ? (
+        {imageSource ? (
           <Image
-            source={{ uri: imageUri }}
+            source={imageSource}
             style={{ width: '100%', height: '100%' }}
             resizeMode="cover"
           />

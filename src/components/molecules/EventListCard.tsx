@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, Image, Platform } from 'react-native';
 import { AppText } from '@atoms/AppText';
+import { safeImageSource } from '@utils/imageSource';
 
 export interface EventListCardProps {
   title: string;
@@ -18,6 +19,7 @@ const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', defaul
 const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
 
 export function EventListCard({ title, description, imageUri }: EventListCardProps) {
+  const imageSource = safeImageSource(imageUri);
   return (
     <View style={{ alignItems: 'center' }}>
       <View
@@ -29,8 +31,8 @@ export function EventListCard({ title, description, imageUri }: EventListCardPro
           overflow: 'hidden',
         }}
       >
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+        {imageSource ? (
+          <Image source={imageSource} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
         ) : null}
       </View>
 
