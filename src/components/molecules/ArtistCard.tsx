@@ -5,8 +5,9 @@
  * 카드 아래 opposite 측면에 아티스트명/Information 텍스트를 배치.
  */
 import React from 'react';
-import { View, Platform } from 'react-native';
+import { Image, View, Platform } from 'react-native';
 import { AppText } from '@atoms/AppText';
+import { safeImageSource } from '@utils/imageSource';
 import type { Artist } from '../../types/lineup';
 
 /** 각진(꼭지) 모서리 위치 — 'left' = 좌하, 'right' = 우하 */
@@ -42,14 +43,27 @@ export function ArtistCard({ artist, tail }: ArtistCardProps) {
   const labelAlign = tail === 'left' ? 'flex-end' : 'flex-start';
   const textAlign = tail === 'left' ? ('right' as const) : ('left' as const);
 
+  // 로컬 require() asset 우선, 없으면 외부 imageUrl(보안 가드 통과 시) 폴백.
+  const remoteSrc = safeImageSource(artist.imageUrl);
+  const imageSource = artist.image ?? remoteSrc ?? null;
+
   return (
     <View style={{ width: 274, alignItems: labelAlign }}>
       <View
         style={[
-          { width: 274, height: 269, backgroundColor: '#FFFFFF' },
+          { width: 274, height: 269, backgroundColor: '#FFFFFF', overflow: 'hidden' },
           cardRadii,
         ]}
-      />
+      >
+        {imageSource ? (
+          <Image
+            source={imageSource}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
+            accessibilityLabel={artist.name}
+          />
+        ) : null}
+      </View>
       <View style={{ marginTop: 10, paddingHorizontal: 4 }}>
         <AppText
           style={{
@@ -57,7 +71,7 @@ export function ArtistCard({ artist, tail }: ArtistCardProps) {
             fontWeight: '900',
             fontSize: 20,
             lineHeight: 23,
-            color: '#FFFFFF',
+            color: '#010070',
             textAlign,
           }}
         >
@@ -67,7 +81,7 @@ export function ArtistCard({ artist, tail }: ArtistCardProps) {
           style={{
             fontFamily: 'Pretendard-Regular',
             fontSize: 12,
-            color: '#FFFFFF',
+            color: '#010070',
             textAlign,
             marginTop: 2,
           }}
