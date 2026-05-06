@@ -62,7 +62,8 @@ export function AboutSection({ title = 'About Us' }: AboutSectionProps) {
             </Text>
           </View>
 
-          {/* Information 그라디언트 버튼 — 새 secondary 팔레트 (#A5FFF3 → #0068FF) */}
+          {/* Information 그라디언트 버튼 — 수평 secondary 팔레트 (#A5FFF3 → #0068FF) +
+              navy 텍스트 (이미지 시안) */}
           <View style={{ alignItems: 'center' }}>
             <Pressable
               onPress={() => router.push('/(tabs)/information' as any)}
@@ -73,9 +74,9 @@ export function AboutSection({ title = 'About Us' }: AboutSectionProps) {
             >
               <Svg width={321} height={35} style={{ position: 'absolute', top: 0, left: 0 }}>
                 <Defs>
-                  <LinearGradient id="infoGrad" x1="0.55" y1="1" x2="0.45" y2="0">
-                    <Stop offset="13.548%" stopColor="#A5FFF3" />
-                    <Stop offset="84.597%" stopColor="#0068FF" />
+                  <LinearGradient id="infoGrad" x1="0" y1="0.5" x2="1" y2="0.5">
+                    <Stop offset="0" stopColor="#A5FFF3" />
+                    <Stop offset="1" stopColor="#0068FF" />
                   </LinearGradient>
                 </Defs>
                 <Rect x={0} y={0} width={321} height={35} rx={17.5} ry={17.5} fill="url(#infoGrad)" />
@@ -89,7 +90,7 @@ export function AboutSection({ title = 'About Us' }: AboutSectionProps) {
                     fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' }),
                     fontWeight: '600',
                     fontSize: 15,
-                    color: '#FFFFFF',
+                    color: '#001E56',
                   }}
                 >
                   Information
