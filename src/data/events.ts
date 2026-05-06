@@ -10,7 +10,7 @@ export const EVENTS_DATA: FestivalEvent[] = [
   {
     id: 'gayoje',
     title: '수원가요제',
-    description: '학내 동아리 무대 — 자세한 내용은 추후 공지',
+    description: '당신의 목소리로 축제의 무대를 장악하라!',
     images: [
       require('../../assets/images/events/수원가요제/KakaoTalk_20260505_150743979.jpg'),
       require('../../assets/images/events/수원가요제/KakaoTalk_20260505_150743979_01.jpg'),
@@ -21,7 +21,7 @@ export const EVENTS_DATA: FestivalEvent[] = [
   {
     id: 'signal',
     title: '수원시그널',
-    description: '수원시그널 — 자세한 내용은 추후 공지',
+    description: '수원시그널 — 사랑의 짝대기',
     images: [
       require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242.jpg'),
       require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242_01.jpg'),
@@ -31,8 +31,8 @@ export const EVENTS_DATA: FestivalEvent[] = [
   },
   {
     id: 'uniform',
-    title: '유니폼',
-    description: '유니폼 — 자세한 내용은 추후 공지',
+    title: '대동제 공식유니폼 현장판매',
+    description: '공식 굿즈로 축제의 열기를 더하세요',
     images: [
       require('../../assets/images/uniform/KakaoTalk_20260505_150809976.png'),
       require('../../assets/images/uniform/KakaoTalk_20260505_150809976_01.png'),

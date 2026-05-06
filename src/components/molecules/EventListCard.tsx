@@ -4,10 +4,10 @@
  * 274×269 pure white rounded-10 카드. 카드 아래(네이비 배경) 에 흰색 title/description.
  * Figma: 카드 내부엔 이미지/placeholder 만, 텍스트는 카드 외부.
  */
-import React from 'react';
-import { View, Image, ImageSourcePropType, Platform, Pressable } from 'react-native';
 import { AppText } from '@atoms/AppText';
 import { safeImageSource } from '@utils/imageSource';
+import React from 'react';
+import { Image, ImageSourcePropType, Platform, Pressable, View } from 'react-native';
 
 export interface EventListCardProps {
   title: string;
@@ -54,7 +54,7 @@ export function EventListCard({ title, description, imageUri, image, onPress }: 
             fontWeight: '600',
             fontSize: 15,
             lineHeight: 20,
-            color: '#FFFFFF',
+            color: '#010070',
             textAlign: 'center',
           }}
           numberOfLines={1}
@@ -67,7 +67,7 @@ export function EventListCard({ title, description, imageUri, image, onPress }: 
             fontWeight: '400',
             fontSize: 12,
             lineHeight: 18,
-            color: '#FFFFFF',
+            color: '#010070',
             textAlign: 'center',
             marginTop: 4,
           }}

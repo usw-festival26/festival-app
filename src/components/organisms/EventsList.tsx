@@ -6,7 +6,7 @@
  */
 import { AppText } from '@components/atoms/AppText';
 import { useEvents } from '@hooks/index';
-import { EventLightbox, EventListCard } from '@molecules/index';
+import { EventListCard, ImageLightbox } from '@molecules/index';
 import React, { useState } from 'react';
 import { Platform, ScrollView } from 'react-native';
 import type { FestivalEvent } from '../../types/map';
@@ -50,7 +50,7 @@ export function EventsList() {
         ))}
       </ScrollView>
 
-      <EventLightbox event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+      <ImageLightbox subject={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </>
   );
 }

@@ -9,7 +9,7 @@ import { Image, Platform, Pressable, ScrollView, Text, View } from 'react-native
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEvents, useHorizontalDrag } from '@hooks/index';
-import { EventLightbox } from '@molecules/EventLightbox';
+import { ImageLightbox } from '@molecules/ImageLightbox';
 import { safeImageSource } from '@utils/imageSource';
 import type { FestivalEvent } from '../../types/map';
 
@@ -157,7 +157,7 @@ export function EventsSection() {
         })}
       </ScrollView>
 
-      <EventLightbox event={selectedEvent} onClose={() => setSelectedEvent(null)} />
+      <ImageLightbox subject={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </View>
   );
 }
