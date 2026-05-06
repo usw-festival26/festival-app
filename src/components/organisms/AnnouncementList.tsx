@@ -48,11 +48,13 @@ const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
       <>
         <Text
           onPress={() => {
-            if (CONTACT_INFO.kakaoChannelUrl) Linking.openURL(CONTACT_INFO.kakaoChannelUrl);
+            if (CONTACT_INFO.kakaoChannelUrl) {
+              Linking.openURL(CONTACT_INFO.kakaoChannelUrl).catch(() => {});
+            }
           }}
           accessibilityRole="link"
           accessibilityLabel="카카오톡 문의 채널 열기"
-          style={{ color: '#0068FF', textDecorationLine: 'underline' }}
+          style={{ color: Colors.festival.primary, textDecorationLine: 'underline' }}
         >
           [카카오톡 채널]
         </Text>
