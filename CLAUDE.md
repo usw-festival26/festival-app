@@ -50,6 +50,20 @@ Timetable, booths, announcements, and lost-found data are in `src/data/*.ts` as 
 - **Language**: Code in English, UI labels and comments in Korean.
 - **Path aliases**: `@components/*`, `@atoms/*`, `@molecules/*`, `@organisms/*`, `@types/*`, `@data/*`, `@hooks/*`, `@constants/*`, `@utils/*` defined in `tsconfig.json`.
 
+## 브랜치 전략 / 자동 sync
+
+- **`develop`** — 통합 작업 브랜치. 대부분의 feature PR base.
+- **`main`** — 릴리스/배포 브랜치. develop 에서 안정화된 상태가 머지된다.
+- 핫픽스가 develop 우회하고 main 에 직접 들어가거나, develop → main 머지
+  이후 develop 이 그 머지커밋을 자동 흡수하지 않으면 develop 이 main 대비
+  'out of date' 로 보이기 시작 — 후속 PR 들이 실제로는 깨끗한데 GitHub UI
+  에서 경고 표시.
+- 해결: `.github/workflows/sync-main-to-develop.yml` — main 에 push 일어날
+  때마다 자동으로 main 을 develop 에 merge 시도 + push. 충돌이면 이슈 오픈.
+  Actions 탭에서 수동 트리거(`workflow_dispatch`) 도 가능.
+- branch protection 이 GitHub Actions 의 push 를 차단하면 Settings → Branches
+  → develop rule 에서 `github-actions[bot]` 을 bypass 허용에 추가 필요.
+
 ## 삭제·파괴적 작업 규칙
 
 `rm`, `git reset --hard`, `git push --force`, `git branch -D`, AsyncStorage clear 등 **되돌릴 수 없는 작업은 가역적 방식 우선**.
