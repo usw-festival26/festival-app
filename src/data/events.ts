@@ -3,6 +3,9 @@
  *
  * 각 이벤트는 `images` 에 다중 사진(`assets/images/events/<폴더>/`) 을 보유.
  * 첫 번째 이미지가 홈 카드 썸네일, 클릭 시 라이트박스에서 좌/우 화살표로 순환.
+ *
+ * NOTE: 'uniform' 이벤트는 굿즈샵으로 이전됨 (11장 사진을 1:1 굿즈 항목으로
+ * 재구성, `src/data/goodsShop.ts`).
  */
 import type { FestivalEvent } from '../types/map';
 
@@ -27,24 +30,6 @@ export const EVENTS_DATA: FestivalEvent[] = [
       require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242_01.jpg'),
       require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242_02.jpg'),
       require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242_03.jpg'),
-    ],
-  },
-  {
-    id: 'uniform',
-    title: '대동제 공식유니폼 현장판매',
-    description: '공식 굿즈로 축제의 열기를 더하세요',
-    images: [
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_01.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_02.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_03.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_04.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_05.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_06.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_07.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_08.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_09.png'),
-      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_10.png'),
     ],
   },
 ];
