@@ -14,6 +14,7 @@ import React, { useState } from 'react';
 import { Image, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { POSTERS } from '@data/posters';
 
@@ -31,6 +32,7 @@ const HEADER_LOGO_WIDTH = Math.round(HEADER_LOGO_HEIGHT * HEADER_LOGO_ASPECT_RAT
 
 export function HeroSection() {
   const navigation = useNavigation();
+  const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const posterCount = POSTERS.length;
@@ -68,8 +70,12 @@ export function HeroSection() {
         />
       </View>
 
-      {/* 메인 포스터 — 헤더 아래 full-bleed cover */}
-      <View
+      {/* 메인 포스터 — 헤더 아래 full-bleed cover. 포스터 영역 탭 시 지도(/booth)
+          로 이동. 화살표/dot 은 zIndex 2 로 위에 있어 자체 onPress 가 우선. */}
+      <Pressable
+        onPress={() => router.navigate('/(tabs)/booth' as never)}
+        accessibilityRole="link"
+        accessibilityLabel="지도로 이동"
         style={{
           position: 'absolute',
           left: 0,
@@ -87,8 +93,10 @@ export function HeroSection() {
             accessibilityLabel="2026 대동제 포스터"
           />
         ) : null}
-        {/* 하단 페이드 — 포스터를 #C3EDFF (primary-light) 로 자연스럽게 잇기 */}
+        {/* 하단 페이드 — 포스터를 #C3EDFF (primary-light) 로 자연스럽게 잇기.
+            pointerEvents=none 으로 부모 Pressable 의 onPress 를 막지 않음. */}
         <Svg
+          pointerEvents="none"
           width="100%"
           height={FADE_HEIGHT}
           viewBox="0 0 100 100"
@@ -103,7 +111,7 @@ export function HeroSection() {
           </Defs>
           <Rect x="0" y="0" width="100" height="100" fill="url(#hero-fade)" />
         </Svg>
-      </View>
+      </Pressable>
 
       {/* 1장 이하면 화살표/dot 의미 없으니 숨김 */}
       {showControls ? (

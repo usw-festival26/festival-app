@@ -12,7 +12,8 @@ import Svg, { Rect, Path } from 'react-native-svg';
 
 export interface FaqBubbleProps {
   question: string;
-  answer?: string;
+  /** string 또는 nested <Text>(예: 하이퍼링크) 를 모두 허용. */
+  answer?: React.ReactNode;
   tail?: 'left' | 'right';
 }
 

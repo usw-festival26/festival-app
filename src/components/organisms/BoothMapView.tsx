@@ -24,7 +24,7 @@ import {
 } from 'react-native';
 import type { Booth } from '../../types/booth';
 import type { BoothCluster, FacilityPin, FoodPin, PinCategory } from '../../types/cluster';
-import type { Facility, FestivalEvent, SheetCategory } from '../../types/map';
+import type { FestivalEvent, MapCoords, SheetCategory } from '../../types/map';
 import { BoothSheetContent } from './BoothSheetContent';
 import { EventSheetContent } from './EventSheetContent';
 import { FacilitySheetContent } from './FacilitySheetContent';
@@ -39,7 +39,6 @@ export interface BoothMapViewProps {
   activeCategory: SheetCategory;
   booths: Booth[];
   foodBooths: Booth[];
-  facilities: Facility[];
   events: FestivalEvent[];
   /** 단과대 그룹 핀 */
   clusters: BoothCluster[];
@@ -49,6 +48,12 @@ export interface BoothMapViewProps {
   facilityPins: FacilityPin[];
   /** 핀 카테고리 필터 — 'all' / cluster / food / facility */
   pinFilter?: 'all' | PinCategory;
+  /** 칩이 food/facility 등으로 바뀐 직후 자동으로 그쪽 핀들의 bbox 중심으로 줌인. */
+  focusCategory?: PinCategory | null;
+  /** 시트 카드 클릭 등 임의 좌표 줌인 트리거. nonce 가 바뀔 때마다 새 줌. */
+  focusRequest?: { coords: MapCoords; nonce: number } | null;
+  /** 시트 F&B/편의 카드 클릭 시 부모가 focusRequest 를 set 할 수 있도록. */
+  onCardFocus?: (coords: MapCoords) => void;
   /** 핀 클릭 핸들러 (cluster/food/facility 분기) */
   onPinPress?: (pin: AnyPin) => void;
   /** 클러스터 핀으로 부스 시트가 필터링됐을 때 표시할 단과대명. 있으면 시트 상단에 노출. */
@@ -78,12 +83,14 @@ export function BoothMapView({
   activeCategory,
   booths,
   foodBooths,
-  facilities,
   events,
   clusters,
   foodPins,
   facilityPins,
   pinFilter,
+  focusCategory,
+  focusRequest,
+  onCardFocus,
   onPinPress,
   selectedClusterName,
   onClearClusterFilter,
@@ -236,17 +243,21 @@ export function BoothMapView({
         foodPins={foodPins}
         facilityPins={facilityPins}
         pinFilter={pinFilter}
+        focusCategory={focusCategory}
+        focusRequest={focusRequest}
         boothById={boothById}
         onPinPress={onPinPress}
         expanded={expanded}
       />
 
-      {/* 바텀시트 — 외곽 래퍼 bg 는 transparent. 흰 카드의 둥근 모서리 바깥
-          (corner exclusion zone) 이 그 아래 지도 그대로 보이도록. */}
+      {/* 바텀시트 — 외곽 래퍼 bg 는 화면 배경(primary-light, #C3EDFF) 과 동색.
+          이전엔 transparent 였으나 sheet 가 MapCanvas 와 column flow 로 stack
+          되어 모서리 cutout 영역에 지도가 아닌 ScreenBackdrop GradientBlob 의
+          짙은 가장자리가 그대로 비쳐 보였음 (검정/네이비 직사각형처럼). */}
       <Animated.View
         style={{
           height: sheetAnim,
-          backgroundColor: 'transparent',
+          backgroundColor: Colors.festival.primaryLight,
         }}
         onLayout={onSheetLayout}
       >
@@ -307,14 +318,21 @@ export function BoothMapView({
 
                 <View style={{ width: sheetWidth, flex: 1 }}>
                   <ScrollView showsVerticalScrollIndicator={false}>
-                    <FoodSheetContent booths={foodBooths} isLoading={isLoading} error={error} onRetry={onRetry} />
+                    <FoodSheetContent
+                      booths={foodBooths}
+                      foodPins={foodPins}
+                      onItemPress={onCardFocus}
+                      isLoading={isLoading}
+                      error={error}
+                      onRetry={onRetry}
+                    />
                     <View className="h-6" />
                   </ScrollView>
                 </View>
 
                 <View style={{ width: sheetWidth, flex: 1 }}>
                   <ScrollView showsVerticalScrollIndicator={false}>
-                    <FacilitySheetContent facilities={facilities} />
+                    <FacilitySheetContent facilityPins={facilityPins} onItemPress={onCardFocus} />
                     <View className="h-6" />
                   </ScrollView>
                 </View>
