@@ -29,4 +29,22 @@ export const EVENTS_DATA: FestivalEvent[] = [
       require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242_03.jpg'),
     ],
   },
+  {
+    id: 'uniform',
+    title: '유니폼',
+    description: '유니폼 — 자세한 내용은 추후 공지',
+    images: [
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_01.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_02.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_03.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_04.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_05.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_06.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_07.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_08.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_09.png'),
+      require('../../assets/images/uniform/KakaoTalk_20260505_150809976_10.png'),
+    ],
+  },
 ];
