@@ -272,10 +272,15 @@ export function DesktopBackdropDecor() {
                     onPress={() => Linking.openURL(CONTACT_INFO.kakaoChannelUrl)}
                     accessibilityRole="link"
                     accessibilityLabel="카카오톡 문의 채널 열기"
+                    // .desktop-decor 부모의 pointer-events:none 가 descendants 까지
+                    // 영향을 줘서 onPress 가 발화 안 되는 케이스 — 이 노드만
+                    // pointer-events:auto 로 override + cursor pointer 로 가시화.
                     style={{
                       color: Colors.festival.mutedDark,
                       textDecorationLine: 'underline',
-                    }}
+                      pointerEvents: 'auto',
+                      cursor: 'pointer',
+                    } as any}
                   >
                     {` ${CONTACT_INFO.kakaoChannelLabel}`}
                   </Text>
