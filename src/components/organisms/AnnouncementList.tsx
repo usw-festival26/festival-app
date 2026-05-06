@@ -3,16 +3,16 @@
  *
  * Notification 배지 → pill 리스트 (핀 공지는 상단) → FAQ 배지 → 말풍선 2개(좌/우 교차)
  */
-import React, { useMemo, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import type { Announcement } from '../../types/announcement';
-import { NotificationBadge } from '@atoms/NotificationBadge';
-import { NotificationPill } from '@molecules/NotificationPill';
-import { FaqBubble } from '@molecules/FaqBubble';
-import { EmptyState } from '@molecules/EmptyState';
 import { NetworkErrorState } from '@atoms/NetworkErrorState';
+import { NotificationBadge } from '@atoms/NotificationBadge';
 import { Colors } from '@constants/colors';
 import { useAnnouncementById } from '@hooks/useAnnouncements';
+import { EmptyState } from '@molecules/EmptyState';
+import { FaqBubble } from '@molecules/FaqBubble';
+import { NotificationPill } from '@molecules/NotificationPill';
+import React, { useMemo, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import type { Announcement } from '../../types/announcement';
 
 export interface AnnouncementListProps {
   announcements: Announcement[];
@@ -22,7 +22,7 @@ export interface AnnouncementListProps {
 }
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
-  { q: '축제는 언제 열리나요?', a: '5월 20일(수)~21일(목) 이틀간 진행됩니다.' },
+  { q: '축제는 언제 열리나요?', a: '5월 14일(목)~15일(금) 양일간 진행됩니다.' },
   { q: '주차는 가능한가요?', a: '교내 주차 제한, 대중교통·셔틀버스 이용을 권장합니다.' },
 ];
 
