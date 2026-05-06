@@ -1,0 +1,105 @@
+name: Sync main → develop
+
+# main 이 갱신될 때마다 develop 으로 자동 동기화.
+# develop 이 main 보다 뒤처져 있어 PR 들이 'out of date' 표시되는 문제 예방.
+#
+# 정책:
+#  1. main 에 push 발생 (보통 main 으로의 PR 머지 결과) 시 트리거
+#  2. develop 체크아웃 → 먼저 fast-forward (`--ff-only`) 시도
+#     - develop → main PR 머지가 merge-commit 방식이면 develop 이 main 의 strict
+#       ancestor 라 ff 가 깔끔히 동작 (develop 에 추가 merge commit 없이 main 의
+#       merge commit 자체를 그대로 흡수)
+#  3. ff 실패 시 (= main 에 develop 우회 커밋이 있어 두 브랜치가 분기) `--no-ff`
+#     로 진짜 merge commit 만들고 push
+#  4. 충돌이면 자동 푸시 포기 + 이슈 오픈해서 운영자에게 알림
+#
+# workflow_dispatch 로 수동 트리거도 가능 (Actions 탭에서 'Run workflow' 클릭).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    name: Auto-merge main into develop
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+          # 기본 GITHUB_TOKEN 으로 push 가능하도록 (브랜치 protection 이 GH Actions
+          # bypass 허용 설정돼 있어야 함 — 안 되면 Settings → Branches → develop
+          # rule 의 'Allow specified actors to bypass required pull requests' 에
+          # github-actions[bot] 추가 필요).
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git identity
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Fetch main
+        run: git fetch origin main
+
+      - name: Check if sync is needed
+        id: check
+        run: |
+          BEHIND=$(git rev-list --count HEAD..origin/main)
+          echo "behind=$BEHIND" >> "$GITHUB_OUTPUT"
+          if [ "$BEHIND" = "0" ]; then
+            echo "develop already includes all main commits — skip"
+          else
+            echo "develop is $BEHIND commits behind main — attempt merge"
+          fi
+
+      - name: Auto-merge main into develop
+        if: steps.check.outputs.behind != '0'
+        id: merge
+        run: |
+          # 1순위: fast-forward — develop 이 main 의 strict ancestor 면 develop 의
+          # tip 만 main tip 으로 이동. 새 merge commit 안 만들어 history 가 깔끔.
+          if git merge --ff-only origin/main; then
+            git push origin develop
+            echo "result=ff" >> "$GITHUB_OUTPUT"
+            echo "::notice::Fast-forwarded develop to main"
+            exit 0
+          fi
+          # 2순위: 분기된 경우만 명시 merge commit (main 핫픽스 + develop 후속 작업 등).
+          if git merge --no-ff origin/main -m "chore: sync main → develop (auto)"; then
+            git push origin develop
+            echo "result=merge" >> "$GITHUB_OUTPUT"
+            echo "::notice::Merged main into develop (divergent branches)"
+          else
+            git merge --abort || true
+            echo "result=conflict" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open issue on conflict
+        if: steps.merge.outputs.result == 'conflict'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "[자동 sync] main → develop 충돌 — 수동 병합 필요" \
+            --body "$(cat <<'BODY'
+          main 의 새 커밋을 develop 으로 자동 sync 시도 중 충돌이 발생했습니다.
+
+          **로컬에서 해결**:
+          \`\`\`bash
+          git checkout develop
+          git fetch origin
+          git merge origin/main
+          # conflict 해결
+          git push origin develop
+          \`\`\`
+
+          또는 Actions 탭에서 충돌 사유 로그 확인 후 PR 로 정리하셔도 됩니다.
+          BODY
+          )" \
+            --label "automation" || echo "::warning::Issue creation failed (label might not exist)"

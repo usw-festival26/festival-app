@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Pressable, Image } from 'react-native';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { AppText } from '@atoms/AppText';
+import { safeImageSource } from '@utils/imageSource';
 import type { Booth } from '../../types/booth';
 
 export interface BoothGridProps {
@@ -27,6 +28,7 @@ function BoothGridCard({ booth, onPress }: { booth: Booth; onPress?: () => void 
     .slice(0, 2)
     .map((m) => m.name)
     .join(', ');
+  const thumbSource = safeImageSource(booth.imageUri);
 
   return (
     <Pressable
@@ -72,9 +74,9 @@ function BoothGridCard({ booth, onPress }: { booth: Booth; onPress?: () => void 
           backgroundColor: '#F0F0F0',
         }}
       >
-        {booth.imageUri ? (
+        {thumbSource ? (
           <Image
-            source={{ uri: booth.imageUri }}
+            source={thumbSource}
             style={{ width: '100%', height: '100%' }}
             resizeMode="cover"
           />

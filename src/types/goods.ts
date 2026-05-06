@@ -5,6 +5,7 @@
  * 한 슬라이드에 매칭된다. 백엔드 추가 시 별도 endpoint 가 생기면 매퍼가 채울 수
  * 있도록 모든 부가 필드는 optional.
  */
+import type { ImageSourcePropType } from 'react-native';
 
 export interface GoodsItem {
   id: string;
@@ -12,6 +13,13 @@ export interface GoodsItem {
   title: string;
   /** 상품 이미지 URI — 미제공 시 placeholder 빈 카드 노출. */
   imageUri?: string;
+  /** 로컬 require'd asset 단일 — imageUri 보다 우선. */
+  image?: ImageSourcePropType;
+  /**
+   * 다중 사진 — ImageLightbox 모달에서 carousel.
+   * 채워져 있으면 카드 탭 시 라이트박스 열림. images[0] 가 카드 썸네일.
+   */
+  images?: ImageSourcePropType[];
   /** 짧은 설명 (선택). 향후 상세 영역 추가 대비. */
   description?: string;
 }

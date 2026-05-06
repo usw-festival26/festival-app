@@ -6,9 +6,9 @@ import type { Announcement } from '../types/announcement';
 export const ANNOUNCEMENTS_DATA: Announcement[] = [
   {
     id: 'notice-001',
-    title: '🎉 2026 USW 대동제 안내',
+    title: '🎉 2026년 수원대학교 대동제 안내',
     content:
-      '2026 USW 대동제가 5월 20일(수)~21일(목) 이틀간 교내 중앙광장 일대에서 열립니다. 다양한 부스, 공연, 먹거리가 준비되어 있으니 많은 관심과 참여 부탁드립니다!',
+      '2026년 수원대학교 대동제가 5월 20일(수)~21일(목) 이틀간 교내 중앙광장 일대에서 열립니다. 다양한 부스, 공연, 먹거리가 준비되어 있으니 많은 관심과 참여 부탁드립니다!',
     publishedAt: '2026-05-15T10:00:00+09:00',
     priority: 'urgent',
     isPinned: true,

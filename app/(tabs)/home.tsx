@@ -21,9 +21,9 @@ export default function HomeScreen() {
       {/* 흰색 포스터 패널 (헤더 포함) */}
       <HeroSection />
 
-      {/* 네이비 영역 — 상단 네이비 띠 → 카드 배너(full-bleed) → ScreenBackdrop(home) blob + Events/Line up/About Us */}
+      {/* 새 primary-light(#C3EDFF) 영역 — 카드 배너(full-bleed) → ScreenBackdrop(home) blob + Events/Line up/About Us */}
       <View
-        className="bg-festival-primary-dark"
+        className="bg-festival-primary-light"
         style={{ position: 'relative', overflow: 'hidden' }}
       >
         <ScreenBackdrop variant="home" />

@@ -91,11 +91,15 @@ const FILTER_LABELS: Record<'all' | PinCategory, string> = {
   facility: '편의',
 };
 
-/** cluster.collegeKey chip row 에 노출할 enum 목록 + "없음" 옵션. */
+/**
+ * cluster.collegeKey chip row 에 노출할 enum 목록 + "없음" 옵션.
+ * 순서는 src/data/collegeLabels.ts 의 COLLEGE_ORDER 와 동일하게 유지 (앱 노출 순서와 일치).
+ * label 은 짧은 한글 prefix — 풀네임은 너무 길어 chip 폭이 깨지므로.
+ */
 const COLLEGE_KEY_OPTIONS: ReadonlyArray<{ key: BackendCollege | null; label: string }> = [
   { key: null, label: '없음' },
   { key: 'HUMANITIES', label: '인문' },
-  { key: 'BUSINESS', label: '경상' },
+  { key: 'BUSINESS', label: '경영' },
   { key: 'LIFE', label: '라이프' },
   { key: 'ICT', label: 'ICT' },
   { key: 'DESIGN', label: '디자인' },
@@ -288,6 +292,22 @@ export default function MapEditorScreen() {
     return state.clusters.filter((c) => c.name === selectedCollege);
   }, [state.clusters, pinFilter, selectedCollege]);
 
+  /**
+   * 같은 collegeKey 를 가진 cluster 가 둘 이상이면 운영자에게 경고.
+   * /menu 와 /booth 시트의 단과대 카드가 cluster 1개당 1장이라 중복 시 카드도 중복된다.
+   * 옵션 'key' 를 라벨로 변환해 사용자 친화적으로 표시.
+   */
+  const duplicateCollegeKeys = useMemo<BackendCollege[]>(() => {
+    const counts = new Map<BackendCollege, number>();
+    for (const c of state.clusters) {
+      if (!c.collegeKey) continue;
+      counts.set(c.collegeKey, (counts.get(c.collegeKey) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .filter(([, n]) => n > 1)
+      .map(([key]) => key);
+  }, [state.clusters]);
+
 
   const selectedPin = useMemo<AnyPin | undefined>(() => {
     if (!selectedPinId) return undefined;
@@ -426,6 +446,41 @@ export default function MapEditorScreen() {
           </Text>
         </Pressable>
       </View>
+
+      {/* 중복 collegeKey 경고 — /menu·/booth 단과대 카드가 cluster 1:1 매핑이라
+          중복이 있으면 카드도 중복 노출된다. */}
+      {duplicateCollegeKeys.length > 0 ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            gap: 8,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            backgroundColor: '#FFF6E5',
+            borderBottomWidth: 1,
+            borderColor: '#F0DCB0',
+          }}
+        >
+          <Ionicons name="warning-outline" size={16} color="#A36B00" style={{ marginTop: 1 }} />
+          <Text
+            style={{
+              flex: 1,
+              fontSize: 12,
+              lineHeight: 16,
+              color: '#A36B00',
+            }}
+          >
+            중복 collegeKey:{' '}
+            {duplicateCollegeKeys
+              .map(
+                (k) => COLLEGE_KEY_OPTIONS.find((o) => o.key === k)?.label ?? k,
+              )
+              .join(', ')}
+            . 단과대 카드가 두 번 표시됩니다 — 같은 collegeKey 의 cluster 를 하나만 남겨주세요.
+          </Text>
+        </View>
+      ) : null}
 
       {/* 카테고리 필터 + 추가 버튼 */}
       <View

@@ -3,6 +3,7 @@
  *
  * 필터 카테고리별로 다른 데이터 형태를 사용합니다.
  */
+import type { ImageSourcePropType } from 'react-native';
 
 /** 지도 필터 카테고리 */
 export type MapFilterCategory = 'all' | 'booth' | 'food' | 'facility' | 'event';
@@ -42,5 +43,11 @@ export interface FestivalEvent {
   id: string;
   title: string;
   description: string;
+  /** 백엔드/외부 단일 이미지 URL — 운영 모드용. */
   imageUri?: string;
+  /**
+   * 로컬 require() asset 다중 이미지 — 라이트박스 모달 carousel 용.
+   * 첫 번째 이미지가 홈 카드 썸네일.
+   */
+  images?: ImageSourcePropType[];
 }

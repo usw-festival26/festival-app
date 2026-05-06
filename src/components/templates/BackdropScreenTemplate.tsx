@@ -38,7 +38,7 @@ export function BackdropScreenTemplate({
   headerBg = '#FFFFFF',
   headerTextColor = '#000000',
   headerSubHeader,
-  screenBg = Colors.festival.primaryDark,
+  screenBg = Colors.festival.primaryLight,
   children,
 }: BackdropScreenTemplateProps) {
   return (

@@ -11,6 +11,7 @@
  * 맵 자체(이미지/팬/줌/핀 렌더)는 MapCanvas 가 담당. 줌 +/− 버튼은 캔버스 빌트인.
  */
 import { DragHandle } from '@atoms/DragHandle';
+import { Colors } from '@constants/colors';
 import { MapCanvas, type AnyPin } from '@organisms/MapCanvas';
 import React, { useEffect, useMemo, useRef } from 'react';
 import {
@@ -54,6 +55,12 @@ export interface BoothMapViewProps {
   selectedClusterName?: string;
   /** 클러스터 필터 해제 콜백 — 시트 상단 "전체 보기" 버튼 등에서 사용 */
   onClearClusterFilter?: () => void;
+  /**
+   * 단과대 카드 그리드(시트 부스 페이지에서 클러스터 미선택 상태) 에서 카드 탭 시
+   * 부모가 selectedClusterId 를 set 하도록 하는 콜백. 미전달이면 카드 그리드는
+   * 노출되지 않고 기존 부스 그리드 fallback.
+   */
+  onSelectCluster?: (clusterId: string) => void;
   isLoading?: boolean;
   error?: string | null;
   onRetry?: () => void;
@@ -80,6 +87,7 @@ export function BoothMapView({
   onPinPress,
   selectedClusterName,
   onClearClusterFilter,
+  onSelectCluster,
   isLoading,
   error,
   onRetry,
@@ -233,11 +241,12 @@ export function BoothMapView({
         expanded={expanded}
       />
 
-      {/* 바텀시트 — 외곽 래퍼는 navy 로 채워 둥근 모서리 exclusion zone 으로 backdrop blob이 비치지 않게 한다. */}
+      {/* 바텀시트 — 외곽 래퍼 bg 는 transparent. 흰 카드의 둥근 모서리 바깥
+          (corner exclusion zone) 이 그 아래 지도 그대로 보이도록. */}
       <Animated.View
         style={{
           height: sheetAnim,
-          backgroundColor: '#010070',
+          backgroundColor: 'transparent',
         }}
         onLayout={onSheetLayout}
       >
@@ -289,6 +298,8 @@ export function BoothMapView({
                       onRetry={onRetry}
                       filterLabel={selectedClusterName}
                       onClearFilter={onClearClusterFilter}
+                      clusters={clusters}
+                      onSelectCluster={onSelectCluster}
                     />
                     <View className="h-6" />
                   </ScrollView>

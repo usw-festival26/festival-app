@@ -10,20 +10,20 @@ export const FACILITY_PINS_DATA: FacilityPin[] = [
     category: 'facility',
     name: '총학생회',
     phone: '',
-    coords: { x: 0.7313, y: 0.3581 },
+    coords: { x: 0.6965, y: 0.3989 },
   },
   {
     id: 'facility-pin-002',
     category: 'facility',
     name: '굿즈샵',
     phone: '',
-    coords: { x: 0.2786, y: 0.3731 },
+    coords: { x: 0.2886, y: 0.3726 },
   },
   {
     id: 'facility-pin-003',
     category: 'facility',
     name: '화장실',
     phone: '',
-    coords: { x: 0.7761, y: 0.9517 },
+    coords: { x: 0.6866, y: 0.8177 },
   },
 ];

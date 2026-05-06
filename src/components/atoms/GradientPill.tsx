@@ -58,8 +58,8 @@ export function GradientPill({
             y2={height * 0.4}
             gradientUnits="userSpaceOnUse"
           >
-            <Stop offset="0" stopColor="#0D00FF" stopOpacity={0.4} />
-            <Stop offset="1" stopColor="#FFBEBF" stopOpacity={0.4} />
+            <Stop offset="0" stopColor="#A5FFF3" stopOpacity={0.4} />
+            <Stop offset="1" stopColor="#0068FF" stopOpacity={0.4} />
           </LinearGradient>
         </Defs>
         <Rect width="100%" height="100%" fill="url(#goodsPillGrad)" />
