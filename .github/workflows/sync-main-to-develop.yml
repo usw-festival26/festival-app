@@ -3,11 +3,15 @@ name: Sync main → develop
 # main 이 갱신될 때마다 develop 으로 자동 동기화.
 # develop 이 main 보다 뒤처져 있어 PR 들이 'out of date' 표시되는 문제 예방.
 #
-# 동작:
+# 정책:
 #  1. main 에 push 발생 (보통 main 으로의 PR 머지 결과) 시 트리거
-#  2. develop 체크아웃 → main 을 merge 시도 (`--no-ff` 으로 명시 머지 커밋)
-#  3. 성공하면 develop 으로 push
-#  4. 충돌이면 자동 push 포기 + 이슈 오픈해서 운영자에게 알림
+#  2. develop 체크아웃 → 먼저 fast-forward (`--ff-only`) 시도
+#     - develop → main PR 머지가 merge-commit 방식이면 develop 이 main 의 strict
+#       ancestor 라 ff 가 깔끔히 동작 (develop 에 추가 merge commit 없이 main 의
+#       merge commit 자체를 그대로 흡수)
+#  3. ff 실패 시 (= main 에 develop 우회 커밋이 있어 두 브랜치가 분기) `--no-ff`
+#     로 진짜 merge commit 만들고 push
+#  4. 충돌이면 자동 푸시 포기 + 이슈 오픈해서 운영자에게 알림
 #
 # workflow_dispatch 로 수동 트리거도 가능 (Actions 탭에서 'Run workflow' 클릭).
 
@@ -58,10 +62,19 @@ jobs:
         if: steps.check.outputs.behind != '0'
         id: merge
         run: |
+          # 1순위: fast-forward — develop 이 main 의 strict ancestor 면 develop 의
+          # tip 만 main tip 으로 이동. 새 merge commit 안 만들어 history 가 깔끔.
+          if git merge --ff-only origin/main; then
+            git push origin develop
+            echo "result=ff" >> "$GITHUB_OUTPUT"
+            echo "::notice::Fast-forwarded develop to main"
+            exit 0
+          fi
+          # 2순위: 분기된 경우만 명시 merge commit (main 핫픽스 + develop 후속 작업 등).
           if git merge --no-ff origin/main -m "chore: sync main → develop (auto)"; then
             git push origin develop
-            echo "result=ok" >> "$GITHUB_OUTPUT"
-            echo "::notice::Synced main → develop successfully"
+            echo "result=merge" >> "$GITHUB_OUTPUT"
+            echo "::notice::Merged main into develop (divergent branches)"
           else
             git merge --abort || true
             echo "result=conflict" >> "$GITHUB_OUTPUT"
