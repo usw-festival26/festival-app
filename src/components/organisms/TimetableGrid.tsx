@@ -9,7 +9,7 @@
  * 라인업 진입점 — DAY 1 활성 시 day=1, DAY 2 활성 시 day=2 가 query 로 전달됨.
  * /lineup 화면이 이 값을 읽어 헤더 라벨을 다르게 표시.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { TimetableDay } from '../../types/timetable';
@@ -32,9 +32,14 @@ export function TimetableGrid({ days }: TimetableGridProps) {
   }
 
   const currentDay = days[selectedDayIndex];
-  const performances = (currentDay?.performances ?? [])
-    .slice()
-    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  // 시간순 정렬은 currentDay 가 바뀔 때만 재계산.
+  const performances = useMemo(
+    () =>
+      (currentDay?.performances ?? [])
+        .slice()
+        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()),
+    [currentDay],
+  );
   const dayNumber = selectedDayIndex + 1;
 
   return (

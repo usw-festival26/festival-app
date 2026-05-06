@@ -10,7 +10,7 @@
  * 정렬: COLLEGE_ORDER (HUMANITIES → BUSINESS → LIFE → ICT → DESIGN → MUSIC →
  * ENGINEERING). collegeKey 가 없는 cluster 는 뒤로 밀린다.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
 import { MenuBoothCard } from '@molecules/MenuBoothCard';
 import { collegeSortIndex } from '@data/collegeLabels';
@@ -28,15 +28,17 @@ export interface CollegeGridProps {
 }
 
 export function CollegeGrid({ clusters, onPressCollege, embedded }: CollegeGridProps) {
-  const sorted = [...clusters].sort(
-    (a, b) => collegeSortIndex(a.collegeKey) - collegeSortIndex(b.collegeKey),
-  );
-
-  // 2열 페어링
-  const rows: BoothCluster[][] = [];
-  for (let i = 0; i < sorted.length; i += 2) {
-    rows.push(sorted.slice(i, i + 2));
-  }
+  // 정렬 + 2열 페어링은 clusters reference 변경 시에만 재계산.
+  const rows = useMemo(() => {
+    const sorted = [...clusters].sort(
+      (a, b) => collegeSortIndex(a.collegeKey) - collegeSortIndex(b.collegeKey),
+    );
+    const grouped: BoothCluster[][] = [];
+    for (let i = 0; i < sorted.length; i += 2) {
+      grouped.push(sorted.slice(i, i + 2));
+    }
+    return grouped;
+  }, [clusters]);
 
   const grid = (
     <>

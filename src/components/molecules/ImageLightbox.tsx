@@ -29,8 +29,9 @@ export interface ImageLightboxProps {
 export function ImageLightbox({ subject, onClose }: ImageLightboxProps) {
   const localImages = subject?.images ?? [];
   const fallbackRemote = safeImageSource(subject?.imageUri);
-  const sources: Array<ImageSourcePropType | { uri: string }> = localImages.length
-    ? (localImages as any[])
+  // safeImageSource 의 { uri: string } 도 ImageSourcePropType 의 union 멤버라 동일 타입.
+  const sources: ImageSourcePropType[] = localImages.length
+    ? localImages
     : fallbackRemote
       ? [fallbackRemote]
       : [];
@@ -76,7 +77,7 @@ export function ImageLightbox({ subject, onClose }: ImageLightboxProps) {
           style={{ width: '90%', maxWidth: 720, aspectRatio: 0.75 }}
         >
           <Image
-            source={sources[currentIndex] as any}
+            source={sources[currentIndex]}
             style={{ width: '100%', height: '100%' }}
             resizeMode="contain"
             accessibilityLabel={`${subject.title} ${currentIndex + 1}/${sources.length}`}

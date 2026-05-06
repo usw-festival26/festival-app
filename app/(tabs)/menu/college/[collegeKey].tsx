@@ -15,21 +15,12 @@ import { useBooths } from '../../../../src/hooks/useBooths';
 import {
   COLLEGE_LABEL_FALLBACK,
   COLLEGE_LABEL_OVERRIDES,
+  COLLEGE_ORDER,
 } from '../../../../src/data/collegeLabels';
 import type { BackendCollege } from '../../../../src/api/types';
 
-const VALID_COLLEGE_KEYS: readonly BackendCollege[] = [
-  'HUMANITIES',
-  'BUSINESS',
-  'LIFE',
-  'ICT',
-  'DESIGN',
-  'MUSIC',
-  'ENGINEERING',
-];
-
 function isBackendCollege(value: unknown): value is BackendCollege {
-  return typeof value === 'string' && (VALID_COLLEGE_KEYS as readonly string[]).includes(value);
+  return typeof value === 'string' && (COLLEGE_ORDER as readonly string[]).includes(value);
 }
 
 export default function CollegeBoothListScreen() {

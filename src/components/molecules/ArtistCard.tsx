@@ -63,7 +63,19 @@ export function ArtistCard({ artist, tail }: ArtistCardProps) {
   const imageSource = artist.image ?? remoteSrc ?? null;
 
   const igUrl = instagramUrlFromInfo(artist.info);
-  const handlePress = igUrl ? () => Linking.openURL(igUrl) : undefined;
+  // canOpenURL 로 핸들러 가능 여부 먼저 확인 — IG 앱 미설치 / web view 차단 등
+  // 예외 상황에서 RN 이 throw 하지 않고 조용히 noop.
+  const handlePress = igUrl
+    ? async () => {
+        try {
+          if (await Linking.canOpenURL(igUrl)) {
+            await Linking.openURL(igUrl);
+          }
+        } catch {
+          // 외부 앱 열기 실패는 무시 — 사용자 입장에선 단순히 반응 없음.
+        }
+      }
+    : undefined;
 
   return (
     <View style={{ width: 274, alignItems: labelAlign }}>
