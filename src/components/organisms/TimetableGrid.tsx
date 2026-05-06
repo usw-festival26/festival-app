@@ -4,7 +4,7 @@
  * 단일 반투명 흰 카드 (368, bg rgba(255,255,255,0.9), rounded-20) 안에:
  *  - 상단: "{N}일차 라인업 보기" 알약 버튼 → /lineup?day=N
  *  - DAY 1 / DAY 2 토글 (active: primary-light bg / inactive: white)
- *  - 시간-아티스트 행 + 가로 구분선
+ *  - 시간(시작만) - 아티스트 행 + 가로 구분선 (행 높이 67px)
  *
  * 라인업 진입점 — DAY 1 활성 시 day=1, DAY 2 활성 시 day=2 가 query 로 전달됨.
  * /lineup 화면이 이 값을 읽어 헤더 라벨을 다르게 표시.
@@ -14,7 +14,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { useRouter } from 'expo-router';
 import type { TimetableDay } from '../../types/timetable';
 import { EmptyState } from '@molecules/EmptyState';
-import { formatTimeRange } from '@utils/date';
+import { formatTime } from '@utils/date';
 
 export interface TimetableGridProps {
   days: TimetableDay[];
@@ -22,6 +22,11 @@ export interface TimetableGridProps {
 
 const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
 const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
+
+// Figma 2139:1415 — 시간 라벨 사이 67px, 시간 텍스트 좌측 고정 width.
+const ROW_HEIGHT = 67;
+const TIME_WIDTH = 60;
+const CARD_INNER_PADDING_X = 53;
 
 export function TimetableGrid({ days }: TimetableGridProps) {
   const router = useRouter();
@@ -114,26 +119,10 @@ export function TimetableGrid({ days }: TimetableGridProps) {
           })}
         </View>
 
-        {/* 설명 (label) */}
-        {currentDay?.label ? (
-          <Text
-            style={{
-              fontFamily: PRETENDARD_REGULAR,
-              fontWeight: '400',
-              fontSize: 12,
-              color: '#02015B',
-              textAlign: 'center',
-              marginTop: 24,
-            }}
-          >
-            {currentDay.label}
-          </Text>
-        ) : null}
-
-        {/* 공연 리스트 */}
+        {/* 공연 리스트 — Figma DAY 토글 → 첫 행 사이 여백 40px */}
         <ScrollView
-          style={{ flex: 1, marginTop: 20 }}
-          contentContainerStyle={{ paddingHorizontal: 34, paddingBottom: 16 }}
+          style={{ flex: 1, marginTop: 40 }}
+          contentContainerStyle={{ paddingBottom: 16 }}
           showsVerticalScrollIndicator={false}
         >
           {performances.length === 0 ? (
@@ -143,7 +132,7 @@ export function TimetableGrid({ days }: TimetableGridProps) {
           ) : (
             performances.map((p) => (
               <View key={p.id} style={styles.row}>
-                <Text style={styles.rowTime}>{formatTimeRange(p.startTime, p.endTime)}</Text>
+                <Text style={styles.rowTime}>{formatTime(p.startTime)}</Text>
                 <Text style={styles.rowTitle} numberOfLines={1}>
                   {p.artistName}
                 </Text>
@@ -163,15 +152,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
   },
+  // 시간 라벨 좌측 고정, 아티스트 텍스트는 카드 가운데 정렬 (시간폭만큼 우측 여백으로 시각적 균형).
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    height: ROW_HEIGHT,
+    marginHorizontal: CARD_INNER_PADDING_X,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5EA',
   },
   rowTime: {
-    width: 110,
+    width: TIME_WIDTH,
     fontFamily: PRETENDARD_REGULAR,
     fontWeight: '400',
     fontSize: 12,
@@ -179,6 +170,7 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     flex: 1,
+    marginRight: TIME_WIDTH,
     fontFamily: PRETENDARD_SEMIBOLD,
     fontWeight: '600',
     fontSize: 15,

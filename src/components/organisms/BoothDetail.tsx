@@ -177,10 +177,12 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   divider: {
+    // Figma 2205:683 — 메뉴 마지막 아이템 → 구분선 까지 큰 여백, 구분선 → Sold out 라벨 27px.
+    // 라인 자체는 옅은 회색. 이전엔 marginTop 0 이라 마지막 아이템 underline 처럼 보였음.
     height: StyleSheet.hairlineWidth,
     backgroundColor: '#000000',
-    marginBottom: 18,
-    marginTop: 0,
-    opacity: 0.35,
+    marginTop: 32,
+    marginBottom: 27,
+    opacity: 0.2,
   },
 });

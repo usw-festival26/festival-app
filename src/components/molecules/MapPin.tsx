@@ -1,14 +1,13 @@
 /**
  * MapPin - 지도 위 핀포인트 (Figma 2096:801).
  *
- * SVG 자체를 import 하지 않고 path 데이터만 그대로 옮겨와 react-native-svg 로
- * 인라인 렌더한다. 이유: Figma export SVG 가 `<filter>`, `<mask>` 를 포함해
- * react-native-svg-transformer 가 변환에 실패한다 (Identifier 'Svg' has already
- * been declared 류 SyntaxError). 경로/그라디언트는 `assets/images/pins/*.svg`
- * 파일 내용 그대로 — Figma 디자이너가 export 한 픽셀과 동일하다.
+ * 마커(티어드롭)는 디자이너가 export 한 PNG 를 그대로 사용
+ * (`assets/images/pins/{빨강|초록|파랑} 핀 아이콘.png`).
+ * 말풍선은 react-native-svg 로 인라인 렌더 — Figma export SVG 가 `<filter>`,
+ * `<mask>` 를 포함해 react-native-svg-transformer 가 변환에 실패하기 때문.
  *
  * 구조 (위에서부터):
- *           ⬤        마커 (티어드롭, 카테고리별 그라디언트)
+ *           ⬤        마커 (PNG, 카테고리별 이미지)
  *                    ↕ MARKER_GAP
  *   ┌──────────────┐
  *   │  Title       │  말풍선 (옅은 파스텔 + 흰색 stroke)
@@ -24,46 +23,40 @@
  * anchor: 말풍선 tail 끝.
  */
 import React from 'react';
-import { Platform, Pressable, Text, View } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
+import { Image, Platform, Pressable, Text, View, type ImageSourcePropType } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import type { PinCategory } from '../../types/cluster';
 
 /**
  * 핀 전체 비례 — 1.0 = Figma 원본 (마커 37×40, 말풍선 146×121).
- * SVG path 데이터·gradient 좌표는 viewBox 원본 그대로, 렌더 width/height 만 줄여
+ * 마커 PNG 와 말풍선 SVG 는 viewBox/원본 비율 그대로, 렌더 width/height 만 줄여
  * 마커·말풍선·텍스트가 동시에 따라간다. 이 값만 만지면 전체 사이즈 조절.
  */
 const PIN_SCALE = 0.60;
 
-// === 마커 viewBox 원본 (path/gradient 좌표계) ===
-// 티어드롭 외곽 path — 세 색 모두 동일.
-const MARKER_PATH =
-  'M 18.2861 0 C 26.1759 0.000137096 32.5713 6.39634 32.5713 14.2861 C 32.5712 20.2695 28.8927 25.3926 23.6738 27.5195 L 22.6152 29.3535 C 20.6907 32.6867 15.8796 32.6868 13.9551 29.3535 L 12.8955 27.5186 C 7.67793 25.391 4.0001 20.2686 4 14.2861 C 4 6.39626 10.3963 0 18.2861 0 Z';
+// === 마커 원본 비율 (PNG) ===
 const MARKER_VB_W = 37;
 const MARKER_VB_H = 40;
 const MARKER_VB_VISIBLE_BOTTOM = 32; // 티어드롭 tail tip y (그림자 제외)
-const MARKER_DOT_CX = 18.4924;
-const MARKER_DOT_CY = 14.4929;
-const MARKER_DOT_R = 4.469;
 
-// 그라디언트 (좌상→우하): SVG 의 linearGradient x1/y1=28.03/28.23 → x2/y2=6.25/7.12
-// 즉 (1,1) → (~0,~0) 정규화 ≈ from 우하 to 좌상.
-// cluster 는 새 secondary 팔레트(#A5FFF3 → #0068FF) 적용 — 브랜드 통일.
-const MARKER_GRADIENT: Record<PinCategory, readonly [string, string]> = {
-  cluster: ['#A5FFF3', '#0068FF'],
-  food: ['#FF514E', '#FFBEBF'], // 빨강 핀 아이콘.svg
-  facility: ['#00A75C', '#D7FF87'], // 초록 핀 아이콘.svg
+const MARKER_SOURCE: Record<PinCategory, ImageSourcePropType> = {
+  cluster: require('../../../assets/images/pins/파랑 핀 아이콘.png'),
+  food: require('../../../assets/images/pins/빨강 핀 아이콘.png'),
+  facility: require('../../../assets/images/pins/초록 핀 아이콘.png'),
 };
 
-// === 말풍선 viewBox 원본 ===
-// 빨강은 viewBox 가 146×120 으로 1px 짧지만 비례 맞추면 시각차 없음 — 통일.
+// === 말풍선 viewBox ===
+// 원본(Figma) body 106.481 에서 88 로 축소 (텍스트 양 대비 위/아래 여백이 과해서).
+// 너비/둥근 corner radius(20)/tail 모양은 그대로 유지하고 직선 구간 길이만 단축.
+//   원본 straight middle: y 20~86.4814  →  새: y 20~68
+//   원본 bottom corner end: y 106.481   →  새: y 88
+//   원본 tail tip control y: 121.297    →  새: 88 + (121.297-106.481) = 102.816
 const BUBBLE_VB_W = 146;
-const BUBBLE_VB_H = 121;
-const BUBBLE_VB_BODY_H = 106.481;
-const BUBBLE_VB_TAIL_TIP_Y = 120;
-// 외곽 path — 둥근 사각형 (radius 20) + 하단 가운데 tail.
+const BUBBLE_VB_H = 103;
+const BUBBLE_VB_BODY_H = 88;
+const BUBBLE_VB_TAIL_TIP_Y = 102.816;
 const BUBBLE_PATH =
-  'M 126 0 C 137.046 0 146 8.9543 146 20 V 86.4814 C 146 97.527 137.046 106.481 126 106.481 H 82.9639 L 76.9062 117.78 C 75.0209 121.297 69.9791 121.297 68.0938 117.78 L 62.0361 106.481 H 20 C 8.9544 106.481 0.0002 97.527 0 86.4814 V 20 C 0 8.9543 8.9543 0 20 0 H 126 Z';
+  'M 126 0 C 137.046 0 146 8.9543 146 20 V 68 C 146 79.046 137.046 88 126 88 H 82.9639 L 76.9062 99.299 C 75.0209 102.816 69.9791 102.816 68.0938 99.299 L 62.0361 88 H 20 C 8.9544 88 0.0002 79.046 0 68 V 20 C 0 8.9543 8.9543 0 20 0 H 126 Z';
 
 const BUBBLE_FILL: Record<PinCategory, string> = {
   cluster: '#FEF2FF', // 파랑핀.svg
@@ -116,9 +109,7 @@ export interface MapPinProps {
 }
 
 export function MapPin({ category, labelLines, onPress, selected }: MapPinProps) {
-  const [gradFrom, gradTo] = MARKER_GRADIENT[category];
   const bubbleFill = BUBBLE_FILL[category];
-  const gradId = `mapPinMarker-${category}`;
 
   const lines = labelLines.slice(0, 3);
   const moreIdx = lines.findIndex((l) => l.trim().startsWith('더보기'));
@@ -138,7 +129,7 @@ export function MapPin({ category, labelLines, onPress, selected }: MapPinProps)
         transform: selected ? [{ scale: 1.08 }] : undefined,
       }}
     >
-      {/* 마커 (상단 가운데) */}
+      {/* 마커 (상단 가운데) — PNG */}
       <View
         style={{
           position: 'absolute',
@@ -154,28 +145,11 @@ export function MapPin({ category, labelLines, onPress, selected }: MapPinProps)
           elevation: 3,
         }}
       >
-        <Svg width={MARKER_W} height={MARKER_H} viewBox={`0 0 ${MARKER_VB_W} ${MARKER_VB_H}`}>
-          <Defs>
-            <LinearGradient
-              id={gradId}
-              x1={28.0259}
-              y1={28.2337}
-              x2={6.25217}
-              y2={7.12257}
-              gradientUnits="userSpaceOnUse"
-            >
-              <Stop offset="0" stopColor={gradFrom} />
-              <Stop offset="1" stopColor={gradTo} />
-            </LinearGradient>
-          </Defs>
-          <Path
-            d={MARKER_PATH}
-            fill={`url(#${gradId})`}
-            stroke="#FFFFFF"
-            strokeWidth={1}
-          />
-          <Circle cx={MARKER_DOT_CX} cy={MARKER_DOT_CY} r={MARKER_DOT_R} fill="#FFFFFF" />
-        </Svg>
+        <Image
+          source={MARKER_SOURCE[category]}
+          style={{ width: MARKER_W, height: MARKER_H }}
+          resizeMode="contain"
+        />
       </View>
 
       {/* 말풍선 + 텍스트 */}
@@ -205,10 +179,14 @@ export function MapPin({ category, labelLines, onPress, selected }: MapPinProps)
             paddingVertical: TEXT_PAD_V,
           }}
         >
-          {/* 제목 + 부제 */}
+          {/* 제목 + 부제 — 말풍선 정중앙 정렬.
+              더보기는 absolute 로 빼서 column flex 에서 분리(아래 참조).
+              alignSelf 'stretch' + Text width 100% 는 RN Web 에서 alignItems:center
+              + numberOfLines 조합 시 폭 측정 collapse 방어. */}
           <View
             style={{
-              flex: moreLine ? 0 : 1,
+              flex: 1,
+              alignSelf: 'stretch',
               alignItems: 'center',
               justifyContent: 'center',
             }}
@@ -218,6 +196,7 @@ export function MapPin({ category, labelLines, onPress, selected }: MapPinProps)
                 numberOfLines={1}
                 ellipsizeMode="tail"
                 style={{
+                  width: '100%',
                   fontFamily: PRETENDARD_SEMIBOLD,
                   fontWeight: '600',
                   fontSize: TITLE_FONT,
@@ -234,6 +213,7 @@ export function MapPin({ category, labelLines, onPress, selected }: MapPinProps)
                 numberOfLines={1}
                 ellipsizeMode="tail"
                 style={{
+                  width: '100%',
                   fontFamily: PRETENDARD_REGULAR,
                   fontWeight: '400',
                   fontSize: SUB_FONT,
@@ -248,29 +228,26 @@ export function MapPin({ category, labelLines, onPress, selected }: MapPinProps)
             ) : null}
           </View>
 
-          {/* 더보기 (오른쪽 하단) */}
+          {/* 더보기 — 우하단 absolute. flex 흐름 밖으로 빼야 title 이 부모 height
+              전체에서 정중앙 정렬을 유지한다 (이전엔 더보기가 flex:1 로 남은
+              공간을 가져가서 title 이 위쪽으로 밀려 보였음). */}
           {moreLine ? (
-            <View
+            <Text
+              numberOfLines={1}
               style={{
-                flex: 1,
-                justifyContent: 'flex-end',
-                alignItems: 'flex-end',
+                position: 'absolute',
+                right: TEXT_PAD_H,
+                bottom: TEXT_PAD_V,
+                fontFamily: PRETENDARD_REGULAR,
+                fontWeight: '400',
+                fontSize: SUB_FONT,
+                lineHeight: SUB_LH,
+                color: '#000000',
+                textAlign: 'right',
               }}
             >
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontFamily: PRETENDARD_REGULAR,
-                  fontWeight: '400',
-                  fontSize: SUB_FONT,
-                  lineHeight: SUB_LH,
-                  color: '#000000',
-                  textAlign: 'right',
-                }}
-              >
-                {moreLine}
-              </Text>
-            </View>
+              {moreLine}
+            </Text>
           ) : null}
         </View>
       </View>

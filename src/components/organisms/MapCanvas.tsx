@@ -23,7 +23,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ImageSourcePropType,
   LayoutChangeEvent,
-  Platform,
   Pressable,
   View,
   Image as RNImage,
@@ -481,9 +480,9 @@ export function MapCanvas({
                   width: imgW,
                   height: imgH,
                   transformOrigin: 'top left' as any,
-                  // 웹 전용 — 첫 transform 시점에 GPU 레이어 승격으로 첫-팬 스파이크 발생.
-                  // willChange 로 초기 페인트 때 미리 레이어를 띄워둬 인터랙션 시 비용을 0으로 만든다.
-                  ...(Platform.OS === 'web' ? ({ willChange: 'transform' } as any) : null),
+                  // willChange: 'transform' 은 의도적으로 빼둠. 켜면 컨테이너가 GPU
+                  // raster 텍스처가 돼서 transform: scale 적용 시 텍스트·SVG 까지 같이
+                  // 픽셀화된다(줌 인 시 글자 깨짐). 첫 팬 스파이크는 감수.
                 },
                 animatedStyle,
               ]}
