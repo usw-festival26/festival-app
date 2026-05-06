@@ -30,6 +30,15 @@ const BRAND_LOGO_ASPECT_RATIO = 1696 / 729;
 const BRAND_LOGO_HEIGHT = 52;
 const BRAND_LOGO_WIDTH = Math.round(BRAND_LOGO_HEIGHT * BRAND_LOGO_ASPECT_RATIO);
 
+// 스플래시와 동일한 outline-text PNG — 폰트 메타가 없는 디자이너 export 글리프.
+// 같은 글씨 스타일을 데스크탑에도 그대로 적용해 브랜드 일관성 확보.
+const TITLE_IMAGE = require('../../../assets/images/text/2026수원대대동제.png');
+const TITLE_IMAGE_W = 108;
+const TITLE_IMAGE_H = 10;
+const SLOGAN_IMAGE = require('../../../assets/images/text/짙은밤,가장빛나는순간.png');
+const SLOGAN_IMAGE_W = 284;
+const SLOGAN_IMAGE_H = 26;
+
 // mobile-content 폭 (global.css 의 max-width 와 동기화)
 const MOBILE_CONTENT_WIDTH = 402;
 // 콘텐츠 그룹: MAIN LOGO 박스 폭(294)을 그룹 폭으로, 텍스트는 이 박스 내부에 배치.
@@ -37,6 +46,13 @@ const MOBILE_CONTENT_WIDTH = 402;
 const CONTENT_GROUP_WIDTH = 294;
 const CONTENT_GROUP_HEIGHT = 336;
 const TEXT_INSET = 90; // 426 - 336
+
+// === 좌측 콘텐츠 그룹 안 세로 배치 — 사용자가 시각 보면서 미세 조정 시 여기만 만지면 됨 ===
+// 타이틀 / 슬로건+로고 / 학교명 3 블록의 Y 좌표.
+const TITLE_TOP = 0;          // 타이틀 PNG (108×10) Y
+const SLOGAN_GROUP_TOP = 30;  // 슬로건 PNG + MIDNIGHT 로고 wrapper Y (둘은 안에서 vertical-center)
+const SLOGAN_GROUP_HEIGHT = 100; // wrapper 높이 — 안의 슬로건+로고 가운데 정렬용
+const SUBTITLE_TOP = 160;     // 학교/단체명 (수원대학교 멋쟁이사자처럼 / 영원) Y
 // Blob 사이즈 (Figma 좌표 그대로)
 const BLOB_TOP_RIGHT = 222;
 const BLOB_LEFT_CENTER = 342;
@@ -59,12 +75,23 @@ const BLOB_RIGHT_LARGE_ROTATE = 0;
 // VERTICAL 양수 = 아래로 / HORIZONTAL 양수 = 더 화면 바깥(오른쪽). 0 이면 Figma 위치 그대로.
 const BLOB_RIGHT_LARGE_VERTICAL_NUDGE = 360;
 const BLOB_RIGHT_LARGE_HORIZONTAL_NUDGE = 100;
-// 푸터 하단 여백 (Figma 의 1040 프레임 하단 오프셋(≈88) 그대로 쓰면 일반 데스크탑 뷰포트에서
-// 너무 떠 보여 32 로 축소)
-const FOOTER_BOTTOM_INSET = 32;
+// 하단 푸터(© + 크레딧 묶음) 가 화면 하단에서 떨어진 거리 (px).
+// 값↑ → 푸터가 위로 올라옴. 사용자가 시안 보고 직접 조정하기 좋은 단일 노브.
+const FOOTER_BOTTOM_INSET = 100;
 // © 와 푸터 크레딧 사이 간격. Figma 시안은 17 이지만 9px 폰트 기준으로
 // 두 블록이 시각적으로 떨어져 보여, 한 묶음으로 읽히도록 좁힘.
 const COPYRIGHT_BOTTOM_GAP = 4;
+
+// 푸터 한 줄 공통 스타일. whiteSpace: 'nowrap' 은 desktop-decor 가 web 전용
+// (.desktop-decor display:none on mobile) 이라 RN-Web 에서 동작.
+// CONTENT_GROUP_WIDTH(294) 에 absolute 로 anchor 돼 있지만 이 nowrap 이 없으면
+// 긴 라인('...최민서', '주소...문의...') 이 wrap 되어 두 줄로 보인다.
+const FOOTER_LINE_STYLE = {
+  fontFamily: 'Pretendard-Medium',
+  fontSize: 9,
+  lineHeight: 12,
+  whiteSpace: 'nowrap',
+} as any;
 
 export function DesktopBackdropDecor() {
   return (
@@ -104,24 +131,17 @@ export function DesktopBackdropDecor() {
               position: 'relative',
             }}
           >
-            {/* 900:217 — 2026년 수원대학교 대동제 (Pretendard Black 32, 한글) */}
-            <View style={{ position: 'absolute', left: TEXT_INSET, top: 0 }}>
-              {['2026년', '수원대학교', '대동제'].map((line) => (
-                <Text
-                  key={line}
-                  style={{
-                    fontFamily: 'Pretendard-Black',
-                    fontSize: 32,
-                    lineHeight: 45,
-                    color: Colors.festival.text,
-                  }}
-                >
-                  {line}
-                </Text>
-              ))}
+            {/* 축제명 라벨 — 스플래시와 동일한 outline-text PNG */}
+            <View style={{ position: 'absolute', left: TEXT_INSET, top: TITLE_TOP }}>
+              <Image
+                source={TITLE_IMAGE}
+                style={{ width: TITLE_IMAGE_W, height: TITLE_IMAGE_H }}
+                resizeMode="contain"
+                accessibilityLabel="2026 수원대학교 대동제"
+              />
             </View>
 
-            {/* 900:219 자리 — 슬로건 + 영문 브랜드 (이전 MAIN/LOGO placeholder 자리).
+            {/* 슬로건 + 영문 브랜드 로고. 슬로건 글씨도 스플래시와 동일 PNG.
                 대동제 타이틀 / 학교명과 같은 좌측 정렬축(TEXT_INSET) 으로 묶어
                 한 컬럼처럼 보이게 한다. (Figma 의 박스 가운데 정렬은 1920 폭에서만
                 자연스럽고, flex 폭에서는 시각 중심이 어긋나 보였음) */}
@@ -129,22 +149,17 @@ export function DesktopBackdropDecor() {
               style={{
                 position: 'absolute',
                 left: TEXT_INSET,
-                top: 141,
-                height: 154,
+                top: SLOGAN_GROUP_TOP,
+                height: SLOGAN_GROUP_HEIGHT,
                 justifyContent: 'center',
               }}
             >
-              <Text
-                style={{
-                  fontFamily: 'Pretendard-SemiBold',
-                  fontSize: 18,
-                  lineHeight: 26,
-                  color: Colors.festival.text,
-                  marginBottom: 10,
-                }}
-              >
-                {FESTIVAL_INFO.tagline}
-              </Text>
+              <Image
+                source={SLOGAN_IMAGE}
+                style={{ width: SLOGAN_IMAGE_W, height: SLOGAN_IMAGE_H, marginBottom: 10 }}
+                resizeMode="contain"
+                accessibilityLabel={FESTIVAL_INFO.tagline}
+              />
               <Image
                 source={BRAND_LOGO_SOURCE}
                 style={{ width: BRAND_LOGO_WIDTH, height: BRAND_LOGO_HEIGHT }}
@@ -154,7 +169,7 @@ export function DesktopBackdropDecor() {
             </View>
 
             {/* 900:218 — 학교/단체명 (Pretendard SemiBold 15) */}
-            <View style={{ position: 'absolute', left: TEXT_INSET, top: 290 }}>
+            <View style={{ position: 'absolute', left: TEXT_INSET, top: SUBTITLE_TOP }}>
               {['수원대학교 멋쟁이사자처럼', '수원대학교 총학생회 영원'].map((line) => (
                 <Text
                   key={line}
@@ -226,30 +241,27 @@ export function DesktopBackdropDecor() {
             <View style={{ position: 'absolute', left: TEXT_INSET, bottom: 0 }}>
               {/* 900:232 — © 카피라이트 */}
               <Text
-                style={{
-                  fontFamily: 'Pretendard-Medium',
-                  fontSize: 9,
-                  lineHeight: 12,
+                style={[FOOTER_LINE_STYLE, {
                   color: Colors.festival.muted,
                   marginBottom: COPYRIGHT_BOTTOM_GAP,
-                }}
+                }]}
               >
                 © 2026 LIKELION USW All rights reserved
               </Text>
 
               {/* 900:237 — 푸터 크레딧 3줄 */}
-              <Text style={{ fontFamily: 'Pretendard-Medium', fontSize: 9, lineHeight: 12 }}>
+              <Text style={FOOTER_LINE_STYLE}>
                 <Text style={{ color: Colors.festival.mutedDark }}>수원대학교 멋쟁이사자처럼</Text>
                 <Text style={{ color: Colors.festival.muted }}>{'  ㅣ  '}</Text>
                 <Text style={{ color: Colors.festival.mutedDark }}>수원대학교 총학생회 영원</Text>
               </Text>
-              <Text style={{ fontFamily: 'Pretendard-Medium', fontSize: 9, lineHeight: 12 }}>
+              <Text style={FOOTER_LINE_STYLE}>
                 <Text style={{ color: Colors.festival.mutedDark }}>기획 및 제작</Text>
                 <Text style={{ color: Colors.festival.muted }}>
                   {'   최재령 김회윤 주호연 정소윤 안혜선 남주연 최민서'}
                 </Text>
               </Text>
-              <Text style={{ fontFamily: 'Pretendard-Medium', fontSize: 9, lineHeight: 12 }}>
+              <Text style={FOOTER_LINE_STYLE}>
                 <Text style={{ color: Colors.festival.mutedDark }}>주소</Text>
                 <Text style={{ color: Colors.festival.muted }}>
                   {'  경기도 화성시 봉담읍 와우안길 17  ㅣ  '}
@@ -260,7 +272,10 @@ export function DesktopBackdropDecor() {
                     onPress={() => Linking.openURL(CONTACT_INFO.kakaoChannelUrl)}
                     accessibilityRole="link"
                     accessibilityLabel="카카오톡 문의 채널 열기"
-                    style={{ color: Colors.festival.muted }}
+                    style={{
+                      color: Colors.festival.mutedDark,
+                      textDecorationLine: 'underline',
+                    }}
                   >
                     {` ${CONTACT_INFO.kakaoChannelLabel}`}
                   </Text>
