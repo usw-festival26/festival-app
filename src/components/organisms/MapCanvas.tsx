@@ -83,6 +83,14 @@ const ZOOM_STEP = 0.25;
 const ZOOM_INITIAL = 1;
 /** expanded 토글 시 적용할 줌 배수 — 줄어든 viewport 만큼 시각적으로 보정. */
 const EXPANDED_ZOOM_FACTOR = 1.4;
+/**
+ * 핀 탭 시 자동 줌 타깃(displayed scale).
+ * 현재 displayed scale 이 이미 이 값보다 크면 줌 변경 없이 센터링만. expanded
+ * 가 같이 켜지면 별도 effect 가 추가 ×1.4 를 얹어 더 가까이 들어간다.
+ */
+const PIN_FOCUS_SCALE = 1.5;
+/** 핀 포커스 애니메이션 길이(ms). pan/줌 버튼(200ms)보다 살짝 길게 — "이동" 느낌 강조. */
+const PIN_FOCUS_DURATION = 320;
 
 /**
  * clusterLabel lookup 실패 시 fallback. module-level 상수라 동일 reference 가
@@ -336,6 +344,50 @@ export function MapCanvas({
   const zoomOut = () => zoomTo(Math.max(scaleState - ZOOM_STEP, ZOOM_MIN));
 
   /**
+   * 특정 이미지 좌표(0~1) 가 viewport 중심에 오도록 tx/ty 를 옮기고 PIN_FOCUS_SCALE
+   * 까지 줌인한다. 현재 displayed scale 이 이미 더 크면 줌은 그대로 두고 센터링만.
+   * 핀 탭 핸들러 등에서 사용.
+   */
+  const zoomToCoords = useCallback(
+    (coords: MapCoords) => {
+      if (layout.cw === 0 || layout.ch === 0 || imgW === 0 || imgH === 0) return;
+      const targetScale = Math.min(
+        Math.max(scale.value, PIN_FOCUS_SCALE),
+        ZOOM_MAX,
+      );
+      const cx = layout.cw / 2;
+      const cy = layout.ch / 2;
+      const imgX = coords.x * imgW;
+      const imgY = coords.y * imgH;
+      // tx + imgX*scale = cx → tx = cx - imgX*scale (이미지 좌표를 viewport 중심으로)
+      const nextTxRaw = cx - imgX * targetScale;
+      const nextTyRaw = cy - imgY * targetScale;
+      const { txMin, txMax, tyMin, tyMax } = computeBounds(targetScale);
+      const nextTx = Math.max(txMin, Math.min(nextTxRaw, txMax));
+      const nextTy = Math.max(tyMin, Math.min(nextTyRaw, tyMax));
+
+      // baseScaleRef 업데이트 — expanded 가 이후에 토글돼도 일관된 base 가 유지되도록.
+      const factor = expanded ? EXPANDED_ZOOM_FACTOR : 1;
+      baseScaleRef.current = targetScale / factor;
+
+      scale.value = withTiming(targetScale, { duration: PIN_FOCUS_DURATION });
+      tx.value = withTiming(nextTx, { duration: PIN_FOCUS_DURATION });
+      ty.value = withTiming(nextTy, { duration: PIN_FOCUS_DURATION });
+      setScaleState(targetScale);
+    },
+    [computeBounds, layout.cw, layout.ch, imgW, imgH, expanded, scale, tx, ty],
+  );
+
+  /** 핀 탭 — 카메라 이동(zoomToCoords) 후 부모 콜백 호출 */
+  const handlePinPress = useCallback(
+    (pin: AnyPin) => {
+      zoomToCoords(pin.coords);
+      onPinPress?.(pin);
+    },
+    [zoomToCoords, onPinPress],
+  );
+
+  /**
    * expanded 토글 시 자동 줌인/줌아웃.
    *
    * 초기 mount 는 prevExpandedRef === null 로 식별해 zoom 호출을 건너뛴다(첫 렌더에서
@@ -412,7 +464,7 @@ export function MapCanvas({
 
   return (
     <View
-      className="flex-1 bg-festival-primary-dark"
+      className="flex-1 bg-festival-primary-light"
       style={{ position: 'relative', overflow: 'hidden' }}
       onLayout={onCanvasLayout}
     >
@@ -449,7 +501,7 @@ export function MapCanvas({
                       category="cluster"
                       labelLines={clusterLabel(c)}
                       selected={selectedPinId === c.id}
-                      onPress={() => onPinPress?.(c)}
+                      onPress={() => handlePinPress(c)}
                     />
                   </PinAnchor>
                 ))}
@@ -461,7 +513,7 @@ export function MapCanvas({
                       category="food"
                       labelLines={foodLabel(p)}
                       selected={selectedPinId === p.id}
-                      onPress={() => onPinPress?.(p)}
+                      onPress={() => handlePinPress(p)}
                     />
                   </PinAnchor>
                 ))}
@@ -473,7 +525,7 @@ export function MapCanvas({
                       category="facility"
                       labelLines={facilityLabel(p)}
                       selected={selectedPinId === p.id}
-                      onPress={() => onPinPress?.(p)}
+                      onPress={() => handlePinPress(p)}
                     />
                   </PinAnchor>
                 ))}

@@ -9,7 +9,7 @@ import React from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContent } from '../../src/components/organisms/DrawerContent';
 
-const SITE = 'USW Festival 2026';
+const SITE = '2026년 수원대학교 대동제';
 const t = (label: string) => `${label} · ${SITE}`;
 
 export default function DrawerLayout() {

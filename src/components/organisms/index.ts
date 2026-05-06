@@ -21,6 +21,7 @@ export { NotFoundContent, type NotFoundContentProps } from './NotFoundContent';
 export { SplashContent, type SplashContentProps } from './SplashContent';
 export { LineupList, type LineupListProps } from './LineupList';
 export { MenuGrid, type MenuGridProps } from './MenuGrid';
+export { CollegeGrid, type CollegeGridProps } from './CollegeGrid';
 export { DesktopBackdropDecor } from './DesktopBackdropDecor';
 export { MapCanvas, type MapCanvasProps, type AnyPin } from './MapCanvas';
 export { GoodsShopHero, type GoodsShopHeroProps } from './GoodsShopHero';

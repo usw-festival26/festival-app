@@ -53,3 +53,6 @@ docs/
 
 # logs
 *.log
+
+# 가역 삭제 trash — Claude/사용자가 rm 대신 여기로 mv. 주기적으로 사용자가 정리.
+.trash/

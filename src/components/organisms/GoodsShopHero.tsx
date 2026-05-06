@@ -15,6 +15,7 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GradientPill } from '../atoms/GradientPill';
 import { GoodsCarouselCard } from '../molecules/GoodsCarouselCard';
+import { ImageLightbox } from '../molecules/ImageLightbox';
 import type { GoodsItem } from '../../types/goods';
 
 export interface GoodsShopHeroProps {
@@ -23,6 +24,7 @@ export interface GoodsShopHeroProps {
 
 export function GoodsShopHero({ items }: GoodsShopHeroProps) {
   const [index, setIndex] = useState(0);
+  const [lightboxItem, setLightboxItem] = useState<GoodsItem | null>(null);
   const total = items.length;
 
   if (total === 0) {
@@ -130,9 +132,16 @@ export function GoodsShopHero({ items }: GoodsShopHeroProps) {
           </Pressable>
         </View>
 
-        {/* 슬라이드 카드 */}
+        {/* 슬라이드 카드 — 사진 보유(images 또는 image) 면 탭 시 라이트박스 */}
         <View style={{ marginTop: 28 }}>
-          <GoodsCarouselCard item={current} />
+          <GoodsCarouselCard
+            item={current}
+            onPress={
+              current.images?.length || current.image || current.imageUri
+                ? () => setLightboxItem(current)
+                : undefined
+            }
+          />
         </View>
 
         {/* 페이지네이션 */}
@@ -149,6 +158,8 @@ export function GoodsShopHero({ items }: GoodsShopHeroProps) {
           {`${index + 1}/${total}`}
         </Text>
       </View>
+
+      <ImageLightbox subject={lightboxItem} onClose={() => setLightboxItem(null)} />
     </View>
   );
 }

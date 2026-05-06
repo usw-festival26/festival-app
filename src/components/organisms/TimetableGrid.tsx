@@ -1,14 +1,16 @@
 /**
- * TimetableGrid - 타임테이블 (Figma 1422:2381)
+ * TimetableGrid - 타임테이블 (Figma 2139:1415)
  *
- * 단일 반투명 흰 카드 (368×733, bg rgba(255,255,255,0.8), rounded-20) 안에:
- *  - DAY 1/DAY 2 토글 (navy active/white inactive pill)
- *  - 설명 텍스트
- *  - 시간-타이틀 행(구분선)
- *  - 하단 "라인업 보기" 버튼 (206×40, navy bg, rounded-20)
+ * 단일 반투명 흰 카드 (368, bg rgba(255,255,255,0.9), rounded-20) 안에:
+ *  - 상단: "{N}일차 라인업 보기" 알약 버튼 → /lineup?day=N
+ *  - DAY 1 / DAY 2 토글 (active: primary-light bg / inactive: white)
+ *  - 시간-아티스트 행 + 가로 구분선
+ *
+ * 라인업 진입점 — DAY 1 활성 시 day=1, DAY 2 활성 시 day=2 가 query 로 전달됨.
+ * /lineup 화면이 이 값을 읽어 헤더 라벨을 다르게 표시.
  */
-import React, { useState } from 'react';
-import { View, ScrollView, Pressable, Text, Platform, StyleSheet } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { TimetableDay } from '../../types/timetable';
 import { EmptyState } from '@molecules/EmptyState';
@@ -30,15 +32,52 @@ export function TimetableGrid({ days }: TimetableGridProps) {
   }
 
   const currentDay = days[selectedDayIndex];
-  const performances = (currentDay?.performances ?? [])
-    .slice()
-    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  // 시간순 정렬은 currentDay 가 바뀔 때만 재계산.
+  const performances = useMemo(
+    () =>
+      (currentDay?.performances ?? [])
+        .slice()
+        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()),
+    [currentDay],
+  );
+  const dayNumber = selectedDayIndex + 1;
 
   return (
     <View style={{ flex: 1, paddingTop: 18, paddingHorizontal: 16 }}>
       <View style={styles.card}>
-        {/* DAY 토글 */}
-        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 18, paddingTop: 40 }}>
+        {/* "N일차 라인업 보기" — Figma 2139:1459 (266×40, bg #C3EDFF) */}
+        <View style={{ alignItems: 'center', paddingTop: 29 }}>
+          <Pressable
+            onPress={() =>
+              router.push(`/(tabs)/lineup?day=${dayNumber}` as any)
+            }
+            accessibilityRole="link"
+            accessibilityLabel={`${dayNumber}일차 라인업 보기`}
+            style={({ pressed }) => ({
+              width: 266,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: '#C3EDFF',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: pressed ? 0.85 : 1,
+            })}
+          >
+            <Text
+              style={{
+                fontFamily: PRETENDARD_SEMIBOLD,
+                fontWeight: '600',
+                fontSize: 15,
+                color: '#010070',
+              }}
+            >
+              {`${dayNumber}일차 라인업 보기`}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* DAY 토글 — Figma 2139:1462 (active: primary-light, inactive: white) */}
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 19, paddingTop: 32 }}>
           {days.map((day, index) => {
             const active = index === selectedDayIndex;
             const dateStr = day.date.slice(5).replace('-', '.');
@@ -52,11 +91,11 @@ export function TimetableGrid({ days }: TimetableGridProps) {
                   paddingHorizontal: 12,
                   paddingVertical: 11,
                   borderRadius: 20,
-                  backgroundColor: active ? '#010070' : '#FFFFFF',
+                  backgroundColor: active ? '#C3EDFF' : '#FFFFFF',
                   shadowColor: '#000',
                   shadowOffset: { width: 0, height: 1 },
                   shadowOpacity: 0.25,
-                  shadowRadius: active ? 5.2 : 6.6,
+                  shadowRadius: active ? 3.3 : 2.6,
                   elevation: 2,
                 }}
               >
@@ -65,24 +104,24 @@ export function TimetableGrid({ days }: TimetableGridProps) {
                     fontFamily: PRETENDARD_SEMIBOLD,
                     fontWeight: '600',
                     fontSize: 15,
-                    color: active ? '#FFFFFF' : '#010070',
+                    color: active ? '#010070' : '#004466',
                   }}
                 >
-                  {`DAY ${index + 1} ${dateStr}`}
+                  {`DAY ${index + 1}  ${dateStr}`}
                 </Text>
               </Pressable>
             );
           })}
         </View>
 
-        {/* 설명 */}
+        {/* 설명 (label) */}
         {currentDay?.label ? (
           <Text
             style={{
               fontFamily: PRETENDARD_REGULAR,
               fontWeight: '400',
               fontSize: 12,
-              color: '#010070',
+              color: '#02015B',
               textAlign: 'center',
               marginTop: 24,
             }}
@@ -112,35 +151,6 @@ export function TimetableGrid({ days }: TimetableGridProps) {
             ))
           )}
         </ScrollView>
-
-        {/* 라인업 보기 버튼 */}
-        <View style={{ alignItems: 'center', paddingVertical: 16 }}>
-          <Pressable
-            onPress={() => router.push('/(tabs)/lineup' as any)}
-            accessibilityRole="button"
-            accessibilityLabel="라인업 보기"
-            style={({ pressed }) => ({
-              width: 206,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: '#02015B',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: pressed ? 0.85 : 1,
-            })}
-          >
-            <Text
-              style={{
-                fontFamily: PRETENDARD_SEMIBOLD,
-                fontWeight: '600',
-                fontSize: 15,
-                color: '#FFFFFF',
-              }}
-            >
-              라인업 보기
-            </Text>
-          </Pressable>
-        </View>
       </View>
     </View>
   );
@@ -172,6 +182,7 @@ const styles = StyleSheet.create({
     fontFamily: PRETENDARD_SEMIBOLD,
     fontWeight: '600',
     fontSize: 15,
-    color: '#000000',
+    color: '#001E56',
+    textAlign: 'center',
   },
 });

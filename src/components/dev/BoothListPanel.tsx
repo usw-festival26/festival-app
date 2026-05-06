@@ -443,12 +443,12 @@ function BoothPanelRow({ booth, clusterName, onCopyId }: BoothPanelRowProps) {
         <Ionicons
           name={unassigned ? 'alert-circle-outline' : 'pin-outline'}
           size={11}
-          color={unassigned ? '#DC2626' : '#0D00FF'}
+          color={unassigned ? '#DC2626' : '#0068FF'}
         />
         <Text
           style={{
             fontSize: 10,
-            color: unassigned ? '#DC2626' : '#0D00FF',
+            color: unassigned ? '#DC2626' : '#0068FF',
             fontWeight: '600',
           }}
         >

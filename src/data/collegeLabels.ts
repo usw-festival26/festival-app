@@ -32,13 +32,40 @@ export const COLLEGE_LABEL_OVERRIDES: Partial<Record<BackendCollege, string>> = 
  */
 export const COLLEGE_LABEL_FALLBACK: Record<BackendCollege, string> = {
   HUMANITIES: '인문사회융합대학',
-  BUSINESS: '경상대학',
+  BUSINESS: '경영공학대학',
   LIFE: '라이프케어사이언스대학',
   ICT: '지능형SW융합대학',
-  DESIGN: '미술대학',
-  MUSIC: '음악대학',
-  ENGINEERING: '공과대학',
+  DESIGN: '디자인앤아트대학',
+  MUSIC: '음악테크놀로지대학',
+  ENGINEERING: '혁신공과대학',
 };
+
+/**
+ * 단과대 표시 순서 (학교 공식 — 부스/메뉴 탭에서 정렬 기준).
+ * 새 단과대가 enum 에 추가되면 이 배열에도 반드시 등장해야 한다.
+ */
+export const COLLEGE_ORDER: readonly BackendCollege[] = [
+  'HUMANITIES',
+  'BUSINESS',
+  'LIFE',
+  'ICT',
+  'DESIGN',
+  'MUSIC',
+  'ENGINEERING',
+];
+
+const COLLEGE_ORDER_INDEX: ReadonlyMap<BackendCollege, number> = new Map(
+  COLLEGE_ORDER.map((c, i) => [c, i]),
+);
+
+/**
+ * Booth/cluster 등을 단과대 정의 순서로 정렬하기 위한 sort key.
+ * collegeKey 가 없거나 알 수 없으면 무한대 → 끝으로 밀려난다.
+ */
+export function collegeSortIndex(collegeKey: BackendCollege | undefined): number {
+  if (!collegeKey) return Number.POSITIVE_INFINITY;
+  return COLLEGE_ORDER_INDEX.get(collegeKey) ?? Number.POSITIVE_INFINITY;
+}
 
 /**
  * 표시 라벨 결정. mappers.ts 에서 호출.
