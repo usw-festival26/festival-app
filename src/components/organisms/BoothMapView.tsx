@@ -241,12 +241,14 @@ export function BoothMapView({
         expanded={expanded}
       />
 
-      {/* 바텀시트 — 외곽 래퍼 bg 는 transparent. 흰 카드의 둥근 모서리 바깥
-          (corner exclusion zone) 이 그 아래 지도 그대로 보이도록. */}
+      {/* 바텀시트 — 외곽 래퍼 bg 는 화면 배경(primary-light, #C3EDFF) 과 동색.
+          이전엔 transparent 였으나 sheet 가 MapCanvas 와 column flow 로 stack
+          되어 모서리 cutout 영역에 지도가 아닌 ScreenBackdrop GradientBlob 의
+          짙은 가장자리가 그대로 비쳐 보였음 (검정/네이비 직사각형처럼). */}
       <Animated.View
         style={{
           height: sheetAnim,
-          backgroundColor: 'transparent',
+          backgroundColor: Colors.festival.primaryLight,
         }}
         onLayout={onSheetLayout}
       >

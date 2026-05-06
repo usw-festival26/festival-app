@@ -6,12 +6,13 @@
 import { NetworkErrorState } from '@atoms/NetworkErrorState';
 import { NotificationBadge } from '@atoms/NotificationBadge';
 import { Colors } from '@constants/colors';
+import { CONTACT_INFO } from '@data/contact';
 import { useAnnouncementById } from '@hooks/useAnnouncements';
 import { EmptyState } from '@molecules/EmptyState';
 import { FaqBubble } from '@molecules/FaqBubble';
 import { NotificationPill } from '@molecules/NotificationPill';
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Linking, Text, View } from 'react-native';
 import type { Announcement } from '../../types/announcement';
 
 export interface AnnouncementListProps {
@@ -21,9 +22,44 @@ export interface AnnouncementListProps {
   onRetry?: () => void;
 }
 
-const FAQ_ITEMS: { q: string; a: string }[] = [
-  { q: '축제는 언제 열리나요?', a: '5월 14일(목)~15일(금) 양일간 진행됩니다.' },
-  { q: '주차는 가능한가요?', a: '교내 주차 제한, 대중교통·셔틀버스 이용을 권장합니다.' },
+const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
+  { q: '축제 운영 기간은 언제인가요?', a: '5/14(목)~5/15(금)' },
+  { q: '축제 운영 시간은 어떻게 되나요?', a: '12:00~02:00' },
+  { q: '주류 구매 시 신분 확인이 필요한가요?', a: '신분증, 운전 면허증' },
+  {
+    q: '부스 및 푸드트럭 운영 시간은 어떻게 되나요? (변동될 수 있음)',
+    a: '부스: 16:00~02:00\n푸드트럭: 14:00~23:00',
+  },
+  {
+    q: '결제는 어떤 방식으로 가능한가요? (현금, 카드 등)',
+    a: '부스: 계좌이체, 현금\n푸드트럭: 계좌이체, 현금, 카드',
+  },
+  {
+    q: '분실물은 언제 업로드되나요?',
+    a: '테이블 이용하셨던 부스 학생회에게 문의주세요!',
+  },
+  {
+    q: '분실물 수령 방법은 어떻게 되나요?',
+    a: '학과 학부 학생회 부스에 방문해 주세요.\n총학생회 부스에 방문해 주세요.\n당일 분실물 카카오톡 공지 확인해 주세요.',
+  },
+  {
+    q: '문의는 어디로 하면 되나요?',
+    a: (
+      <>
+        <Text
+          onPress={() => {
+            if (CONTACT_INFO.kakaoChannelUrl) Linking.openURL(CONTACT_INFO.kakaoChannelUrl);
+          }}
+          accessibilityRole="link"
+          accessibilityLabel="카카오톡 문의 채널 열기"
+          style={{ color: '#0068FF', textDecorationLine: 'underline' }}
+        >
+          [카카오톡 채널]
+        </Text>
+        을 통해 문의 바랍니다.
+      </>
+    ),
+  },
 ];
 
 export function AnnouncementList({ announcements, isLoading, error, onRetry }: AnnouncementListProps) {

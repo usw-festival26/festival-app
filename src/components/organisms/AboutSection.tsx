@@ -6,10 +6,11 @@
  * (카드 y:1241-1495, 버튼 y:1440-1475) → 카드 paddingBottom:20, 하단에 버튼 렌더.
  */
 import React from 'react';
-import { View, Text, Pressable, Platform } from 'react-native';
+import { View, Text, Pressable, Platform, Linking } from 'react-native';
 import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { RobotoBlackText } from '../atoms/RobotoBlackText';
+import { CONTACT_INFO } from '@data/contact';
 
 export interface AboutSectionProps {
   title?: string;
@@ -29,16 +30,15 @@ export function AboutSection({ title = 'About Us' }: AboutSectionProps) {
         <View
           style={{
             width: 368,
-            height: 254,
+            // height 고정 제거 — 본문이 길어져 잘리지 않도록 content 기반.
             borderRadius: 12,
             backgroundColor: '#FFFFFF',
             paddingTop: 24,
             paddingHorizontal: 24,
             paddingBottom: 20,
-            justifyContent: 'space-between',
           }}
         >
-          <View>
+          <View style={{ marginBottom: 20 }}>
             <Text
               style={{
                 fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' }),
@@ -48,7 +48,7 @@ export function AboutSection({ title = 'About Us' }: AboutSectionProps) {
                 marginBottom: 8,
               }}
             >
-              수원대학교 대동제에 오신 것을 환영합니다
+              2026 수원대학교 대동제
             </Text>
             <Text
               style={{
@@ -58,7 +58,21 @@ export function AboutSection({ title = 'About Us' }: AboutSectionProps) {
                 color: '#3F3F5C',
               }}
             >
-              학생, 교직원, 지역 주민 모두가 함께 즐기는 축제입니다. 다양한 부스, 공연, 먹거리가 준비되어 있으니 많은 관심과 참여 부탁드립니다.
+              {'학우 간의 소통과 화합을 위해 기획된 축제입니다.\n다양한 공연, 부스, 이벤트를 통해 즐거운 시간을 보낼 수 있습니다.\n\n📍 일정: 5월 14일 ~ 5월 15일\n⏰ 운영 시간: 12:00 ~ 02:00\n📌 장소: 수원대학교 캠퍼스 일대\n💲 결제 방식: 현금 및 계좌이체\n\n⚠️ 안전하고 즐거운 축제를 위해 질서 유지 및 안전 수칙을 준수해주시기 바랍니다.\n📞 문의: '}
+              <Text
+                onPress={() => {
+                  if (CONTACT_INFO.kakaoChannelUrl) Linking.openURL(CONTACT_INFO.kakaoChannelUrl);
+                }}
+                accessibilityRole="link"
+                accessibilityLabel="카카오톡 문의 채널 열기"
+                style={{
+                  color: '#0068FF',
+                  textDecorationLine: 'underline',
+                }}
+              >
+                [카카오톡 채널]
+              </Text>
+              {'을 통해 문의 바랍니다.'}
             </Text>
           </View>
 
