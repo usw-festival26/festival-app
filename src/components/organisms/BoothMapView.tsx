@@ -241,13 +241,12 @@ export function BoothMapView({
         expanded={expanded}
       />
 
-      {/* 바텀시트 — 외곽 래퍼는 지도 이미지(메인 지도.jpg)의 외곽 배경색(festival.bright)
-          으로 채운다. 둥근 모서리 exclusion zone 이 지도 바닥 영역과 자연스럽게 이어지고,
-          backdrop blob 이 비치는 것도 동시에 막는다. */}
+      {/* 바텀시트 — 외곽 래퍼 bg 는 transparent. 흰 카드의 둥근 모서리 바깥
+          (corner exclusion zone) 이 그 아래 지도 그대로 보이도록. */}
       <Animated.View
         style={{
           height: sheetAnim,
-          backgroundColor: Colors.festival.bright,
+          backgroundColor: 'transparent',
         }}
         onLayout={onSheetLayout}
       >
