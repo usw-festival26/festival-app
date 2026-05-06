@@ -8,19 +8,39 @@
  * `useLineup` 의 Artist 데이터에 image (require'd asset) / imageUrl (외부) 중
  * 하나가 있으면 cover 로 배경 적용. 둘 다 없으면 기본 흰색 카드.
  */
-import React from 'react';
-import { Image, View, ScrollView, Text, Pressable, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import { useLineup, useHorizontalDrag } from '@hooks/index';
+import { useHorizontalDrag, useLineup } from '@hooks/index';
 import { safeImageSource } from '@utils/imageSource';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Image, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 
 const ROBOTO_BLACK = Platform.select({ web: 'Roboto', default: 'Roboto_900Black' });
 
 const CARD_W = 140;
 const CARD_H = 180;
 const NAME_BOTTOM_FADE_HEIGHT = 64; // 이름 영역 위로 내려오는 어두운 그라디언트 높이
+
+/**
+ * 이름 가독성용 하단 페이드 — 카드마다 react-native-svg 로 LinearGradient 를
+ * 그리던 걸 제거 (9× SVG = 다수 DOM 노드, 홈 마운트 시 JS 스레드 블록 원인 중 하나).
+ *  - web: CSS linear-gradient 로 부드러운 페이드.
+ *  - native: backgroundImage 가 무시되므로 단색 rgba 로 fallback (살짝 덜 부드럽지만
+ *    SVG 비용이 더 큼).
+ */
+const FADE_OVERLAY_STYLE = {
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  bottom: 0,
+  height: NAME_BOTTOM_FADE_HEIGHT,
+  ...(Platform.OS === 'web'
+    ? {
+        backgroundImage:
+          'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%)',
+      }
+    : { backgroundColor: 'rgba(0,0,0,0.35)' }),
+} as any;
 
 export function LineupSection() {
   const router = useRouter();
@@ -80,7 +100,7 @@ export function LineupSection() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingLeft: 17, paddingRight: 48, gap: 10 }}
       >
-        {data.slice(0, 6).map((item) => {
+        {data.slice(0, 9).map((item) => {
           const remoteSrc = safeImageSource(item.imageUrl);
           const imageSource = item.image ?? remoteSrc ?? null;
           return (
@@ -106,24 +126,8 @@ export function LineupSection() {
                 />
               ) : null}
 
-              {/* 하단 어두운 그라디언트 — 흰 이름 텍스트 가독성 확보 */}
-              {imageSource ? (
-                <Svg
-                  width="100%"
-                  height={NAME_BOTTOM_FADE_HEIGHT}
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                  style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
-                >
-                  <Defs>
-                    <LinearGradient id={`lineup-fade-${item.id}`} x1="0" y1="0" x2="0" y2="1">
-                      <Stop offset="0" stopColor="#000000" stopOpacity="0" />
-                      <Stop offset="1" stopColor="#000000" stopOpacity="0.55" />
-                    </LinearGradient>
-                  </Defs>
-                  <Rect x="0" y="0" width="100" height="100" fill={`url(#lineup-fade-${item.id})`} />
-                </Svg>
-              ) : null}
+              {/* 하단 어두운 페이드 — 이름 가독성. SVG 대신 CSS gradient(웹)/단색(native) */}
+              {imageSource ? <View style={FADE_OVERLAY_STYLE} /> : null}
 
               <View style={{ position: 'absolute', left: 14, top: 147 }}>
                 <Text
