@@ -464,7 +464,7 @@ export function MapCanvas({
 
   return (
     <View
-      className="flex-1 bg-festival-bright"
+      className="flex-1 bg-festival-primary-light"
       style={{ position: 'relative', overflow: 'hidden' }}
       onLayout={onCanvasLayout}
     >
