@@ -23,9 +23,11 @@ const ROBOTO_BLACK = Platform.select({ web: 'Roboto', default: 'Roboto_900Black'
 const PRETENDARD_BLACK = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Black' });
 
 export function LineupList({ artists, day }: LineupListProps) {
-  // day 가 들어오면 한글 헤딩으로, 없으면 기본 영문 헤딩.
+  // day 가 들어오면 한글 헤딩 + 그 일차 아티스트만 필터.
+  // 양일/미정 (day 미설정) 아티스트는 day 진입점에서 제외 — 명확한 컨텍스트 우선.
   const heading = day ? `${day}일차 아티스트` : 'Festival Lineup';
   const headingFontFamily = day ? PRETENDARD_BLACK : ROBOTO_BLACK;
+  const visibleArtists = day ? artists.filter((a) => a.day === day) : artists;
 
   return (
     <View style={{ paddingTop: 24, paddingBottom: 40, alignItems: 'center' }}>
@@ -44,7 +46,7 @@ export function LineupList({ artists, day }: LineupListProps) {
       </AppText>
 
       <View style={{ gap: 40, alignItems: 'center' }}>
-        {artists.map((a, idx) => (
+        {visibleArtists.map((a, idx) => (
           <ArtistCard
             key={a.id}
             artist={a}
