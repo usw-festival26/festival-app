@@ -14,6 +14,7 @@ import React from 'react';
 import { ScrollView, View } from 'react-native';
 import { MenuBoothCard } from '@molecules/MenuBoothCard';
 import { collegeSortIndex } from '@data/collegeLabels';
+import { collegeLogoFor } from '@data/collegeLogos';
 import type { BoothCluster } from '../../types/cluster';
 
 export interface CollegeGridProps {
@@ -45,6 +46,8 @@ export function CollegeGrid({ clusters, onPressCollege, embedded }: CollegeGridP
             <MenuBoothCard
               key={cluster.id}
               organizer={cluster.name}
+              image={collegeLogoFor(cluster.collegeKey)}
+              imageResizeMode="contain"
               onPress={() => onPressCollege(cluster)}
             />
           ))}

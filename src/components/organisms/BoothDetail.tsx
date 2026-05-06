@@ -30,29 +30,24 @@ const CARD_WIDTH = 368;
 const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
 const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
 
-function group(items: BoothMenuItem[]) {
-  const main: BoothMenuItem[] = [];
-  const side: BoothMenuItem[] = [];
-  const set: BoothMenuItem[] = [];
+/**
+ * 메뉴를 isAvailable 기준으로 둘로 나눔. Figma 2205:683 시안 — Main/Side/Set
+ * 카테고리 구분 폐기, 가용/품절만 분리.
+ */
+function splitByAvailability(items: BoothMenuItem[]) {
+  const available: BoothMenuItem[] = [];
+  const soldOut: BoothMenuItem[] = [];
   items.forEach((i) => {
-    const cat = i.menuCategory ?? 'main';
-    if (cat === 'side') side.push(i);
-    else if (cat === 'set') set.push(i);
-    else main.push(i);
+    if (i.isAvailable === false) soldOut.push(i);
+    else available.push(i);
   });
-  return { main, side, set };
+  return { available, soldOut };
 }
 
 export function BoothDetail({ booth, menus }: BoothDetailProps) {
   const router = useRouter();
-  const { main, side, set } = group(menus ?? booth.menuItems ?? []);
+  const { available, soldOut } = splitByAvailability(menus ?? booth.menuItems ?? []);
   const thumbSource = safeImageSource(booth.imageUri);
-
-  const sections: { label: string; items: BoothMenuItem[] }[] = [
-    { label: 'Main', items: main },
-    { label: 'Side', items: side },
-    { label: 'Set', items: set },
-  ].filter((s) => s.items.length > 0);
 
   return (
     <ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 24, paddingBottom: 40 }}>
@@ -98,14 +93,23 @@ export function BoothDetail({ booth, menus }: BoothDetailProps) {
           </View>
         </View>
 
-        {/* 섹션 스택 — MenuSection molecule 재사용, label 중앙 정렬 */}
+        {/* 메뉴 섹션 — 'Menu' (가용) 위, 구분선, 'Sold out' (품절) 아래 */}
         <View style={{ marginTop: 32 }}>
-          {sections.map((s, idx) => (
-            <View key={s.label} style={{ paddingHorizontal: 20 }}>
-              {idx > 0 && <View style={styles.divider} />}
-              <MenuSection label={s.label} items={s.items} align="center" />
+          {available.length > 0 ? (
+            <View style={{ paddingHorizontal: 36 }}>
+              <MenuSection label="Menu" items={available} align="center" labelColor="#001E56" />
             </View>
-          ))}
+          ) : null}
+          {available.length > 0 && soldOut.length > 0 ? (
+            <View style={{ paddingHorizontal: 16 }}>
+              <View style={styles.divider} />
+            </View>
+          ) : null}
+          {soldOut.length > 0 ? (
+            <View style={{ paddingHorizontal: 36 }}>
+              <MenuSection label="Sold out" items={soldOut} align="center" labelColor="#560001" />
+            </View>
+          ) : null}
         </View>
 
         <View style={{ height: 24 }} />
