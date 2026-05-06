@@ -3,12 +3,27 @@
  *
  * 274×269 흰 blob 카드 — 4개 모서리 중 1개(tail)만 10px 각지고 나머지는 134.5px 둥근 형태.
  * 카드 아래 opposite 측면에 아티스트명/Information 텍스트를 배치.
+ *
+ * `artist.info` 가 `@handle` 형식이면 카드 탭 시 인스타그램으로 이동.
  */
 import React from 'react';
-import { Image, View, Platform } from 'react-native';
+import { Image, Linking, Platform, Pressable, View } from 'react-native';
 import { AppText } from '@atoms/AppText';
 import { safeImageSource } from '@utils/imageSource';
 import type { Artist } from '../../types/lineup';
+
+/**
+ * `info` 가 `@xxx` 형태이면 인스타그램 URL 생성. 핸들에 영숫자/`._` 외 문자가 있으면
+ * 잘못된 입력으로 보고 null. 빈 핸들도 null.
+ */
+function instagramUrlFromInfo(info: string | undefined): string | null {
+  if (!info) return null;
+  const trimmed = info.trim();
+  if (!trimmed.startsWith('@')) return null;
+  const handle = trimmed.slice(1);
+  if (!handle || !/^[A-Za-z0-9._]+$/.test(handle)) return null;
+  return `https://www.instagram.com/${handle}/`;
+}
 
 /** 각진(꼭지) 모서리 위치 — 'left' = 좌하, 'right' = 우하 */
 export type ArtistCardTail = 'left' | 'right';
@@ -47,12 +62,20 @@ export function ArtistCard({ artist, tail }: ArtistCardProps) {
   const remoteSrc = safeImageSource(artist.imageUrl);
   const imageSource = artist.image ?? remoteSrc ?? null;
 
+  const igUrl = instagramUrlFromInfo(artist.info);
+  const handlePress = igUrl ? () => Linking.openURL(igUrl) : undefined;
+
   return (
     <View style={{ width: 274, alignItems: labelAlign }}>
-      <View
-        style={[
+      <Pressable
+        onPress={handlePress}
+        accessibilityRole={igUrl ? 'link' : undefined}
+        accessibilityLabel={igUrl ? `${artist.name} 인스타그램으로 이동` : artist.name}
+        disabled={!igUrl}
+        style={({ pressed }) => [
           { width: 274, height: 269, backgroundColor: '#FFFFFF', overflow: 'hidden' },
           cardRadii,
+          pressed && igUrl ? { opacity: 0.85 } : null,
         ]}
       >
         {imageSource ? (
@@ -60,10 +83,9 @@ export function ArtistCard({ artist, tail }: ArtistCardProps) {
             source={imageSource}
             style={{ width: '100%', height: '100%' }}
             resizeMode="cover"
-            accessibilityLabel={artist.name}
           />
         ) : null}
-      </View>
+      </Pressable>
       <View style={{ marginTop: 10, paddingHorizontal: 4 }}>
         <AppText
           style={{
