@@ -7,7 +7,7 @@
  *    primary-light(#C3EDFF) 페이드. 다음 섹션과 자연스럽게 이어짐.
  *  - 좌/우 화살표 (14, 554) / (360, 554). 4개 dot pagination (183, 565).
  *
- * 포스터 carousel — 일단 단일 이미지(`assets/images/대동제 포스터.jpg`).
+ * 포스터 carousel — 일단 단일 이미지(`assets/images/축제포스터_사이즈.png`).
  * 추후 여러 장 받으면 currentIndex 에 매핑된 이미지 배열로 확장.
  */
 import React, { useState } from 'react';
@@ -23,7 +23,7 @@ const POSTER_HEIGHT = PANEL_HEIGHT - HEADER_HEIGHT; // 536
 // 하단 fade 영역 높이 (Figma: top 309 ~ 596 = 287). 포스터 영역 안 좌표.
 const FADE_HEIGHT = 287;
 
-const POSTER_IMAGE = require('../../../assets/images/대동제 포스터.jpg');
+const POSTER_IMAGE = require('../../../assets/images/축제포스터_사이즈.png');
 
 // 헤더 가운데 미드나잇 가로 로고 — intrinsic 1696×729 (≈ 2.326).
 const HEADER_LOGO_SOURCE = require('../../../assets/images/logo/미드나잇로고_가로.png');
