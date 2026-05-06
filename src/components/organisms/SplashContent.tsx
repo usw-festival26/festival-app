@@ -225,22 +225,67 @@ export function SplashContent({ onPress }: SplashContentProps) {
           <DriftBlob key={spec.gradientId} spec={spec} drift={drift} />
         ))}
 
-        {/* 미드나잇 로고 — 920:3826 자리 (x:54, y:360, w:294, h:154).
-            정방형 PNG 를 contain 으로 가운데 정렬 → 약 154×154 로 표시. */}
+        {/* 미드나잇 로고 — Figma 2139:746 / 2182:808 (x:75, y:275, 253×238).
+            검정 변형 PNG 를 cover + opacity 0.9 로 채움. */}
         <View pointerEvents="none" style={styles.logoWrap}>
           <Image
-            source={require('../../../assets/images/logo/미드나잇로고.png')}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode="contain"
+            source={require('../../../assets/images/logo/미드나잇로고_검정.png')}
+            style={{ width: '100%', height: '100%', opacity: 0.9 }}
+            resizeMode="cover"
             accessibilityLabel="미드나잇 로고"
           />
         </View>
 
-        {/* 터치 안내 — 920:3827 (y:761) */}
+        {/* 축제명 라벨 — Figma 2185:1536 (x:50, y:535, 108×10).
+            Figma 에서 outline 된 텍스트라 폰트 메타가 없어 export PNG 를 그대로 사용. */}
+        <View pointerEvents="none" style={styles.titleLabel}>
+          <Image
+            source={require('../../../assets/images/text/2026수원대대동제.png')}
+            style={{ width: 108, height: 10 }}
+            resizeMode="contain"
+            accessibilityLabel="2026 수원대학교 대동제"
+          />
+        </View>
+
+        {/* 메인 슬로건 — Figma 2185:1523 (x:50, y:552, 284×26). PNG export. */}
+        <View pointerEvents="none" style={styles.slogan}>
+          <Image
+            source={require('../../../assets/images/text/짙은밤,가장빛나는순간.png')}
+            style={{ width: 284, height: 26 }}
+            resizeMode="contain"
+            accessibilityLabel=":짙은 밤, 가장 빛나는 순간"
+          />
+        </View>
+
+        {/* 날짜 — Figma 2185:1582 (x:50, y:591, 68×9). PNG export. */}
+        <View pointerEvents="none" style={styles.date}>
+          <Image
+            source={require('../../../assets/images/text/날짜.png')}
+            style={{ width: 68, height: 9 }}
+            resizeMode="contain"
+            accessibilityLabel="05.14-05.15"
+          />
+        </View>
+
+        {/* 터치 안내 — Figma 2139:745 (y:761, color #046 = #004466).
+            이건 outline 안 된 실제 텍스트라 그대로 둠 (폰트 정보 보유). */}
         <View pointerEvents="none" style={styles.hintWrap}>
-          <AppText className="text-[12px] text-festival-primary-dark text-center font-pretendard">
+          <AppText
+            className="text-[12px] text-center font-pretendard"
+            style={{ color: '#004466' }}
+          >
             화면을 터치해주세요
           </AppText>
+        </View>
+
+        {/* 영문 푸터 — Figma 2185:1549 (x:133 center, y:797, 137×8). PNG export. */}
+        <View pointerEvents="none" style={styles.creditWrap}>
+          <Image
+            source={require('../../../assets/images/text/2026TUoSF.png')}
+            style={{ width: 137, height: 8 }}
+            resizeMode="contain"
+            accessibilityLabel="2026 The University of Suwon Festival"
+          />
         </View>
       </Animated.View>
 
@@ -267,19 +312,29 @@ const styles = StyleSheet.create({
 
   logoWrap: {
     position: 'absolute',
-    left: 54,
-    top: 360,
-    width: 294,
-    height: 154,
-    alignItems: 'center',
-    justifyContent: 'center',
+    left: 75,
+    top: 275,
+    width: 253,
+    height: 238,
   },
+
+  titleLabel: { position: 'absolute', left: 50, top: 535 },
+  slogan: { position: 'absolute', left: 50, top: 552 },
+  date: { position: 'absolute', left: 50, top: 591 },
 
   hintWrap: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 761,
+    alignItems: 'center',
+  },
+
+  creditWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 797,
     alignItems: 'center',
   },
 });
