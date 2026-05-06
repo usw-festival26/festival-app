@@ -41,6 +41,7 @@ export function EventsList() {
           title={item.title}
           description={item.description}
           imageUri={item.imageUri}
+          image={item.images?.[0]}
         />
       ))}
     </ScrollView>

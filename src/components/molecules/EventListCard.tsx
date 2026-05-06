@@ -5,21 +5,25 @@
  * Figma: 카드 내부엔 이미지/placeholder 만, 텍스트는 카드 외부.
  */
 import React from 'react';
-import { View, Image, Platform } from 'react-native';
+import { View, Image, ImageSourcePropType, Platform } from 'react-native';
 import { AppText } from '@atoms/AppText';
 import { safeImageSource } from '@utils/imageSource';
 
 export interface EventListCardProps {
   title: string;
   description: string;
+  /** 외부 이미지 URL (백엔드 모드용). */
   imageUri?: string;
+  /** 로컬 require'd asset (fixture 모드용 — imageUri 보다 우선). */
+  image?: ImageSourcePropType;
 }
 
 const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
 const PRETENDARD_REGULAR = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' });
 
-export function EventListCard({ title, description, imageUri }: EventListCardProps) {
-  const imageSource = safeImageSource(imageUri);
+export function EventListCard({ title, description, imageUri, image }: EventListCardProps) {
+  const remoteSrc = safeImageSource(imageUri);
+  const imageSource = image ?? remoteSrc ?? null;
   return (
     <View style={{ alignItems: 'center' }}>
       <View

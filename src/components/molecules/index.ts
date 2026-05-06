@@ -18,6 +18,7 @@ export { FeatureCard, type FeatureCardProps } from './FeatureCard';
 export { ArtistCard, type ArtistCardProps } from './ArtistCard';
 export { NotificationPill, type NotificationPillProps } from './NotificationPill';
 export { FaqBubble, type FaqBubbleProps } from './FaqBubble';
+export { EventLightbox, type EventLightboxProps } from './EventLightbox';
 export { MenuSection, type MenuSectionProps } from './MenuSection';
 export { MapCategoryChips, type MapCategoryChipsProps, type MapChipKey } from './MapCategoryChips';
 export { MapPin, MAP_PIN_DIMENSIONS, type MapPinProps } from './MapPin';
