@@ -24,7 +24,7 @@ import {
 } from 'react-native';
 import type { Booth } from '../../types/booth';
 import type { BoothCluster, FacilityPin, FoodPin, PinCategory } from '../../types/cluster';
-import type { Facility, FestivalEvent, SheetCategory } from '../../types/map';
+import type { FestivalEvent, MapCoords, SheetCategory } from '../../types/map';
 import { BoothSheetContent } from './BoothSheetContent';
 import { EventSheetContent } from './EventSheetContent';
 import { FacilitySheetContent } from './FacilitySheetContent';
@@ -39,7 +39,6 @@ export interface BoothMapViewProps {
   activeCategory: SheetCategory;
   booths: Booth[];
   foodBooths: Booth[];
-  facilities: Facility[];
   events: FestivalEvent[];
   /** 단과대 그룹 핀 */
   clusters: BoothCluster[];
@@ -49,6 +48,12 @@ export interface BoothMapViewProps {
   facilityPins: FacilityPin[];
   /** 핀 카테고리 필터 — 'all' / cluster / food / facility */
   pinFilter?: 'all' | PinCategory;
+  /** 칩이 food/facility 등으로 바뀐 직후 자동으로 그쪽 핀들의 bbox 중심으로 줌인. */
+  focusCategory?: PinCategory | null;
+  /** 시트 카드 클릭 등 임의 좌표 줌인 트리거. nonce 가 바뀔 때마다 새 줌. */
+  focusRequest?: { coords: MapCoords; nonce: number } | null;
+  /** 시트 F&B/편의 카드 클릭 시 부모가 focusRequest 를 set 할 수 있도록. */
+  onCardFocus?: (coords: MapCoords) => void;
   /** 핀 클릭 핸들러 (cluster/food/facility 분기) */
   onPinPress?: (pin: AnyPin) => void;
   /** 클러스터 핀으로 부스 시트가 필터링됐을 때 표시할 단과대명. 있으면 시트 상단에 노출. */
@@ -78,12 +83,14 @@ export function BoothMapView({
   activeCategory,
   booths,
   foodBooths,
-  facilities,
   events,
   clusters,
   foodPins,
   facilityPins,
   pinFilter,
+  focusCategory,
+  focusRequest,
+  onCardFocus,
   onPinPress,
   selectedClusterName,
   onClearClusterFilter,
@@ -236,6 +243,8 @@ export function BoothMapView({
         foodPins={foodPins}
         facilityPins={facilityPins}
         pinFilter={pinFilter}
+        focusCategory={focusCategory}
+        focusRequest={focusRequest}
         boothById={boothById}
         onPinPress={onPinPress}
         expanded={expanded}
@@ -309,14 +318,21 @@ export function BoothMapView({
 
                 <View style={{ width: sheetWidth, flex: 1 }}>
                   <ScrollView showsVerticalScrollIndicator={false}>
-                    <FoodSheetContent booths={foodBooths} isLoading={isLoading} error={error} onRetry={onRetry} />
+                    <FoodSheetContent
+                      booths={foodBooths}
+                      foodPins={foodPins}
+                      onItemPress={onCardFocus}
+                      isLoading={isLoading}
+                      error={error}
+                      onRetry={onRetry}
+                    />
                     <View className="h-6" />
                   </ScrollView>
                 </View>
 
                 <View style={{ width: sheetWidth, flex: 1 }}>
                   <ScrollView showsVerticalScrollIndicator={false}>
-                    <FacilitySheetContent facilities={facilities} />
+                    <FacilitySheetContent facilityPins={facilityPins} onItemPress={onCardFocus} />
                     <View className="h-6" />
                   </ScrollView>
                 </View>

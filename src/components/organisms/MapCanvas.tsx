@@ -74,6 +74,17 @@ export interface MapCanvasProps {
    * 얹어 상대 줌 비율은 보존.
    */
   expanded?: boolean;
+  /**
+   * 카테고리 칩에서 food/facility 등 특정 카테고리가 활성화되면, 해당 카테고리
+   * 핀들의 bbox 중심으로 한 번 자동 줌인한다. null/undefined 면 동작 안 함.
+   * 같은 값으로 재set 하면 재실행 안 함 (lastFocusedRef 가드).
+   */
+  focusCategory?: PinCategory | null;
+  /**
+   * 시트 카드 클릭 등 임의 좌표로 줌인. nonce 가 변할 때마다 새 줌 트리거.
+   * 같은 좌표를 반복 클릭해도 매번 동작하도록 호출 측에서 nonce 를 갱신.
+   */
+  focusRequest?: { coords: MapCoords; nonce: number } | null;
 }
 
 const ZOOM_MIN = 0.5;
@@ -112,6 +123,8 @@ export function MapCanvas({
   editable,
   onCanvasTap,
   expanded,
+  focusCategory,
+  focusRequest,
 }: MapCanvasProps) {
   const aspect = imgNaturalHeight / imgNaturalWidth;
 
@@ -385,6 +398,64 @@ export function MapCanvas({
     },
     [zoomToCoords, onPinPress],
   );
+
+  /**
+   * focusCategory 가 새 값으로 바뀌면 해당 카테고리 핀들의 bbox 중심으로 자동 줌인.
+   * 같은 값으로 다시 set 되면 lastFocusedRef 가 막아서 재줌 안 함. layout 이 아직
+   * 안 잡혔으면 ref 업데이트도 안 하고 보류 → layout 들어오면 재실행 시 동작.
+   */
+  const lastFocusedRef = useRef<PinCategory | null | undefined>(undefined);
+  useEffect(() => {
+    if (focusCategory === lastFocusedRef.current) return;
+    if (!focusCategory) {
+      lastFocusedRef.current = focusCategory;
+      return;
+    }
+    if (layout.cw === 0 || layout.ch === 0 || imgW === 0 || imgH === 0) return;
+
+    const pins =
+      focusCategory === 'cluster'
+        ? clusters
+        : focusCategory === 'food'
+          ? foodPins
+          : focusCategory === 'facility'
+            ? facilityPins
+            : [];
+    if (pins.length === 0) {
+      // 핀 없으면 ref 만 업데이트 (재시도 안 하도록)
+      lastFocusedRef.current = focusCategory;
+      return;
+    }
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const p of pins) {
+      const { x, y } = p.coords;
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+    if (!Number.isFinite(minX)) {
+      lastFocusedRef.current = focusCategory;
+      return;
+    }
+
+    zoomToCoords({ x: (minX + maxX) / 2, y: (minY + maxY) / 2 });
+    lastFocusedRef.current = focusCategory;
+  }, [focusCategory, layout.cw, layout.ch, imgW, imgH, clusters, foodPins, facilityPins, zoomToCoords]);
+
+  /**
+   * focusRequest 의 nonce 가 바뀔 때마다 그 좌표로 한 번 줌인. layout 미준비 시 보류.
+   */
+  const lastFocusNonceRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!focusRequest) return;
+    if (focusRequest.nonce === lastFocusNonceRef.current) return;
+    if (layout.cw === 0 || layout.ch === 0 || imgW === 0 || imgH === 0) return;
+    zoomToCoords(focusRequest.coords);
+    lastFocusNonceRef.current = focusRequest.nonce;
+  }, [focusRequest, layout.cw, layout.ch, imgW, imgH, zoomToCoords]);
 
   /**
    * expanded 토글 시 자동 줌인/줌아웃.

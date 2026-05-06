@@ -15,7 +15,7 @@
  * 편의 핀 클릭 → 시트 facility 페이지로 슬라이드.
  */
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { BackdropScreenTemplate } from '../../../src/components/templates/BackdropScreenTemplate';
 import { BoothMapView } from '../../../src/components/organisms/BoothMapView';
 import { MapCategoryChips } from '../../../src/components/molecules/MapCategoryChips';
@@ -27,17 +27,7 @@ import { FOOD_PINS_DATA } from '../../../src/data/foodPins';
 import { FACILITY_PINS_DATA } from '../../../src/data/facilityPins';
 import { isClusterMember } from '../../../src/utils/clusterMembership';
 import type { PinCategory } from '../../../src/types/cluster';
-import type { Facility, SheetCategory } from '../../../src/types/map';
-
-/**
- * 시트 표시용 Facility[] 는 FACILITY_PINS_DATA 에서 추출.
- * 핀 = facility entity 라 별도 데이터 파일 불필요.
- */
-const FACILITIES_FROM_PINS: Facility[] = FACILITY_PINS_DATA.map((p) => ({
-  id: p.id,
-  name: p.name,
-  phone: p.phone,
-}));
+import type { MapCoords, SheetCategory } from '../../../src/types/map';
 
 export default function BoothMapScreen() {
   const router = useRouter();
@@ -49,6 +39,12 @@ export default function BoothMapScreen() {
   const [expanded, setExpanded] = useState(false);
   const [activeCategory, setActiveCategory] = useState<SheetCategory>('booth');
   const [selectedClusterId, setSelectedClusterId] = useState<string | undefined>();
+  // F&B / 편의 카드 클릭 시 임의 좌표 줌인 트리거. nonce 갱신으로 같은 핀
+  // 반복 클릭도 매번 동작.
+  const [focusRequest, setFocusRequest] = useState<{ coords: MapCoords; nonce: number } | null>(null);
+  const handleCardFocus = useCallback((coords: MapCoords) => {
+    setFocusRequest({ coords, nonce: Date.now() });
+  }, []);
 
   // 시트 접거나 카테고리 바뀌면 selectedClusterId 리셋
   const handleExpandedChange = (next: boolean) => {
@@ -70,6 +66,13 @@ export default function BoothMapScreen() {
         : activeCategory === 'facility'
           ? 'facility'
           : 'all';
+
+  // 자동 줌인 — F&B / 편의 칩 활성 시 해당 핀들의 bbox 중심으로 카메라 이동.
+  // 사용자 명시 X 인 booth(cluster) 칩은 줌 안 함 (단과대 핀이 흩어져 있어 의미 적음).
+  const focusCategory: PinCategory | null =
+    expanded && (activeCategory === 'food' || activeCategory === 'facility')
+      ? activeCategory
+      : null;
 
   const handlePinPress = (pin: AnyPin) => {
     if (pin.category === 'cluster') {
@@ -125,12 +128,14 @@ export default function BoothMapScreen() {
         activeCategory={activeCategory}
         booths={visibleBooths}
         foodBooths={foodBooths}
-        facilities={FACILITIES_FROM_PINS}
         events={EVENTS_DATA}
         clusters={clusters}
         foodPins={FOOD_PINS_DATA}
         facilityPins={FACILITY_PINS_DATA}
         pinFilter={pinFilter}
+        focusCategory={focusCategory}
+        focusRequest={focusRequest}
+        onCardFocus={handleCardFocus}
         onPinPress={handlePinPress}
         selectedClusterName={selectedClusterName}
         onClearClusterFilter={() => setSelectedClusterId(undefined)}
