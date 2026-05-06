@@ -10,13 +10,13 @@ export const FOOD_PINS_DATA: FoodPin[] = [
     category: 'food',
     name: '푸드트럭1',
     boothId: 'booth-001',
-    coords: { x: 0.1119, y: 0.5859 },
+    coords: { x: 0.1260, y: 0.5164 },
     description: '떡볶이',
   },
   {
     id: 'food-1777611189681',
     category: 'food',
     name: '푸드트럭2',
-    coords: { x: 0.1169, y: 0.7352 },
+    coords: { x: 0.1277, y: 0.6178 },
   },
 ];
