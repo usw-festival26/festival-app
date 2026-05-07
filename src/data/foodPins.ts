@@ -6,10 +6,11 @@ import type { FoodPin } from '../types/cluster';
 
 export const FOOD_PINS_DATA: FoodPin[] = [
   {
+    // boothId 제거 — 이전엔 booth-001(떡볶이 천국, 하드코딩) 로 push 되던 동작이
+    // 의도와 다름. 푸드트럭2 처럼 시트/지도 정보만 노출되도록 entity 연결 해제.
     id: 'food-pin-001',
     category: 'food',
     name: '푸드트럭1',
-    boothId: 'booth-001',
     coords: { x: 0.1260, y: 0.5164 },
     description: '떡볶이',
   },
