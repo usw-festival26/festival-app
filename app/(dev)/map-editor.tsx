@@ -75,8 +75,11 @@ function infoDialog(title: string, message: string) {
   Alert.alert(title, message);
 }
 
-const FESTIVAL_MAP = require('../../assets/images/메인 지도.jpg');
-const STORAGE_KEY = 'dev:mapEditor:v1';
+const FESTIVAL_MAP = require('../../assets/images/map/메인 지도.jpg');
+// v2: clusters.ts 단과대 라벨이 학교 공식 풀네임으로 정합(3a6601d)된 후, 이전 v1
+// AsyncStorage 가 옛 짧은 라벨(공과대학/경상대학/미술대학/음악대학)로 굳어 있던 케이스를
+// 무효화. 운영자가 /map-editor 를 다시 열면 CLUSTERS_DATA 로 fresh hydrate.
+const STORAGE_KEY = 'dev:mapEditor:v2';
 
 interface EditorState {
   clusters: BoothCluster[];
@@ -549,8 +552,8 @@ export default function MapEditorScreen() {
       <View style={{ flex: 1 }}>
         <MapCanvas
           imgSource={FESTIVAL_MAP}
-          imgNaturalWidth={1608}
-          imgNaturalHeight={3496}
+          imgNaturalWidth={1440}
+          imgNaturalHeight={2062}
           clusters={visibleClusters}
           foodPins={state.foodPins}
           facilityPins={state.facilityPins}

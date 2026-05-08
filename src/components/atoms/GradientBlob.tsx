@@ -21,7 +21,7 @@ import React from 'react';
 import { View, Image } from 'react-native';
 
 // Figma 에서 export 된 공용 blob PNG (489×489, 원 지름 289 + halo 100×2).
-const VECTOR_PNG = require('../../../assets/images/VectorCircle.png');
+const VECTOR_PNG = require('../../../assets/images/decoration/VectorCircle.png');
 
 const PNG_FULL = 489;
 const PNG_CIRCLE = 289;

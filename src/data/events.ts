@@ -18,7 +18,7 @@ export const EVENTS_DATA: FestivalEvent[] = [
       require('../../assets/images/events/수원가요제/KakaoTalk_20260505_150743979.jpg'),
       require('../../assets/images/events/수원가요제/KakaoTalk_20260505_150743979_01.jpg'),
       require('../../assets/images/events/수원가요제/KakaoTalk_20260505_150743979_02.jpg'),
-      require('../../assets/images/events/수원가요제/KakaoTalk_20260505_150743979_03.jpg'),
+      require('../../assets/images/events/수원가요제/수원가요제_수정.jpeg'),
     ],
   },
   {
@@ -28,7 +28,7 @@ export const EVENTS_DATA: FestivalEvent[] = [
     images: [
       require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242.jpg'),
       require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242_01.jpg'),
-      require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242_02.jpg'),
+      require('../../assets/images/events/수원시그널/수원시그널_수정.jpeg'),
       require('../../assets/images/events/수원시그널/KakaoTalk_20260505_150757242_03.jpg'),
     ],
   },

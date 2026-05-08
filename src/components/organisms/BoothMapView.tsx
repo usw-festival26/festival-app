@@ -30,9 +30,11 @@ import { EventSheetContent } from './EventSheetContent';
 import { FacilitySheetContent } from './FacilitySheetContent';
 import { FoodSheetContent } from './FoodSheetContent';
 
-const FESTIVAL_MAP = require('../../../assets/images/메인 지도.jpg');
-const MAP_NATURAL_WIDTH = 1608;
-const MAP_NATURAL_HEIGHT = 3496;
+const FESTIVAL_MAP = require('../../../assets/images/map/메인 지도.jpg');
+// 실제 이미지 자연 사이즈 (옛값 1608×3496 — 이전 지도, aspect 2.17 → 잘못된 stretch 발생).
+// 새 메인 지도.jpg = 1440×2062, aspect 1.432.
+const MAP_NATURAL_WIDTH = 1440;
+const MAP_NATURAL_HEIGHT = 2062;
 
 export interface BoothMapViewProps {
   expanded: boolean;

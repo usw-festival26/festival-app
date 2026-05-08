@@ -7,12 +7,13 @@
  *  - Main / Side / Set 세로 스택, 섹션 라벨 센터(Roboto Black 20 #010070) — MenuSection molecule 재사용
  *  - 섹션 사이 가로 구분선
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, View, Text, Pressable, Image, Platform, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { Booth, BoothMenuItem } from '../../types/booth';
 import { MenuSection } from '@molecules/MenuSection';
+import { ImageLightbox, type ImageLightboxSubject } from '@molecules/ImageLightbox';
 import { safeImageSource } from '@utils/imageSource';
 
 export interface BoothDetailProps {
@@ -48,6 +49,12 @@ export function BoothDetail({ booth, menus }: BoothDetailProps) {
   const router = useRouter();
   const { available, soldOut } = splitByAvailability(menus ?? booth.menuItems ?? []);
   const thumbSource = safeImageSource(booth.imageUri);
+  const [lightboxSubject, setLightboxSubject] = useState<ImageLightboxSubject | null>(null);
+
+  const openBoothLightbox = () => {
+    if (!booth.imageUri) return;
+    setLightboxSubject({ id: booth.id, title: booth.name, imageUri: booth.imageUri });
+  };
 
   return (
     <ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 24, paddingBottom: 40 }}>
@@ -73,19 +80,26 @@ export function BoothDetail({ booth, menus }: BoothDetailProps) {
 
         {/* 썸네일(좌) + 부스 안내(우) */}
         <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 17, marginTop: 10 }}>
-          <View style={styles.thumb}>
-            {thumbSource ? (
+          {thumbSource ? (
+            <Pressable
+              onPress={openBoothLightbox}
+              accessibilityRole="button"
+              accessibilityLabel={`${booth.name} 사진 자세히 보기`}
+              className="w-[165px] h-[181px] rounded-[20px] border border-black bg-white overflow-hidden items-center justify-center active:opacity-[0.85]"
+            >
               <Image
                 source={thumbSource}
-                style={{ width: '100%', height: '100%' }}
+                className="w-full h-full"
                 resizeMode="cover"
               />
-            ) : (
+            </Pressable>
+          ) : (
+            <View className="w-[165px] h-[181px] rounded-[20px] border border-black bg-white overflow-hidden items-center justify-center">
               <Text style={styles.thumbPlaceholder}>
-                {'Location In Map\nor\nPoster'}
+                {'지도 위치\n또는\n포스터'}
               </Text>
-            )}
-          </View>
+            </View>
+          )}
 
           <View style={{ flex: 1, paddingTop: 15 }}>
             <Text style={styles.sideTitle}>부스 안내</Text>
@@ -114,6 +128,8 @@ export function BoothDetail({ booth, menus }: BoothDetailProps) {
 
         <View style={{ height: 24 }} />
       </View>
+
+      <ImageLightbox subject={lightboxSubject} onClose={() => setLightboxSubject(null)} />
     </ScrollView>
   );
 }
@@ -143,17 +159,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#000000',
   },
-  thumb: {
-    width: 165,
-    height: 181,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#000000',
-    backgroundColor: '#FFFFFF',
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  // styles.thumb 는 className 으로 이전 (NativeWind 가이드라인 정합).
   thumbPlaceholder: {
     fontFamily: PRETENDARD_SEMIBOLD,
     fontWeight: '600',

@@ -17,15 +17,15 @@
  * Phase 2: 팬 + 줌만. Phase 4 에서 editable prop 으로 핀 드래그 추가 예정.
  */
 import { Ionicons } from '@expo/vector-icons';
-import { MapPin, MAP_PIN_DIMENSIONS } from '@molecules/MapPin';
+import { MAP_PIN_DIMENSIONS, MapPin } from '@molecules/MapPin';
 import { buildClusterIndex, findClustersForBooth } from '@utils/clusterMembership';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ImageSourcePropType,
   LayoutChangeEvent,
   Pressable,
-  View,
   Image as RNImage,
+  View,
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -141,9 +141,16 @@ export function MapCanvas({
    * 정규화 좌표계 union bbox — 이미지(0,0)~(1,1) 와 모든 핀 좌표를 포함.
    * 핀이 모두 이미지 안일 때 (0,1,0,1) 로 현재 동작과 호환.
    * NaN/Infinity 좌표는 무시 (방어).
+   *
+   * HORIZONTAL_PAN_PADDING: 이미지 좌/우 가장자리 밖으로 추가 팬 가능 영역
+   * (정규화 단위, 양쪽 동일). 지도 양옆 여백을 좀 더 보고 싶을 때 늘림.
    */
   const pinBBox = useMemo(() => {
-    let minX = 0, maxX = 1, minY = 0, maxY = 1;
+    const HORIZONTAL_PAN_PADDING = 0.2;
+    let minX = -HORIZONTAL_PAN_PADDING;
+    let maxX = 1 + HORIZONTAL_PAN_PADDING;
+    let minY = 0;
+    let maxY = 1;
     for (const p of [...clusters, ...foodPins, ...facilityPins]) {
       const x = p.coords?.x;
       const y = p.coords?.y;

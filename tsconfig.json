@@ -21,8 +21,14 @@
       "@templates/*": [
         "./src/components/templates/*"
       ],
+      "@types": [
+        "./src/types/index.ts"
+      ],
       "@types/*": [
         "./src/types/*"
+      ],
+      "@data": [
+        "./src/data/index.ts"
       ],
       "@data/*": [
         "./src/data/*"

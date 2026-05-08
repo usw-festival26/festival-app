@@ -1,5 +1,8 @@
 /**
- * 단과대 로고 매핑 — `assets/images/수원대 로고/수원대 로고/<단과대명>.png`.
+ * 단과대 로고 매핑.
+ * - HUMANITIES → `assets/images/college/인문사회융합대학 로고및 메뉴가격/단대 로고.png`
+ *   (학생회 측에서 새 자산 묶음 전달, 단대 통합 로고만 갈아끼움)
+ * - 그 외 6개 단과대 → `assets/images/수원대 로고/수원대 로고/<단과대명>.png`
  *
  * CollegeGrid 카드 썸네일 / 추후 BoothDetail 헤더 등 단과대 컨텍스트 시각화에 사용.
  * 7개 단과대 enum 모두 매핑.
@@ -8,7 +11,7 @@ import type { ImageSourcePropType } from 'react-native';
 import type { BackendCollege } from '../api/types';
 
 export const COLLEGE_LOGO: Record<BackendCollege, ImageSourcePropType> = {
-  HUMANITIES: require('../../assets/images/수원대 로고/수원대 로고/인문사회융합대학.png'),
+  HUMANITIES: require('../../assets/images/college/인문사회융합대학 로고및 메뉴가격/단대 로고.png'),
   BUSINESS: require('../../assets/images/수원대 로고/수원대 로고/경영공학대학.png'),
   LIFE: require('../../assets/images/수원대 로고/수원대 로고/라이프케어사이언스대학.png'),
   ICT: require('../../assets/images/수원대 로고/수원대 로고/지능형SW융합대학.png'),
