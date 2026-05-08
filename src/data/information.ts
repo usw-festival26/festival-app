@@ -6,7 +6,7 @@
  * - LIKELION_INSTAGRAM_URL / LIKELION_SITE_URL: About 본문 끝 인라인 링크 타깃
  * - DEVELOPERS: Who We Are? 섹션의 개발팀 7명 (Figma 수직 순서)
  */
-import type { Developer, InformationSection } from '../types/information';
+import type { Developer, InformationSection } from '@types';
 
 export const INFORMATION_DATA: InformationSection[] = [
   {

@@ -10,25 +10,29 @@
 import React from 'react';
 import { Linking, Platform, Text, View } from 'react-native';
 import { GradientBlob } from '../atoms/GradientBlob';
-import { DeveloperCard } from '../molecules/DeveloperCard';
-import type { Developer } from '../../types/information';
+import { DeveloperCard } from '../molecules';
+import type { Developer } from '@types';
 
 interface BlobCardProps {
   width: number;
-  height: number;
+  /**
+   * 최소 높이 — 디자인 시안의 고정 높이를 보장하면서 본문이 길어지면 자연 확장.
+   * (이전엔 height 고정 + overflow:hidden 으로 긴 본문이 잘렸음.)
+   */
+  minHeight?: number;
   radii: [number, number, number, number]; // [tl, tr, br, bl]
   marginBottom?: number;
   children?: React.ReactNode;
 }
 
-function BlobCard({ width, height, radii, marginBottom = 20, children }: BlobCardProps) {
+function BlobCard({ width, minHeight, radii, marginBottom = 20, children }: BlobCardProps) {
   const [tl, tr, br, bl] = radii;
 
   return (
     <View
       style={{
         width,
-        height,
+        minHeight,
         borderTopLeftRadius: tl,
         borderTopRightRadius: tr,
         borderBottomRightRadius: br,
@@ -37,7 +41,6 @@ function BlobCard({ width, height, radii, marginBottom = 20, children }: BlobCar
         overflow: 'hidden',
         alignSelf: 'center',
         marginBottom,
-        position: 'relative',
       }}
     >
       {children}
@@ -110,27 +113,23 @@ export function InformationContent({
         <GradientBlob size={329} rotate={56.4} />
       </View>
 
-      {/* About — Figma 368×572 */}
+      {/* About — Figma 368×572 (minHeight, 본문 길이에 따라 확장) */}
       <BlobCard
         width={368}
-        height={572}
+        minHeight={572}
         radii={[107.5, 107.5, 107.5, 10]}
         marginBottom={45}
       >
-        <View
-          style={{ position: 'absolute', top: 58, left: 0, right: 0, alignItems: 'center' }}
-          pointerEvents="none"
-        >
+        {/* 시안 좌표(top:58 / top:95) 를 padding 으로 풀어 flow 레이아웃 — 본문 잘림 회피 */}
+        <View style={{ paddingTop: 58, alignItems: 'center' }} pointerEvents="none">
           <Text style={titleStyle}>About</Text>
         </View>
         <View
           style={{
-            position: 'absolute',
-            top: 95,
-            left: 0,
-            right: 0,
-            alignItems: 'center',
+            paddingTop: 11,
+            paddingBottom: 40,
             paddingHorizontal: 24,
+            alignItems: 'center',
           }}
         >
           <Text style={[bodyStyle, { width: 320 }]}>

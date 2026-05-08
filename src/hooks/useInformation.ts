@@ -16,8 +16,8 @@ import {
   INFORMATION_DATA,
   LIKELION_INSTAGRAM_URL,
   LIKELION_SITE_URL,
-} from '@data/information';
-import type { Developer, InformationSection } from '../types/information';
+} from '@data';
+import type { Developer, InformationSection } from '@types';
 
 export interface UseInformationResult {
   aboutBody: string;

@@ -19,7 +19,7 @@ export default function InformationScreen() {
       headerBg="#FFFFFF"
       headerTextColor="#000000"
     >
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <InformationContent
           aboutBody={aboutBody}
           instagramUrl={instagramUrl}

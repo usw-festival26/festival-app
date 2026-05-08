@@ -85,18 +85,18 @@ export function BoothDetail({ booth, menus }: BoothDetailProps) {
               onPress={openBoothLightbox}
               accessibilityRole="button"
               accessibilityLabel={`${booth.name} 사진 자세히 보기`}
-              style={({ pressed }) => [styles.thumb, { opacity: pressed ? 0.85 : 1 }]}
+              className="w-[165px] h-[181px] rounded-[20px] border border-black bg-white overflow-hidden items-center justify-center active:opacity-[0.85]"
             >
               <Image
                 source={thumbSource}
-                style={{ width: '100%', height: '100%' }}
+                className="w-full h-full"
                 resizeMode="cover"
               />
             </Pressable>
           ) : (
-            <View style={styles.thumb}>
+            <View className="w-[165px] h-[181px] rounded-[20px] border border-black bg-white overflow-hidden items-center justify-center">
               <Text style={styles.thumbPlaceholder}>
-                {'Location In Map\nor\nPoster'}
+                {'지도 위치\n또는\n포스터'}
               </Text>
             </View>
           )}
@@ -159,17 +159,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#000000',
   },
-  thumb: {
-    width: 165,
-    height: 181,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#000000',
-    backgroundColor: '#FFFFFF',
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  // styles.thumb 는 className 으로 이전 (NativeWind 가이드라인 정합).
   thumbPlaceholder: {
     fontFamily: PRETENDARD_SEMIBOLD,
     fontWeight: '600',

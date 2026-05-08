@@ -9,7 +9,7 @@
  */
 import React from 'react';
 import { Image, Platform, Text, View } from 'react-native';
-import type { Developer } from '../../types/information';
+import type { Developer } from '@types';
 
 const PRETENDARD_BLACK = Platform.select({
   web: 'Pretendard Variable',
@@ -83,7 +83,7 @@ export function DeveloperCard({ developer, side }: DeveloperCardProps) {
         <Text
           style={{
             fontFamily: PRETENDARD_BLACK,
-            fontWeight: '800',
+            fontWeight: '900',
             fontSize: 20,
             lineHeight: 24,
             color: NAME_COLOR,

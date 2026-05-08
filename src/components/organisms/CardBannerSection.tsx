@@ -25,6 +25,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Image, PanResponder, View } from 'react-native';
+import { Colors } from '@constants/colors';
 
 const BANNERS = [
   {
@@ -56,8 +57,9 @@ const SWIPE_THRESHOLD_RATIO = 0.2;
 const DOT_SIZE = 6;
 const DOT_GAP = 4;
 const DOT_MARGIN_TOP = 12;
-const DOT_ACTIVE = '#001E56';
-const DOT_INACTIVE = '#D9D9D9';
+// festival 디자인 토큰 — Colors.festival.navy / surface 와 동기화.
+const DOT_ACTIVE = Colors.festival.navy;
+const DOT_INACTIVE = Colors.festival.surface;
 
 export function CardBannerSection() {
   const [containerWidth, setContainerWidth] = useState(0);
