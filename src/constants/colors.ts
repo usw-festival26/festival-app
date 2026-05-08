@@ -15,6 +15,11 @@
 export const Colors = {
   festival: {
     primaryDark: '#010070',
+    /**
+     * 짙은 네이비 — Information / About Us 본문 강조 텍스트, 카드 배너 dot active 등
+     * primaryDark(#010070, MIDNIGHT)와 다른 tone(짙은 네이비). Figma `#001E56` 시안.
+     */
+    navy: '#001E56',
     primary: '#0068FF',
     primaryLight: '#C3EDFF',
     secondaryFrom: '#A5FFF3',

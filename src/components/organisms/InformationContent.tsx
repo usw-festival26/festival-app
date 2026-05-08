@@ -1,38 +1,38 @@
 /**
- * InformationContent - Information 화면 본문 (Figma 920:4712)
+ * InformationContent - Information 화면 본문 (Figma 2304:629)
  *
- * 3개 organic blob 카드(흰 배경) + 카드 위에 덮이는 장식 blob 3개.
- * - About (368×215): TL/TR/BR 107.5, BL 10 — title + body
- * - History (368×269): TL/TR/BL 134.5, BR 10 — title + body
- * - Who We Are? (368×578): TL/TR/BR 184, BL 10 — title + body + navy pill + body + navy pill
+ * 구조: About blob 카드 + "Who We Are?" 타이틀 + 개발팀 7명 카드 (좌-우 교차).
+ * 장식 GradientBlob 들은 카드 뒤가 아니라 위에 덮인다 (Figma 와 동일).
  *
- * 타이틀: Pretendard-Black 22, #010070 (네이비). 본문: Pretendard-Regular 12, #000000.
- *
- * 장식 blob 3개는 JSX 상 카드보다 뒤에 렌더되어(absolute) 카드 위에 덮인다.
- * 좌표(top/left/size)는 Figma 920:4712 의 Ellipse68/69/70 을 그대로 옮긴 값이다.
- * 헤더(105px) 아래 content 시작점 offset(-99px) 을 적용해 Figma Y 를 contentY 로 변환.
+ * About 카드 본문은 동아리 소개 멀티라인 + 인스타그램/사이트 인라인 링크.
+ * Linking.canOpenURL 가드 후 openURL — IG 앱 미설치/외부 차단 시 silent noop.
  */
 import React from 'react';
-import { View, Text, Platform } from 'react-native';
-import type { InformationSection } from '../../types/information';
+import { Linking, Platform, Text, View } from 'react-native';
 import { GradientBlob } from '../atoms/GradientBlob';
+import { DeveloperCard } from '../molecules';
+import type { Developer } from '@types';
 
 interface BlobCardProps {
   width: number;
-  height: number;
+  /**
+   * 최소 높이 — 디자인 시안의 고정 높이를 보장하면서 본문이 길어지면 자연 확장.
+   * (이전엔 height 고정 + overflow:hidden 으로 긴 본문이 잘렸음.)
+   */
+  minHeight?: number;
   radii: [number, number, number, number]; // [tl, tr, br, bl]
   marginBottom?: number;
   children?: React.ReactNode;
 }
 
-function BlobCard({ width, height, radii, marginBottom = 20, children }: BlobCardProps) {
+function BlobCard({ width, minHeight, radii, marginBottom = 20, children }: BlobCardProps) {
   const [tl, tr, br, bl] = radii;
 
   return (
     <View
       style={{
         width,
-        height,
+        minHeight,
         borderTopLeftRadius: tl,
         borderTopRightRadius: tr,
         borderBottomRightRadius: br,
@@ -41,7 +41,6 @@ function BlobCard({ width, height, radii, marginBottom = 20, children }: BlobCar
         overflow: 'hidden',
         alignSelf: 'center',
         marginBottom,
-        position: 'relative',
       }}
     >
       {children}
@@ -54,7 +53,7 @@ const titleStyle = {
   fontWeight: '900' as const,
   fontSize: 22,
   lineHeight: 26,
-  color: '#010070',
+  color: '#0068FF',
   letterSpacing: -0.5,
   textAlign: 'center' as const,
 };
@@ -62,106 +61,112 @@ const titleStyle = {
 const bodyStyle = {
   fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Regular' }),
   fontSize: 12,
-  lineHeight: 20,
-  color: '#000000',
-  width: 270,
+  lineHeight: 19,
+  color: '#001E56',
   textAlign: 'center' as const,
   letterSpacing: -0.3,
 };
 
-function CenteredTitle({ top, children }: { top: number; children: React.ReactNode }) {
-  return (
-    <View style={{ position: 'absolute', top, left: 0, right: 0, alignItems: 'center' }}>
-      <Text style={titleStyle}>{children}</Text>
-    </View>
-  );
-}
+const linkStyle = {
+  color: '#0068FF',
+  textDecorationLine: 'underline' as const,
+};
 
-function CenteredBody({ top, children }: { top: number; children: React.ReactNode }) {
-  return (
-    <View
-      style={{ position: 'absolute', top, left: 0, right: 0, alignItems: 'center' }}
-      pointerEvents="none"
-    >
-      <Text style={bodyStyle}>{children}</Text>
-    </View>
-  );
+async function openExternal(url: string) {
+  try {
+    if (await Linking.canOpenURL(url)) {
+      await Linking.openURL(url);
+    }
+  } catch {
+    // 외부 앱 열기 실패는 사용자 입장에선 무반응으로 처리.
+  }
 }
 
 export interface InformationContentProps {
-  sections: InformationSection[];
+  aboutBody: string;
+  instagramUrl: string;
+  siteUrl: string;
+  developers: Developer[];
 }
 
-export function InformationContent({ sections }: InformationContentProps) {
-  const aboutBody = sections[0]?.body ?? '';
-  const historyBody = sections[1]?.body ?? '';
-  const whoBody = sections[2]?.body ?? '';
-
+export function InformationContent({
+  aboutBody,
+  instagramUrl,
+  siteUrl,
+  developers,
+}: InformationContentProps) {
   return (
-    <View style={{ paddingTop: 24, paddingBottom: 40, position: 'relative' }}>
-      {/* About */}
-      <BlobCard width={368} height={215} radii={[107.5, 107.5, 107.5, 10]} marginBottom={18}>
-        <CenteredTitle top={58}>About</CenteredTitle>
-        <CenteredBody top={102}>{aboutBody}</CenteredBody>
-      </BlobCard>
-
-      {/* History */}
-      <BlobCard width={368} height={269} radii={[134.5, 134.5, 10, 134.5]} marginBottom={15}>
-        <CenteredTitle top={58}>History</CenteredTitle>
-        <CenteredBody top={102}>{historyBody}</CenteredBody>
-      </BlobCard>
-
-      {/* Who We Are? — body 는 1개만 렌더. Figma 는 placeholder lorem 을 2번 겹쳐놨지만
-          실제 데이터 구조(섹션 1개)에서는 동일 문단 반복이 어색함. 팀 소개가 확정되기 전까진 body 1개 + pill 2개. */}
-      <BlobCard width={368} height={578} radii={[184, 184, 184, 10]} marginBottom={40}>
-        <CenteredTitle top={82}>Who We Are?</CenteredTitle>
-        <CenteredBody top={138.57}>{whoBody}</CenteredBody>
-        <View
-          style={{
-            position: 'absolute',
-            top: 194.57,
-            left: 0,
-            right: 0,
-            alignItems: 'center',
-          }}
-          pointerEvents="none"
-        >
-          <View style={{ width: 163, height: 107, borderRadius: 53.5, backgroundColor: '#010070' }} />
-        </View>
-        <View
-          style={{
-            position: 'absolute',
-            top: 376,
-            left: 0,
-            right: 0,
-            alignItems: 'center',
-          }}
-          pointerEvents="none"
-        >
-          <View style={{ width: 163, height: 107, borderRadius: 53.5, backgroundColor: '#010070' }} />
-        </View>
-      </BlobCard>
-
-      {/* 장식 blob — 카드 위에 덮이는 foreground. Figma 920:4712 Ellipse68/69/70.
-          contentY = figmaY - 99 (header 105 + About 시작 Figma 123 → 우리 contentY 24). */}
-      <View
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 176, left: 272 }}
-      >
+    <View style={{ paddingTop: 24, position: 'relative', overflow: 'hidden' }}>
+      {/* 장식 GradientBlob — 카드 뒤로 깔리도록 가장 먼저 렌더.
+          Figma 2304:629 좌표. contentY = figmaY - 99
+          (헤더 105 + paddingTop 24 - About Figma top 123). */}
+      <View pointerEvents="none" style={{ position: 'absolute', top: 487, left: 296 }}>
         <GradientBlob size={154} />
       </View>
-      <View
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 464, left: -3 }}
-      >
+      <View pointerEvents="none" style={{ position: 'absolute', top: 861, left: 0 }}>
         <GradientBlob size={92} rotate={90} reversed />
       </View>
-      <View
-        pointerEvents="none"
-        style={{ position: 'absolute', top: 917, left: 283 }}
-      >
+      <View pointerEvents="none" style={{ position: 'absolute', top: 1258, left: 283 }}>
         <GradientBlob size={289} />
       </View>
+      <View pointerEvents="none" style={{ position: 'absolute', top: 1743, left: -123 }}>
+        <GradientBlob size={329} rotate={56.4} />
+      </View>
+
+      {/* About — Figma 368×572 (minHeight, 본문 길이에 따라 확장) */}
+      <BlobCard
+        width={368}
+        minHeight={572}
+        radii={[107.5, 107.5, 107.5, 10]}
+        marginBottom={45}
+      >
+        {/* 시안 좌표(top:58 / top:95) 를 padding 으로 풀어 flow 레이아웃 — 본문 잘림 회피 */}
+        <View style={{ paddingTop: 58, alignItems: 'center' }} pointerEvents="none">
+          <Text style={titleStyle}>About</Text>
+        </View>
+        <View
+          style={{
+            paddingTop: 11,
+            paddingBottom: 40,
+            paddingHorizontal: 24,
+            alignItems: 'center',
+          }}
+        >
+          <Text style={[bodyStyle, { width: 320 }]}>
+            {aboutBody}
+            {'\n\n인스타그램: '}
+            <Text
+              style={linkStyle}
+              accessibilityRole="link"
+              accessibilityLabel="멋쟁이사자처럼 수원대 인스타그램 열기"
+              onPress={() => openExternal(instagramUrl)}
+            >
+              @likelion_suwon
+            </Text>
+            {'\n사이트: '}
+            <Text
+              style={linkStyle}
+              accessibilityRole="link"
+              accessibilityLabel="멋쟁이사자처럼 수원대 공식 사이트 열기"
+              onPress={() => openExternal(siteUrl)}
+            >
+              {siteUrl}
+            </Text>
+          </Text>
+        </View>
+      </BlobCard>
+
+      {/* Who We Are? 타이틀 */}
+      <View style={{ alignItems: 'center', marginBottom: 32 }}>
+        <Text style={titleStyle}>Who We Are?</Text>
+      </View>
+
+      {/* 개발팀 카드 — 좌/우 교차 */}
+      {developers.map((dev, idx) => (
+        <View key={dev.id} style={{ marginBottom: idx === developers.length - 1 ? 0 : 48 }}>
+          <DeveloperCard developer={dev} side={idx % 2 === 0 ? 'left' : 'right'} />
+        </View>
+      ))}
     </View>
   );
 }

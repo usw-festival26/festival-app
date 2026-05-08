@@ -1,7 +1,7 @@
 /**
- * 추가정보 화면 - Figma 1228:1182
+ * 추가정보 화면 - Figma 2304:629
  *
- * 흰색 헤더 + 네이비 백드롭 + 3개 blob 카드(About / History / Who We Are?).
+ * 흰색 헤더 + 네이비 백드롭 + About 카드 + Who We Are? + 개발팀 7명 카드.
  */
 import React from 'react';
 import { ScrollView } from 'react-native';
@@ -10,7 +10,7 @@ import { InformationContent } from '../../src/components/organisms/InformationCo
 import { useInformation } from '../../src/hooks/useInformation';
 
 export default function InformationScreen() {
-  const { sections } = useInformation();
+  const { aboutBody, instagramUrl, siteUrl, developers } = useInformation();
 
   return (
     <BackdropScreenTemplate
@@ -20,7 +20,12 @@ export default function InformationScreen() {
       headerTextColor="#000000"
     >
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <InformationContent sections={sections} />
+        <InformationContent
+          aboutBody={aboutBody}
+          instagramUrl={instagramUrl}
+          siteUrl={siteUrl}
+          developers={developers}
+        />
       </ScrollView>
     </BackdropScreenTemplate>
   );

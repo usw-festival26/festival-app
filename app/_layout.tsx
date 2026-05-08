@@ -76,7 +76,7 @@ export default function RootLayout() {
       {/*
         웹 브라우저 탭 기본 제목.
         per-route 제목은 (tabs)/_layout.tsx 의 Drawer.Screen options.title 에서 덮어씀.
-        favicon 은 app.json web.favicon (assets/images/VectorCircle.png) 으로 일원화.
+        favicon 은 app.json web.favicon (assets/images/logo/미드나잇로고.png) 으로 일원화.
       */}
       <Head>
         <title>2026년 수원대학교 대동제</title>

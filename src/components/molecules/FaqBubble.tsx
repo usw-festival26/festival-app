@@ -1,5 +1,5 @@
 /**
- * FaqBubble - 말풍선 (Figma 기반, assets/images/Group 1707481735.svg 형태)
+ * FaqBubble - 말풍선 (Figma 기반, 'Group 1707481735' 형태)
  *
  * - 전체 357×65 기준: 본문 rounded-20 흰 카드(335×65) + 좌/우 옆구리에 돋아난 갈매기형 꼬리.
  * - tail='left': 꼬리가 좌측으로 튀어나옴(기본). tail='right': 수평 미러.
