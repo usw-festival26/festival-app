@@ -30,7 +30,7 @@ import { EventSheetContent } from './EventSheetContent';
 import { FacilitySheetContent } from './FacilitySheetContent';
 import { FoodSheetContent } from './FoodSheetContent';
 
-const FESTIVAL_MAP = require('../../../assets/images/메인 지도.jpg');
+const FESTIVAL_MAP = require('../../../assets/images/map/메인 지도.jpg');
 const MAP_NATURAL_WIDTH = 1608;
 const MAP_NATURAL_HEIGHT = 3496;
 

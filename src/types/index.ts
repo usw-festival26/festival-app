@@ -23,7 +23,7 @@ export type {
   LostFoundCategory,
 } from './lostFound';
 
-export type { InformationSection } from './information';
+export type { InformationSection, Developer } from './information';
 
 export type { Artist } from './lineup';
 

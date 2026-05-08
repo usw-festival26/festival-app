@@ -12,5 +12,5 @@
 import type { ImageSourcePropType } from 'react-native';
 
 export const POSTERS: ImageSourcePropType[] = [
-  require('../../assets/images/축제포스터_사이즈.png'),
+  require('../../assets/images/posters/축제포스터_사이즈.png'),
 ];

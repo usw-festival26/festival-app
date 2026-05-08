@@ -1,6 +1,9 @@
 /**
  * 핀 에디터(/map-editor) 에서 export 한 데이터.
  * 이 파일을 통째로 교체해도 무방.
+ *
+ * cluster.name 은 학교 공식 단과대 표기 (commit 3a6601d 정합).
+ * 폭 좁은 핀 라벨은 MapPin 이 ellipsis 처리하므로 데이터는 풀네임으로 유지.
  */
 import type { BoothCluster } from '../types/cluster';
 

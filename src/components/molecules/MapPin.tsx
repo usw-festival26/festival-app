@@ -32,7 +32,7 @@ import type { PinCategory } from '../../types/cluster';
  * 마커 PNG 와 말풍선 SVG 는 viewBox/원본 비율 그대로, 렌더 width/height 만 줄여
  * 마커·말풍선·텍스트가 동시에 따라간다. 이 값만 만지면 전체 사이즈 조절.
  */
-const PIN_SCALE = 0.60;
+const PIN_SCALE = 0.45;
 
 // === 마커 원본 비율 (PNG) ===
 const MARKER_VB_W = 37;
