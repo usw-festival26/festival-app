@@ -552,8 +552,8 @@ export default function MapEditorScreen() {
       <View style={{ flex: 1 }}>
         <MapCanvas
           imgSource={FESTIVAL_MAP}
-          imgNaturalWidth={1608}
-          imgNaturalHeight={3496}
+          imgNaturalWidth={1440}
+          imgNaturalHeight={2062}
           clusters={visibleClusters}
           foodPins={state.foodPins}
           facilityPins={state.facilityPins}
