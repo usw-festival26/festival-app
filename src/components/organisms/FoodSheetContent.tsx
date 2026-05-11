@@ -8,10 +8,10 @@
  * 스타일링: NativeWind className 우선, fontFamily 만 inline (Pretendard variant 토큰
  * 별도 미정의).
  */
+import { ALCOHOLS, FOOD_TRUCK_VENDORS, LOTTE_DRINKS } from '@data';
+import type { BulletProps, FoodSheetContentProps, MapCoords } from '@types';
 import React, { useMemo } from 'react';
-import { View, Text, Pressable, Platform, Image } from 'react-native';
-import { FOOD_TRUCK_VENDORS, LOTTE_DRINKS, ALCOHOLS } from '@data';
-import type { FoodSheetContentProps, BulletProps, MapCoords } from '@types';
+import { Image, Platform, Pressable, Text, View } from 'react-native';
 
 const SECTION_BAR = require('../../../assets/images/components/Vector 656.png');
 
@@ -60,7 +60,7 @@ function SectionHeader({ title }: { title: string }) {
       </Text>
       <Image
         source={SECTION_BAR}
-        style={{ width: 57, height: 1, marginTop: 8 }}
+        style={{ width: 100, height: 3, marginTop: 8 }}
         resizeMode="contain"
         accessibilityLabel=""
       />
