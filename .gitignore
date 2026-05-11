@@ -59,3 +59,8 @@ docs/
 
 # 단과대 자산 zip 원본 — 풀린 폴더만 사용. 원본 zip 은 추적 대상 아님.
 assets/images/college/*.zip
+
+# 이미지 디렉토리에 잘못 들어간 텍스트/문서 (RTF, HWP) — 코드가 사용 안 함.
+# 메뉴/가격을 앱이 써야 하면 src/data/ 아래 .ts 로 옮길 것.
+assets/images/**/*.rtf
+assets/images/**/*.hwp

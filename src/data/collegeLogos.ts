@@ -12,7 +12,7 @@
  * CollegeGrid 카드 썸네일 / 추후 BoothDetail 헤더 등 단과대 컨텍스트 시각화에 사용.
  */
 import type { ImageSourcePropType } from 'react-native';
-import type { BackendCollege } from '../api/types';
+import type { BackendCollege } from '@api/types';
 
 export const COLLEGE_LOGO: Record<BackendCollege, ImageSourcePropType> = {
   HUMANITIES: require('../../assets/images/college/인문사회융합대학 로고및 메뉴가격/단대 로고.png'),

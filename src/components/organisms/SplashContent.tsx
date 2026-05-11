@@ -252,7 +252,9 @@ export function SplashContent({ onPress }: SplashContentProps) {
               width: FIGMA_BASE_WIDTH,
               height: FIGMA_BASE_HEIGHT,
               transform: [{ scale: stageScale }],
-              transformOrigin: 'top left',
+              // transformOrigin 은 web 전용 CSS — native(iOS/Android) 는 미지원이므로 IS_WEB 일 때만 spread.
+              // (native 에선 default 가 center 라 알맞은 위치가 아니지만, native 에서도 viewport 가 base 보다 큰 경우만 scale=1 로 동작하므로 시각 영향 적음.)
+              ...(IS_WEB ? { transformOrigin: 'top left' } : null),
             }}
           >
         {BLOBS.map((spec) => (

@@ -29,7 +29,20 @@ export type { Artist } from './lineup';
 
 export type {
   MapFilterCategory,
+  SheetCategory,
   Facility,
   FestivalEvent,
+  MapCoords,
 } from './map';
 export { MAP_FILTER_LABELS } from './map';
+
+export type {
+  PinCategory,
+  Pinnable,
+  BoothCluster,
+  FoodPin,
+  FacilityPin,
+} from './cluster';
+export { PIN_CATEGORY_LABELS } from './cluster';
+
+export type { FoodSheetContentProps, BulletProps } from './foodSheet';

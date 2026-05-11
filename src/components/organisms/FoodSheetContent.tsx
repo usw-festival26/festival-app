@@ -3,12 +3,15 @@
  *
  * 헤더 "F&B" + 부제 + 푸드트럭 15개 2단 불릿 리스트 + 롯데칠성 7개 + 주류 3개.
  * 푸드트럭 항목 탭 → 단일 푸드핀 좌표로 지도 줌인. 음료/주류는 비인터랙티브.
+ *
+ * 스타일링: NativeWind className 우선, fontFamily 만 inline style (NativeWind
+ * tailwind config 에 Pretendard variant 토큰이 별도로 없어 platform-specific
+ * font family name 을 inline 으로 적용).
  */
 import React, { useMemo } from 'react';
 import { View, Text, Pressable, Platform } from 'react-native';
-import { FOOD_TRUCK_VENDORS, LOTTE_DRINKS, ALCOHOLS } from '@data/foodFnb';
-import type { FoodPin } from '../../types/cluster';
-import type { MapCoords } from '../../types/map';
+import { FOOD_TRUCK_VENDORS, LOTTE_DRINKS, ALCOHOLS } from '@data';
+import type { FoodSheetContentProps, BulletProps, MapCoords } from '@types';
 
 const ROBOTO_BLACK = Platform.select({ web: 'Roboto, sans-serif', default: 'Roboto-Black' });
 const PRETENDARD_BOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Bold' });
@@ -18,40 +21,18 @@ const PRETENDARD_LIGHT = Platform.select({ web: 'Pretendard Variable', default: 
 const FOOD_TRUCKS_LEFT = FOOD_TRUCK_VENDORS.slice(0, 8);
 const FOOD_TRUCKS_RIGHT = FOOD_TRUCK_VENDORS.slice(8);
 
-export interface FoodSheetContentProps {
-  /** 단일 푸드 핀 — 푸드트럭 항목 탭 시 이 좌표로 줌인. */
-  foodPins?: FoodPin[];
-  onItemPress?: (coords: MapCoords) => void;
-}
-
-interface BulletProps {
-  label: string;
-  onPress?: () => void;
-}
-
 function Bullet({ label, onPress }: BulletProps) {
   const content = (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 6 }}>
+    <View className="flex-row items-start py-[6px]">
       <Text
-        style={{
-          fontFamily: PRETENDARD_MEDIUM,
-          fontSize: 15,
-          color: '#000',
-          lineHeight: 20,
-          width: 14,
-          textAlign: 'center',
-        }}
+        className="text-[15px] text-black text-center font-medium leading-5 w-[14px]"
+        style={{ fontFamily: PRETENDARD_MEDIUM }}
       >
         •
       </Text>
       <Text
-        style={{
-          fontFamily: PRETENDARD_MEDIUM,
-          fontSize: 15,
-          color: '#000',
-          lineHeight: 20,
-          flex: 1,
-        }}
+        className="text-[15px] text-black flex-1 font-medium leading-5"
+        style={{ fontFamily: PRETENDARD_MEDIUM }}
       >
         {label}
       </Text>
@@ -74,91 +55,48 @@ export function FoodSheetContent({ foodPins, onItemPress }: FoodSheetContentProp
 
   return (
     <View>
-      <View style={{ alignItems: 'center', paddingTop: 28 }}>
+      <View className="items-center pt-[28px]">
         <Text
-          style={{
-            fontFamily: ROBOTO_BLACK,
-            fontSize: 20,
-            fontWeight: '900',
-            color: '#000',
-            textAlign: 'center',
-          }}
+          className="text-[20px] text-black text-center font-black"
+          style={{ fontFamily: ROBOTO_BLACK }}
         >
           F&B
         </Text>
         <Text
-          style={{
-            fontFamily: PRETENDARD_LIGHT,
-            fontSize: 14,
-            color: '#002466',
-            marginTop: 14,
-            fontWeight: '300',
-          }}
+          className="text-[14px] text-[#002466] mt-[14px] font-light"
+          style={{ fontFamily: PRETENDARD_LIGHT }}
         >
           푸드트럭 메뉴는 변동사항이 있을 수 있습니다!
         </Text>
       </View>
 
-      <View style={{ alignItems: 'center', marginTop: 30 }}>
+      <View className="items-center mt-[30px]">
         <Text
-          style={{
-            fontFamily: PRETENDARD_BOLD,
-            fontSize: 17,
-            color: '#000',
-            fontWeight: '700',
-          }}
+          className="text-[17px] text-black font-bold"
+          style={{ fontFamily: PRETENDARD_BOLD }}
         >
           푸드트럭
         </Text>
       </View>
-      <View
-        style={{
-          marginTop: 14,
-          paddingHorizontal: 24,
-          flexDirection: 'row',
-          position: 'relative',
-        }}
-      >
-        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+      <View className="mt-[14px] px-[24px] flex-row relative">
+        <View className="flex-1 px-[16px]">
           {FOOD_TRUCKS_LEFT.map((name) => (
             <Bullet key={name} label={name} onPress={handleTruckPress} />
           ))}
         </View>
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: '50%',
-            width: 1,
-            backgroundColor: '#000',
-            opacity: 0.2,
-          }}
-        />
-        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+        <View className="absolute top-0 bottom-0 left-1/2 w-px bg-black/20" />
+        <View className="flex-1 px-[16px]">
           {FOOD_TRUCKS_RIGHT.map((name) => (
             <Bullet key={name} label={name} onPress={handleTruckPress} />
           ))}
         </View>
       </View>
 
-      <View
-        style={{
-          marginTop: 36,
-          paddingHorizontal: 24,
-          flexDirection: 'row',
-          position: 'relative',
-        }}
-      >
-        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+      <View className="mt-[36px] px-[24px] flex-row relative">
+        <View className="flex-1 px-[16px]">
           <Text
-            style={{
-              fontFamily: PRETENDARD_BOLD,
-              fontSize: 17,
-              color: '#000',
-              fontWeight: '700',
-              marginBottom: 10,
-            }}
+            className="text-[17px] text-black font-bold mb-[10px]"
+            style={{ fontFamily: PRETENDARD_BOLD }}
           >
             롯데칠성
           </Text>
@@ -166,26 +104,11 @@ export function FoodSheetContent({ foodPins, onItemPress }: FoodSheetContentProp
             <Bullet key={name} label={name} />
           ))}
         </View>
-        <View
-          style={{
-            position: 'absolute',
-            top: 30,
-            bottom: 0,
-            left: '50%',
-            width: 1,
-            backgroundColor: '#000',
-            opacity: 0.2,
-          }}
-        />
-        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+        <View className="absolute top-[30px] bottom-0 left-1/2 w-px bg-black/20" />
+        <View className="flex-1 px-[16px]">
           <Text
-            style={{
-              fontFamily: PRETENDARD_BOLD,
-              fontSize: 17,
-              color: '#000',
-              fontWeight: '700',
-              marginBottom: 10,
-            }}
+            className="text-[17px] text-black font-bold mb-[10px]"
+            style={{ fontFamily: PRETENDARD_BOLD }}
           >
             주류
           </Text>

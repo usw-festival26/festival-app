@@ -142,10 +142,10 @@ export function HeroSection() {
             <Ionicons name="chevron-back" size={28} color="#010070" />
           </Pressable>
 
-          {/* 우측 화살표 */}
+          {/* 우측 화살표 — left:14 좌측과 대칭. left:360 고정값을 쓰면 viewport <402 인 SE 에서 잘림. */}
           <Pressable
             onPress={goNext}
-            style={{ position: 'absolute', left: 360, top: arrowTop, width: 28, height: 28, zIndex: 2 }}
+            style={{ position: 'absolute', right: 14, top: arrowTop, width: 28, height: 28, zIndex: 2 }}
             className="items-center justify-center active:opacity-70"
             accessibilityRole="button"
             accessibilityLabel="다음 포스터"

@@ -9,8 +9,8 @@
  */
 import React from 'react';
 import { Linking, Platform, Text, View } from 'react-native';
-import { GradientBlob } from '../atoms/GradientBlob';
-import { DeveloperCard } from '../molecules';
+import { GradientBlob } from '@components/atoms';
+import { DeveloperCard } from '@components/molecules';
 import type { Developer } from '@types';
 
 interface BlobCardProps {
