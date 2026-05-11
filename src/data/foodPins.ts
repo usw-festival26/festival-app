@@ -9,6 +9,6 @@ export const FOOD_PINS_DATA: FoodPin[] = [
     id: 'food-pin-001',
     category: 'food',
     name: '푸드트럭',
-    coords: { x: 0.26015, y: 0.56745 },
+    coords: { x: 0.1537, y: 0.5299 },
   },
 ];
