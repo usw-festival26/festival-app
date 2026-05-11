@@ -22,6 +22,7 @@ import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { POSTERS } from '@data/posters';
+import { Colors } from '@constants/colors';
 
 const HEADER_HEIGHT = 60;
 // 포스터 PNG 자연 비율 (assets/images/posters/축제포스터_사이즈.png — IHDR 1235×1643).
@@ -130,8 +131,8 @@ export function HeroSection() {
         >
           <Defs>
             <LinearGradient id="hero-fade" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor="#C3EDFF" stopOpacity="0" />
-              <Stop offset="1" stopColor="#C3EDFF" stopOpacity="1" />
+              <Stop offset="0" stopColor={Colors.festival.primaryLight} stopOpacity="0" />
+              <Stop offset="1" stopColor={Colors.festival.primaryLight} stopOpacity="1" />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="100" height="100" fill="url(#hero-fade)" />
