@@ -158,10 +158,8 @@ export function InformationContent({
         <Text style={titleStyle}>Who We Are?</Text>
       </View>
 
-      {/* 개발팀 카드 — 좌/우 교차 + 인덱스별 곡률 variant.
-          Figma 카드 1·2 (주호연·남주연) 만 rounded, 3~7 은 extended.
-          row 자체에 사진 24 overflow 가 포함돼 있어 marginBottom 24 만 추가하면
-          Figma 의 row-to-row 24 gap 과 시각 일치. 마지막 카드는 마진 0. */}
+      {/* 개발팀 카드 — 좌/우 교차. 모든 카드 동일 곡률(rounded, 주호연 패턴) 통일.
+          사진은 row 안 vertical center 라 카드 outside 로 튀어나오지 않음. */}
       {developers.map((dev, idx) => (
         <View
           key={dev.id}
@@ -170,7 +168,7 @@ export function InformationContent({
           <DeveloperCard
             developer={dev}
             side={idx % 2 === 0 ? 'left' : 'right'}
-            variant={idx < 2 ? 'rounded' : 'extended'}
+            variant="rounded"
           />
         </View>
       ))}

@@ -1,13 +1,13 @@
 /**
  * DeveloperCard - Who We Are? 섹션 개발팀 멤버 카드 (Figma 2304:629)
  *
- * 한 행 (row) = 카드(246×143) + 사진(105×105 원형). 사진은 카드 bottom 보다
- * 24px 아래로 튀어나오는 디자인 (Figma photo top:62 from card top, photo height
- * 105 → photo bottom 167, card height 143 → 차 24).
+ * 한 행(row) = 카드(246×143) + 사진(105×105 원형). 둘 다 row(365×143) 안의
+ * absolute children — 카드는 사진 반대편 모서리 정렬, 사진은 사진 쪽 모서리에
+ * vertical center 정렬. row height = CARD_HEIGHT(143) — 사진이 카드 outside 로
+ * 튀어나오지 않음.
  *
- * row height = 167 (카드 143 + photo overflow 24).
- * side='left'  → 카드 왼쪽 / 사진 오른쪽
- * side='right' → 카드 오른쪽 / 사진 왼쪽 (mirror)
+ * side='left'  → 카드 left:0  / 사진 right:0
+ * side='right' → 카드 right:0 / 사진 left:0
  *
  * 곡률 variant:
  *  - 'rounded'  → 71.5 / 71.5 / 10 / 71.5  (카드 1·2 패턴)
@@ -42,22 +42,20 @@ const ROLE_COLOR = '#004466';
 const CARD_WIDTH = 246;
 const CARD_HEIGHT = 143;
 const PHOTO_SIZE = 105;
-const PHOTO_TOP = 62; // Figma: photo top - card top
-const ROW_WIDTH = CARD_WIDTH + PHOTO_SIZE; // 351 — gap 은 카드/사진 모두 row 가장자리 정렬, 가운데 빈 공간이 자동 생김 (Figma 와 동일)
-// Figma 카드 left 20 + width 246 → end 266. photo left 280 → gap 14 (266→280). row width = 365 (사진 right 385 - 카드 left 20).
 const ROW_GAP = 14;
 const ROW_TOTAL_WIDTH = CARD_WIDTH + ROW_GAP + PHOTO_SIZE; // 365
-const ROW_HEIGHT = PHOTO_TOP + PHOTO_SIZE; // 167 — 카드 143 보다 24 큼 (사진 overflow)
+// 사진을 row 안에서 vertical center 로 두는 좌표.
+const PHOTO_TOP_CENTER = (CARD_HEIGHT - PHOTO_SIZE) / 2; // 19
 const SIDE_MARGIN_LEFT = 20;
 const SIDE_MARGIN_RIGHT = 17;
-const ROW_FOOTPRINT = ROW_TOTAL_WIDTH + Math.max(SIDE_MARGIN_LEFT, SIDE_MARGIN_RIGHT); // 385
+const ROW_FOOTPRINT = ROW_TOTAL_WIDTH + Math.max(SIDE_MARGIN_LEFT, SIDE_MARGIN_RIGHT);
 
 export type DeveloperCardVariant = 'rounded' | 'extended';
 
 export interface DeveloperCardProps {
   developer: Developer;
   side: 'left' | 'right';
-  /** 기본 'extended'. Figma 카드 1·2(주호연·남주연) 만 'rounded'. */
+  /** 기본 'rounded' (주호연 카드 패턴). */
   variant?: DeveloperCardVariant;
 }
 
@@ -82,13 +80,13 @@ function getCardRadii(variant: DeveloperCardVariant, cardOnLeft: boolean) {
   };
 }
 
-export function DeveloperCard({ developer, side, variant = 'extended' }: DeveloperCardProps) {
+export function DeveloperCard({ developer, side, variant = 'rounded' }: DeveloperCardProps) {
   const cardOnLeft = side === 'left';
 
   const { width: vw } = useWindowDimensions();
   const cardScale = vw > 0 ? Math.min(vw / ROW_FOOTPRINT, 1) : 1;
   const scaledRowWidth = ROW_TOTAL_WIDTH * cardScale;
-  const scaledRowHeight = ROW_HEIGHT * cardScale;
+  const scaledRowHeight = CARD_HEIGHT * cardScale;
   const scaledMarginLeft = (cardOnLeft ? SIDE_MARGIN_LEFT : 0) * cardScale;
   const scaledMarginRight = (cardOnLeft ? 0 : SIDE_MARGIN_RIGHT) * cardScale;
 
@@ -104,16 +102,16 @@ export function DeveloperCard({ developer, side, variant = 'extended' }: Develop
         marginRight: scaledMarginRight,
       }}
     >
-      {/* 내부는 unscaled 365×167 캔버스. transform: scale 로 viewport 적응. */}
+      {/* 내부는 unscaled 365×143 캔버스. transform: scale 로 viewport 적응. */}
       <View
         style={{
           width: ROW_TOTAL_WIDTH,
-          height: ROW_HEIGHT,
+          height: CARD_HEIGHT,
           transform: [{ scale: cardScale }],
           ...(IS_WEB ? { transformOrigin: 'top left' } : null),
         }}
       >
-        {/* 카드 — top:0, 사진 반대편에 정렬 */}
+        {/* 카드 — top:0, 사진 반대편 모서리 정렬 */}
         <View
           style={{
             position: 'absolute',
@@ -169,11 +167,12 @@ export function DeveloperCard({ developer, side, variant = 'extended' }: Develop
           </Text>
         </View>
 
-        {/* 사진 — top:62, 사진 위치 (카드 반대편), 카드 bottom 보다 24 아래로 overflow */}
+        {/* 사진 — vertical center, 사진쪽 모서리(right:0 또는 left:0) 정렬.
+            카드 안에 들어가서 row outside 로 튀어나오지 않음. */}
         <View
           style={{
             position: 'absolute',
-            top: PHOTO_TOP,
+            top: PHOTO_TOP_CENTER,
             ...(cardOnLeft ? { right: 0 } : { left: 0 }),
             width: PHOTO_SIZE,
             height: PHOTO_SIZE,
