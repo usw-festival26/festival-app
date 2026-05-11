@@ -136,10 +136,15 @@ export function SplashContent({ onPress }: SplashContentProps) {
 
   // viewport-adaptive scale — Figma base(402×832) 가 viewport 보다 크면 비례 축소.
   // 큰 화면에선 scale 1 유지 (디자인 의도 그대로). stage 가운데 정렬.
+  // ⚠️ web SSR/static 첫 렌더에선 useWindowDimensions 가 0 을 반환할 수 있어
+  // scale=0 → 콘텐츠 invisible 이슈. vw/availH 가 양수일 때만 scale 계산, 아니면 1.
   const insets = useSafeAreaInsets();
   const { width: vw, height: vh } = useWindowDimensions();
   const availH = Math.max(0, vh - insets.top - insets.bottom);
-  const stageScale = Math.min(vw / FIGMA_BASE_WIDTH, availH / FIGMA_BASE_HEIGHT, 1);
+  const stageScale =
+    vw > 0 && availH > 0
+      ? Math.min(vw / FIGMA_BASE_WIDTH, availH / FIGMA_BASE_HEIGHT, 1)
+      : 1;
   const stageMarginTop = Math.max(0, (availH - FIGMA_BASE_HEIGHT * stageScale) / 2);
 
   useEffect(() => {

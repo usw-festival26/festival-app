@@ -47,8 +47,9 @@ export function DeveloperCard({ developer, side }: DeveloperCardProps) {
 
   // viewport-adaptive scale — vw 가 ROW_FOOTPRINT(385) 보다 작으면 비례 축소.
   // SE(375)→0.974 정도, 더 좁은 폰에서도 한 행에 fit.
+  // ⚠️ web SSR/static 첫 렌더 시 vw=0 → scale=0 → 카드 invisible. 0 일 땐 1 fallback.
   const { width: vw } = useWindowDimensions();
-  const cardScale = Math.min(vw / ROW_FOOTPRINT, 1);
+  const cardScale = vw > 0 ? Math.min(vw / ROW_FOOTPRINT, 1) : 1;
   const scaledRowWidth = ROW_WIDTH * cardScale;
   const scaledRowHeight = CARD_HEIGHT * cardScale;
   const scaledMarginLeft = (cardOnLeft ? 20 : 0) * cardScale;
