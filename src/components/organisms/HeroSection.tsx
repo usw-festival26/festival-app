@@ -31,6 +31,10 @@ const POSTER_RATIO = 1235 / 1643; // ≈ 0.7517
 const FADE_RATIO = 287 / 536; // 포스터 영역 대비 fade 영역 비율
 const ARROW_FROM_BOTTOM = 42; // Figma 596 - 554
 const DOT_FROM_BOTTOM = 31;   // Figma 596 - 565
+// 데스크탑(≥701px)에선 global.css 의 .mobile-content 가 max-width 402 로 hero
+// 컨테이너 폭을 capping. useWindowDimensions().width 는 브라우저 viewport 전체라
+// hero 실제 폭과 다를 수 있음 — Math.min 으로 컨테이너 폭 보정.
+const MOBILE_CONTENT_MAX_WIDTH = 402;
 // SSR/static 첫 렌더 시 vw=0 fallback (Figma base width).
 const FALLBACK_VW = 402;
 
@@ -46,9 +50,11 @@ export function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // 포스터 자연 비율 기반 panelHeight — 폭 fit + 자연 height. 잘림 없음, 빈 영역 없음.
+  // 데스크탑 viewport 가 클 때도 mobile-content 의 max-width 402 로 capping.
   const { width: vw } = useWindowDimensions();
   const safeVw = vw > 0 ? vw : FALLBACK_VW;
-  const posterHeight = safeVw / POSTER_RATIO;
+  const containerWidth = Math.min(safeVw, MOBILE_CONTENT_MAX_WIDTH);
+  const posterHeight = containerWidth / POSTER_RATIO;
   const panelHeight = HEADER_HEIGHT + posterHeight;
   const fadeHeight = Math.round(posterHeight * FADE_RATIO);
   const arrowTop = panelHeight - ARROW_FROM_BOTTOM;
