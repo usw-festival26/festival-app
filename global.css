@@ -6,18 +6,8 @@
 @tailwind utilities;
 
 @layer base {
-  /*
-   * 글꼴 fallback chain:
-   *  1) Roboto             — 영문 (한글 글리프 없음, per-glyph fallback 으로 다음으로)
-   *  2) Pretendard-Regular — expo-font(useFonts) 가 self-host 한 .otf 의 family name.
-   *                          assets/fonts/Pretendard-Regular.otf 가 번들에 포함되어
-   *                          노트북/Windows 환경 (Pretendard 미설치) 에서도 한글 보장
-   *  3) Pretendard Variable— jsdelivr web font fallback (CDN 의존, 지연/차단 가능)
-   *  4) Pretendard         — OS 시스템 폰트 (Mac 사용자가 직접 설치한 경우)
-   *  5) sans-serif         — 최종 fallback (Windows: Malgun Gothic)
-   */
   * {
-    font-family: 'Roboto', 'Pretendard-Regular', 'Pretendard Variable', 'Pretendard', sans-serif;
+    font-family: 'Roboto', 'Pretendard Variable', 'Pretendard', sans-serif;
   }
 }
 
