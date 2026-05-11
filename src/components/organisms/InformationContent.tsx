@@ -18,12 +18,12 @@
  * About 본문은 segments(text+weight) 로 받아 weight 별 fontFamily 분기.
  * 인스타그램/사이트는 인라인 Pressable — Linking 가드 후 openURL.
  */
-import React from 'react';
-import { Linking, Platform, Text, View } from 'react-native';
 import { GradientBlob } from '@components/atoms';
 import { DeveloperCard } from '@components/molecules';
-import type { Developer } from '@types';
 import type { AboutBodySegment } from '@hooks';
+import type { Developer } from '@types';
+import React from 'react';
+import { Linking, Platform, Text, View } from 'react-native';
 
 const PRETENDARD_BLACK = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Black' });
 const PRETENDARD_SEMIBOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' });
