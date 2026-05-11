@@ -3,26 +3,32 @@
  *
  * 새 시안:
  *  - 0~60: 흰색 헤더 (햄버거 좌측 + 미드나잇 가로 로고 가운데)
- *  - 60~596: 메인 포스터 이미지 full-bleed (cover) + 하단 그라디언트로
+ *  - 60~패널끝: 메인 포스터 이미지 full-bleed (cover) + 하단 그라디언트로
  *    primary-light(#C3EDFF) 페이드. 다음 섹션과 자연스럽게 이어짐.
- *  - 좌/우 화살표 (14, 554) / (360, 554). dot pagination (183, 565).
+ *  - 좌/우 화살표 / dot pagination 은 패널 하단 고정 offset (Figma 596 기준 42, 31).
+ *
+ * **viewport-adaptive 패널 높이** — Figma 596 고정값을 쓰면 휴대폰 viewport 가
+ * 596 보다 작거나 비슷한 기기에서 화살표/dot 이 화면 밖으로 밀려 사용자가 스크롤해야
+ * 보이는 문제. useWindowDimensions + SafeArea top inset 으로 viewport 한 화면을
+ * 정확히 차지하도록 동적 계산. 다음 섹션은 스크롤 후 등장.
  *
  * 포스터는 `src/data/posters.ts` 의 `POSTERS` 배열을 따라간다. 갯수에 따라
  * dot 수와 화살표 표시 여부가 자동 결정 (1장이면 dot/화살표 숨김).
  */
 import React, { useState } from 'react';
-import { Image, View, Pressable } from 'react-native';
+import { Image, View, Pressable, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { POSTERS } from '@data/posters';
 
-const PANEL_HEIGHT = 596;
 const HEADER_HEIGHT = 60;
-const POSTER_HEIGHT = PANEL_HEIGHT - HEADER_HEIGHT; // 536
-// 하단 fade 영역 높이 (Figma: top 309 ~ 596 = 287). 포스터 영역 안 좌표.
-const FADE_HEIGHT = 287;
+// Figma 패널 높이 596 기준 비율/오프셋. viewport adaptive 시 보정에 사용.
+const FADE_RATIO = 287 / 536; // 포스터 영역 대비 fade 영역 비율
+const ARROW_FROM_BOTTOM = 42; // Figma 596 - 554
+const DOT_FROM_BOTTOM = 31;   // Figma 596 - 565
 
 // 헤더 가운데 미드나잇 가로 로고 — intrinsic 1696×729 (≈ 2.326).
 const HEADER_LOGO_SOURCE = require('../../../assets/images/logo/미드나잇로고_가로.png');
@@ -35,6 +41,15 @@ export function HeroSection() {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  // SafeArea top 만큼 ScrollScreenTemplate 가 이미 padding — 그 아래로 한 viewport 차지.
+  const panelHeight = Math.max(0, windowHeight - insets.top);
+  const posterHeight = Math.max(0, panelHeight - HEADER_HEIGHT);
+  const fadeHeight = Math.round(posterHeight * FADE_RATIO);
+  const arrowTop = panelHeight - ARROW_FROM_BOTTOM;
+  const dotTop = panelHeight - DOT_FROM_BOTTOM;
+
   const posterCount = POSTERS.length;
   // POSTERS 가 비어있는 edge case 방어 — 빈 배열이면 화살표/dot 도 안 그리고 이미지도 미표시.
   const safeIndex = posterCount > 0 ? currentIndex % posterCount : 0;
@@ -45,7 +60,7 @@ export function HeroSection() {
   const goNext = () => setCurrentIndex((i) => (i < posterCount - 1 ? i + 1 : 0));
 
   return (
-    <View className="bg-festival-card w-full" style={{ height: PANEL_HEIGHT }}>
+    <View className="bg-festival-card w-full" style={{ height: panelHeight }}>
       {/* 햄버거 — SafeArea 가 status bar 처리하므로 Figma top:61 - 44 = 17 */}
       <Pressable
         onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
@@ -81,7 +96,7 @@ export function HeroSection() {
           left: 0,
           right: 0,
           top: HEADER_HEIGHT,
-          height: POSTER_HEIGHT,
+          height: posterHeight,
           overflow: 'hidden',
         }}
       >
@@ -98,7 +113,7 @@ export function HeroSection() {
         <Svg
           pointerEvents="none"
           width="100%"
-          height={FADE_HEIGHT}
+          height={fadeHeight}
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
           style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
@@ -116,10 +131,10 @@ export function HeroSection() {
       {/* 1장 이하면 화살표/dot 의미 없으니 숨김 */}
       {showControls ? (
         <>
-          {/* 좌측 화살표 (Figma top:598 - 44 = 554) */}
+          {/* 좌측 화살표 — 패널 하단에서 ARROW_FROM_BOTTOM(42)px 위 */}
           <Pressable
             onPress={goPrev}
-            style={{ position: 'absolute', left: 14, top: 554, width: 28, height: 28, zIndex: 2 }}
+            style={{ position: 'absolute', left: 14, top: arrowTop, width: 28, height: 28, zIndex: 2 }}
             className="items-center justify-center active:opacity-70"
             accessibilityRole="button"
             accessibilityLabel="이전 포스터"
@@ -130,7 +145,7 @@ export function HeroSection() {
           {/* 우측 화살표 */}
           <Pressable
             onPress={goNext}
-            style={{ position: 'absolute', left: 360, top: 554, width: 28, height: 28, zIndex: 2 }}
+            style={{ position: 'absolute', left: 360, top: arrowTop, width: 28, height: 28, zIndex: 2 }}
             className="items-center justify-center active:opacity-70"
             accessibilityRole="button"
             accessibilityLabel="다음 포스터"
@@ -145,7 +160,7 @@ export function HeroSection() {
               position: 'absolute',
               left: 0,
               right: 0,
-              top: 565,
+              top: dotTop,
               height: 6,
               flexDirection: 'row',
               alignItems: 'center',
