@@ -1,111 +1,199 @@
 /**
- * FoodSheetContent - 지도 바텀시트: 푸드트럭 2열 그리드
+ * FoodSheetContent — F&B 시트 (Figma 2185:1226)
  *
- * Figma 166:176
- *
- * 데이터 통합 — booths(category='food' 부스) + foodPins(지도 핀 전용 푸드트럭) 둘
- * 다 한 그리드에 표시. 푸드핀의 boothId 가 booths 중 하나와 매칭되면 booth 카드만
- * 남기고 핀은 skip(중복 방지). booth 카드도 매칭되는 푸드핀의 coords 를 가져와서,
- * 카드 누름 시 그 핀 위치로 지도가 줌인.
+ * 헤더 "F&B" + 부제 + 푸드트럭 15개 2단 불릿 리스트 + 롯데칠성 7개 + 주류 3개.
+ * 푸드트럭 항목 탭 → 단일 푸드핀 좌표로 지도 줌인. 음료/주류는 비인터랙티브.
  */
 import React, { useMemo } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import { AppText } from '@atoms/AppText';
-import { BoothCard } from '@molecules/BoothCard';
-import { NetworkErrorState } from '@atoms/NetworkErrorState';
-import { Colors } from '@constants/colors';
-import type { Booth } from '../../types/booth';
+import { View, Text, Pressable, Platform } from 'react-native';
+import { FOOD_TRUCK_VENDORS, LOTTE_DRINKS, ALCOHOLS } from '@data/foodFnb';
 import type { FoodPin } from '../../types/cluster';
 import type { MapCoords } from '../../types/map';
 
+const ROBOTO_BLACK = Platform.select({ web: 'Roboto, sans-serif', default: 'Roboto-Black' });
+const PRETENDARD_BOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Bold' });
+const PRETENDARD_MEDIUM = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Medium' });
+const PRETENDARD_LIGHT = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Light' });
+
+const FOOD_TRUCKS_LEFT = FOOD_TRUCK_VENDORS.slice(0, 8);
+const FOOD_TRUCKS_RIGHT = FOOD_TRUCK_VENDORS.slice(8);
+
 export interface FoodSheetContentProps {
-  booths: Booth[];
-  /** 지도 핀 전용 푸드트럭 — booth 가 없는 푸드만 카드로 추가 표시. */
+  /** 단일 푸드 핀 — 푸드트럭 항목 탭 시 이 좌표로 줌인. */
   foodPins?: FoodPin[];
-  /** 카드 누름 시 해당 핀 좌표로 지도 줌인. coords 없는 카드는 비활성. */
   onItemPress?: (coords: MapCoords) => void;
-  isLoading?: boolean;
-  error?: string | null;
-  onRetry?: () => void;
 }
 
-interface FoodCard {
-  id: string;
-  name: string;
-  description?: string;
-  imageUri?: string;
-  location?: string;
-  /** 매칭 푸드핀이 있으면 그 좌표 — 없으면 카드 클릭 비활성. */
-  coords?: MapCoords;
+interface BulletProps {
+  label: string;
+  onPress?: () => void;
 }
 
-export function FoodSheetContent({ booths, foodPins, onItemPress, isLoading, error, onRetry }: FoodSheetContentProps) {
-  const cards = useMemo<FoodCard[]>(() => {
-    const pinByBoothId = new Map<string, FoodPin>();
-    for (const p of foodPins ?? []) {
-      if (p.boothId) pinByBoothId.set(p.boothId, p);
-    }
-    const seenBoothIds = new Set<string>();
-    const merged: FoodCard[] = booths.map((b) => {
-      seenBoothIds.add(b.id);
-      return {
-        id: b.id,
-        name: b.name,
-        description: b.description,
-        imageUri: b.imageUri,
-        location: b.location,
-        coords: pinByBoothId.get(b.id)?.coords,
-      };
-    });
-    for (const p of foodPins ?? []) {
-      if (p.boothId && seenBoothIds.has(p.boothId)) continue;
-      merged.push({
-        id: p.id,
-        name: p.name,
-        description: p.description,
-        coords: p.coords,
-      });
-    }
-    return merged;
-  }, [booths, foodPins]);
+function Bullet({ label, onPress }: BulletProps) {
+  const content = (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 6 }}>
+      <Text
+        style={{
+          fontFamily: PRETENDARD_MEDIUM,
+          fontSize: 15,
+          color: '#000',
+          lineHeight: 20,
+          width: 14,
+          textAlign: 'center',
+        }}
+      >
+        •
+      </Text>
+      <Text
+        style={{
+          fontFamily: PRETENDARD_MEDIUM,
+          fontSize: 15,
+          color: '#000',
+          lineHeight: 20,
+          flex: 1,
+        }}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+  if (!onPress) return content;
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`${label} 위치 보기`}>
+      {content}
+    </Pressable>
+  );
+}
 
-  const rows: FoodCard[][] = [];
-  for (let i = 0; i < cards.length; i += 2) {
-    rows.push(cards.slice(i, i + 2));
-  }
+export function FoodSheetContent({ foodPins, onItemPress }: FoodSheetContentProps) {
+  const truckCoords = useMemo<MapCoords | undefined>(() => {
+    return foodPins?.[0]?.coords;
+  }, [foodPins]);
+
+  const handleTruckPress = truckCoords && onItemPress ? () => onItemPress(truckCoords) : undefined;
 
   return (
     <View>
-      <AppText className="text-xl font-black text-center mb-4">푸드트럭</AppText>
-      {isLoading ? (
-        <View className="py-6 items-center">
-          <ActivityIndicator size="small" color={Colors.festival.primaryDark} />
-        </View>
-      ) : error ? (
-        <NetworkErrorState onRetry={onRetry} />
-      ) : (
-        <View className="px-3">
-          {rows.map((row, i) => (
-            <View key={i} className="flex-row">
-              {row.map((item) => (
-                <BoothCard
-                  key={item.id}
-                  title={item.name}
-                  time={item.location}
-                  about={item.description}
-                  imageUri={item.imageUri}
-                  onPress={
-                    item.coords && onItemPress
-                      ? () => onItemPress(item.coords!)
-                      : undefined
-                  }
-                />
-              ))}
-              {row.length === 1 && <View className="flex-1 mx-1" />}
-            </View>
+      <View style={{ alignItems: 'center', paddingTop: 28 }}>
+        <Text
+          style={{
+            fontFamily: ROBOTO_BLACK,
+            fontSize: 20,
+            fontWeight: '900',
+            color: '#000',
+            textAlign: 'center',
+          }}
+        >
+          F&B
+        </Text>
+        <Text
+          style={{
+            fontFamily: PRETENDARD_LIGHT,
+            fontSize: 14,
+            color: '#002466',
+            marginTop: 14,
+            fontWeight: '300',
+          }}
+        >
+          푸드트럭 메뉴는 변동사항이 있을 수 있습니다!
+        </Text>
+      </View>
+
+      <View style={{ alignItems: 'center', marginTop: 30 }}>
+        <Text
+          style={{
+            fontFamily: PRETENDARD_BOLD,
+            fontSize: 17,
+            color: '#000',
+            fontWeight: '700',
+          }}
+        >
+          푸드트럭
+        </Text>
+      </View>
+      <View
+        style={{
+          marginTop: 14,
+          paddingHorizontal: 24,
+          flexDirection: 'row',
+          position: 'relative',
+        }}
+      >
+        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+          {FOOD_TRUCKS_LEFT.map((name) => (
+            <Bullet key={name} label={name} onPress={handleTruckPress} />
           ))}
         </View>
-      )}
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: '50%',
+            width: 1,
+            backgroundColor: '#000',
+            opacity: 0.2,
+          }}
+        />
+        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+          {FOOD_TRUCKS_RIGHT.map((name) => (
+            <Bullet key={name} label={name} onPress={handleTruckPress} />
+          ))}
+        </View>
+      </View>
+
+      <View
+        style={{
+          marginTop: 36,
+          paddingHorizontal: 24,
+          flexDirection: 'row',
+          position: 'relative',
+        }}
+      >
+        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+          <Text
+            style={{
+              fontFamily: PRETENDARD_BOLD,
+              fontSize: 17,
+              color: '#000',
+              fontWeight: '700',
+              marginBottom: 10,
+            }}
+          >
+            롯데칠성
+          </Text>
+          {LOTTE_DRINKS.map((name) => (
+            <Bullet key={name} label={name} />
+          ))}
+        </View>
+        <View
+          style={{
+            position: 'absolute',
+            top: 30,
+            bottom: 0,
+            left: '50%',
+            width: 1,
+            backgroundColor: '#000',
+            opacity: 0.2,
+          }}
+        />
+        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+          <Text
+            style={{
+              fontFamily: PRETENDARD_BOLD,
+              fontSize: 17,
+              color: '#000',
+              fontWeight: '700',
+              marginBottom: 10,
+            }}
+          >
+            주류
+          </Text>
+          {ALCOHOLS.map((name) => (
+            <Bullet key={name} label={name} />
+          ))}
+        </View>
+      </View>
     </View>
   );
 }

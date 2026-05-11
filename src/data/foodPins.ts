@@ -8,14 +8,7 @@ export const FOOD_PINS_DATA: FoodPin[] = [
   {
     id: 'food-pin-001',
     category: 'food',
-    name: '푸드트럭1',
-    coords: { x: 0.2623, y: 0.5206 },
-    description: '떡볶이',
-  },
-  {
-    id: 'food-1777611189681',
-    category: 'food',
-    name: '푸드트럭2',
-    coords: { x: 0.2580, y: 0.6143 },
+    name: '푸드트럭',
+    coords: { x: 0.26015, y: 0.56745 },
   },
 ];
