@@ -45,10 +45,36 @@ Timetable, booths, announcements, and lost-found data are in `src/data/*.ts` as 
 ## Key Conventions
 
 - **Styling**: NativeWind `className` prop exclusively. Custom color tokens under `festival.*` in `tailwind.config.js`. Use `src/constants/colors.ts` when JS color values are needed.
-- **Types**: All interfaces in `src/types/`. Every entity has `id: string`. Categories are string literal union types.
-- **Barrel exports**: Each directory has `index.ts`. Import from the barrel, not individual files.
+- **Types**: 모든 interface/type 은 `src/types/` 디렉토리에 정의 — **컴포넌트 파일 안에 인터페이스 직접 선언 금지** (컴포넌트 props / helper props 도 포함). `src/types/index.ts` 배럴에 re-export 해서 `import type { Foo } from '@types'` 로 사용. Every entity has `id: string`. Categories are string literal union types.
 - **Language**: Code in English, UI labels and comments in Korean.
-- **Path aliases**: `@components/*`, `@atoms/*`, `@molecules/*`, `@organisms/*`, `@types/*`, `@data/*`, `@hooks/*`, `@constants/*`, `@utils/*` defined in `tsconfig.json`.
+
+### Import 규칙 (CodeRabbit 반복 지적 — 새 파일/리팩터 시 반드시 준수)
+
+1. **상대경로 import 금지** — `'../foo'`, `'../../bar'` 형태 **절대 사용 X**. 항상 `tsconfig.json` 의 path alias 사용.
+2. **Barrel 우선** — 디렉토리 `index.ts` 가 export 하는 심볼은 barrel 에서 import. 개별 파일 직접 import 는 barrel 미정의일 때만 폴백.
+3. **사용 가능한 alias 전체 목록** (`tsconfig.json` `compilerOptions.paths` 와 동기):
+   - 컴포넌트: `@components/*` (= `src/components/*`), `@atoms/*`, `@molecules/*`, `@organisms/*`, `@templates/*`
+   - 데이터: `@data` (배럴) / `@data/*` (개별)
+   - 타입: `@types` (배럴) / `@types/*` (개별)
+   - 기타: `@hooks/*`, `@constants/*`, `@utils/*`, `@api/*`, `@config/*`
+   - 루트: `@/*` (= 프로젝트 루트)
+
+**예시**:
+```ts
+// ✗ 금지
+import { GradientBlob } from '../atoms/GradientBlob';
+import { DeveloperCard } from '../molecules';
+import type { FoodPin } from '../../types/cluster';
+import type { BackendCollege } from '../api/types';
+
+// ✓ 권장
+import { GradientBlob } from '@components/atoms';   // barrel
+import { DeveloperCard } from '@components/molecules'; // barrel
+import type { FoodPin } from '@types';              // src/types/index.ts 배럴
+import type { BackendCollege } from '@api/types';   // path alias
+```
+
+새 컴포넌트/유틸/타입을 만들면 해당 디렉토리의 `index.ts` 에도 export 추가 (barrel 일관성).
 
 ## 브랜치 전략 / 자동 sync
 
