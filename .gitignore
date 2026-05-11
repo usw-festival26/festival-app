@@ -56,3 +56,6 @@ docs/
 
 # 가역 삭제 trash — Claude/사용자가 rm 대신 여기로 mv. 주기적으로 사용자가 정리.
 .trash/
+
+# 단과대 자산 zip 원본 — 풀린 폴더만 사용. 원본 zip 은 추적 대상 아님.
+assets/images/college/*.zip
