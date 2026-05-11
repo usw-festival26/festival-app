@@ -8,8 +8,10 @@
  * Figma 의 -scale-y-100 + rotate(180) 변환을 풀어 직접 radii 로 표현.
  */
 import React from 'react';
-import { Image, Platform, Text, View } from 'react-native';
+import { Image, Platform, Text, View, useWindowDimensions } from 'react-native';
 import type { Developer } from '@types';
+
+const IS_WEB = Platform.OS === 'web';
 
 const PRETENDARD_BLACK = Platform.select({
   web: 'Pretendard Variable',
@@ -31,7 +33,9 @@ const CARD_WIDTH = 246;
 const CARD_HEIGHT = 143;
 const PHOTO_SIZE = 105;
 const GAP = 14;
-const ROW_WIDTH = CARD_WIDTH + GAP + PHOTO_SIZE;
+const ROW_WIDTH = CARD_WIDTH + GAP + PHOTO_SIZE; // 365
+// Figma 폭 402 기준 마진 포함 footprint. viewport 가 작으면 비례 축소.
+const ROW_FOOTPRINT = ROW_WIDTH + 20; // 좌카드 marginLeft 20 / 우카드 marginRight 17 중 큰 값
 
 export interface DeveloperCardProps {
   developer: Developer;
@@ -40,6 +44,15 @@ export interface DeveloperCardProps {
 
 export function DeveloperCard({ developer, side }: DeveloperCardProps) {
   const cardOnLeft = side === 'left';
+
+  // viewport-adaptive scale — vw 가 ROW_FOOTPRINT(385) 보다 작으면 비례 축소.
+  // SE(375)→0.974 정도, 더 좁은 폰에서도 한 행에 fit.
+  const { width: vw } = useWindowDimensions();
+  const cardScale = Math.min(vw / ROW_FOOTPRINT, 1);
+  const scaledRowWidth = ROW_WIDTH * cardScale;
+  const scaledRowHeight = CARD_HEIGHT * cardScale;
+  const scaledMarginLeft = (cardOnLeft ? 20 : 0) * cardScale;
+  const scaledMarginRight = (cardOnLeft ? 0 : 17) * cardScale;
 
   // 카드 모서리 — 사진 반대쪽이 둥근 형태.
   // 카드가 왼쪽 (사진이 오른쪽) → 카드의 오른쪽 모서리 안쪽이 각짐.
@@ -61,13 +74,21 @@ export function DeveloperCard({ developer, side }: DeveloperCardProps) {
   return (
     <View
       style={{
+        width: scaledRowWidth,
+        height: scaledRowHeight,
+        alignSelf: cardOnLeft ? 'flex-start' : 'flex-end',
+        marginLeft: scaledMarginLeft,
+        marginRight: scaledMarginRight,
+      }}
+    >
+    <View
+      style={{
         width: ROW_WIDTH,
         height: CARD_HEIGHT,
         flexDirection: cardOnLeft ? 'row' : 'row-reverse',
         alignItems: 'center',
-        alignSelf: cardOnLeft ? 'flex-start' : 'flex-end',
-        marginLeft: cardOnLeft ? 24 : 0,
-        marginRight: cardOnLeft ? 0 : 24,
+        transform: [{ scale: cardScale }],
+        ...(IS_WEB ? { transformOrigin: 'top left' } : null),
       }}
     >
       <View
@@ -130,6 +151,7 @@ export function DeveloperCard({ developer, side }: DeveloperCardProps) {
         }}
         resizeMode="cover"
       />
+    </View>
     </View>
   );
 }

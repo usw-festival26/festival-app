@@ -7,21 +7,6 @@ import type { Booth } from '../types/booth';
 
 export const BOOTHS_DATA: Booth[] = [
   {
-    id: 'booth-001',
-    name: '떡볶이 천국',
-    organizer: '컴퓨터공학과',
-    college: '지능형SW융합대학',
-    collegeKey: 'ICT',
-    description: '매콤한 떡볶이와 튀김을 판매합니다.',
-    location: 'A구역 1번',
-    category: 'food',
-    menuItems: [
-      { id: 'menu-001', name: '떡볶이', price: 4000, isAvailable: true, menuCategory: 'main' },
-      { id: 'menu-002', name: '모듬튀김', price: 3000, isAvailable: true, menuCategory: 'side' },
-      { id: 'menu-003', name: '순대', price: 4000, isAvailable: false, menuCategory: 'side' },
-    ],
-  },
-  {
     id: 'booth-002',
     name: '칵테일 바',
     organizer: '경영학과',

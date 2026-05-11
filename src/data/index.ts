@@ -11,3 +11,4 @@ export {
 } from './information';
 export { LINEUP_DATA } from './lineup';
 export { CONTACT_INFO } from './contact';
+export { FOOD_TRUCK_VENDORS, LOTTE_DRINKS, ALCOHOLS } from './foodFnb';

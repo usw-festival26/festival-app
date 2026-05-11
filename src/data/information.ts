@@ -57,7 +57,7 @@ export const ABOUT_BODY = `LIKELION USW 14th
 전국 80여 개 대학과 연계된 탄탄한 기술력을 바탕으로,
 우리 캠퍼스에 필요한 IT 솔루션을 고민하고 실천합니다.
 상상을 현실로 바꾸는 힘,
-수원대학교 멋쟁이사자처럼입니다.`;
+수원대학교 멋쟁이사자처럼 14기입니다.`;
 
 export const DEVELOPERS: Developer[] = [
   {
@@ -92,7 +92,7 @@ export const DEVELOPERS: Developer[] = [
     id: 'dev-005',
     name: '안혜선',
     role: '프론트엔드',
-    college: '컴퓨터SW전공',
+    college: '정보보호학과',
     image: require('../../assets/images/developers/babogaeguri 1.png'),
   },
   {
