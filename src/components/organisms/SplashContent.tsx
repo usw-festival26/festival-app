@@ -32,7 +32,7 @@ const DRIFT_MS = 24000;
 const EASE_OUT_EXPO = Easing.bezier(0.16, 1, 0.3, 1);
 const IS_WEB = Platform.OS === 'web';
 
-// Figma 디자인 base 사이즈 — 모든 absolute 좌표가 이 캔버스 기준.
+// Figma 디자인 base 사이즈 — stage 안 children 의 absolute 좌표가 이 캔버스 기준.
 // viewport 가 이보다 작으면 stage 컨테이너 전체를 비례 축소 (transform scale).
 const FIGMA_BASE_WIDTH = 402;
 const FIGMA_BASE_HEIGHT = 832;
@@ -42,6 +42,16 @@ const FIGMA_BASE_HEIGHT = 832;
 const CONTENT_SCALE_END = IS_WEB ? 1.06 : 1.1;
 const WASH_OPACITY_END = IS_WEB ? 0.35 : 0.55;
 const FADE_START = 0.32; // ~200ms / 620ms — opacity fade 시작 지점
+
+// stage 가 차지할 영역 = viewport - status bar 여백 - hint/credit 예약 공간.
+// 이 reserve 만큼 stage 가 더 작게 scale 되어 viewport 안에서 hint area 와
+// 겹치지 않고 hint/credit 가 항상 visible bottom 에 노출된다.
+const STAGE_TOP_PADDING = 28;
+const HINT_RESERVE = 96;
+// hint/credit 의 viewport bottom 으로부터 거리. 브라우저 nav bar / gesture
+// bar 와 안전하게 떨어지도록 hint 56, credit 24.
+const HINT_BOTTOM = 56;
+const CREDIT_BOTTOM = 24;
 
 interface DriftSpec {
   size: number;
@@ -140,20 +150,25 @@ export function SplashContent({ onPress }: SplashContentProps) {
   const drift = useSharedValue(0);
   const [reduceMotion, setReduceMotion] = useState(true);
 
-  // viewport-adaptive scale — Figma base(402×832) 가 viewport 보다 크면 비례 축소.
-  // 큰 화면에선 scale 1 유지 (디자인 의도 그대로). stage 가운데 정렬.
+  // viewport-adaptive scale — stage 영역 = viewport - top padding - hint reserve.
+  // stage 는 viewport 위쪽 정렬, hint/credit 는 stage 밖에서 viewport bottom 으로
+  // anchor. 작은 viewport 에선 stage 가 height-limited 비율로 축소되어 hint area
+  // 와 충돌하지 않고, 큰 viewport (안드로이드 등 vh > 850) 에선 stage 가 위쪽에
+  // 붙어 보임. 이전 가운데 정렬은 큰 viewport 에서 hint 가 visible 영역 밖으로
+  // 밀려 잘리는 회귀가 있어 폐기.
   // ⚠️ web SSR/static 첫 렌더에선 useWindowDimensions 가 0 을 반환할 수 있어
-  // scale=0 → 콘텐츠 invisible 이슈. vw/availH 가 양수일 때만 scale 계산, 아니면 1.
+  // scale=0 → 콘텐츠 invisible 이슈. vw/availStageH 가 양수일 때만 scale 계산, 아니면 1.
   const insets = useSafeAreaInsets();
   const { width: vw, height: vh } = useWindowDimensions();
   const { stageScale, stageMarginTop } = useMemo(() => {
-    const availH = Math.max(0, vh - insets.top - insets.bottom);
+    const safeTop = insets.top + STAGE_TOP_PADDING;
+    const safeBottom = insets.bottom + HINT_RESERVE;
+    const availStageH = Math.max(0, vh - safeTop - safeBottom);
     const scale =
-      vw > 0 && availH > 0
-        ? Math.min(vw / FIGMA_BASE_WIDTH, availH / FIGMA_BASE_HEIGHT, 1)
+      vw > 0 && availStageH > 0
+        ? Math.min(vw / FIGMA_BASE_WIDTH, availStageH / FIGMA_BASE_HEIGHT, 1)
         : 1;
-    const marginTop = Math.max(0, (availH - FIGMA_BASE_HEIGHT * scale) / 2);
-    return { stageScale: scale, stageMarginTop: marginTop };
+    return { stageScale: scale, stageMarginTop: safeTop };
   }, [vw, vh, insets.top, insets.bottom]);
 
   useEffect(() => {
@@ -245,9 +260,10 @@ export function SplashContent({ onPress }: SplashContentProps) {
     >
       <Animated.View style={containerStyle}>
         {/* Stage — Figma base 캔버스(402×832). viewport 가 작으면 비례 축소.
-            외부 wrapper 는 scaled 사이즈로 layout 가운데 정렬, 내부는 원본 좌표 +
-            transform-origin top-left scale — children 의 absolute top:797 등이 visual
-            로도 정확히 stage 끝에 위치하도록. */}
+            외부 wrapper 는 scaled 사이즈로 viewport top 정렬 (status bar 만큼만
+            띄움). 내부는 원본 좌표 + transform-origin top-left scale 로 children
+            의 absolute top 이 비례 보존됨. hint/credit 는 stage 밖에서 viewport
+            bottom anchored. */}
         <View
           style={{
             width: FIGMA_BASE_WIDTH * stageScale,
@@ -311,12 +327,19 @@ export function SplashContent({ onPress }: SplashContentProps) {
             accessibilityLabel="05.14-05.15"
           />
         </View>
+          </View>
+        </View>
 
-        {/* 터치 안내 — Figma 2139:745 (y:761, color #046 = #004466).
-            이건 outline 안 된 실제 텍스트라 그대로 둠 (폰트 정보 보유).
-            leading-[12px] 로 line-height 를 font-size 와 일치시켜 baseline
-            여유 패딩으로 글자가 wrapper 아래로 밀려 보이는 현상 제거. */}
-        <View pointerEvents="none" style={styles.hintWrap}>
+        {/* 터치 안내 — viewport bottom anchored.
+            과거에 stage 안 absolute top:761 로 두었더니 큰 viewport (안드로이드
+            등 vh > 850) 에서 stage 가 viewport 가운데 정렬되며 hint 의 시각 y
+            가 브라우저 nav bar 영역에 가려져 보이지 않는 회귀가 있었음.
+            stage 밖으로 빼서 항상 viewport bottom 으로부터 일정 거리에 위치.
+            leading-[12px] 로 line-height = font-size 일치 (baseline 패딩 제거). */}
+        <View
+          pointerEvents="none"
+          style={[styles.hintWrap, { bottom: HINT_BOTTOM + insets.bottom }]}
+        >
           <AppText
             className="text-[12px] leading-[12px] text-center font-pretendard"
             style={{ color: '#004466' }}
@@ -325,16 +348,17 @@ export function SplashContent({ onPress }: SplashContentProps) {
           </AppText>
         </View>
 
-        {/* 영문 푸터 — Figma 2185:1549 (x:133 center, y:797, 137×8). PNG export. */}
-        <View pointerEvents="none" style={styles.creditWrap}>
+        {/* 영문 푸터 — viewport bottom anchored (Figma 2185:1549). */}
+        <View
+          pointerEvents="none"
+          style={[styles.creditWrap, { bottom: CREDIT_BOTTOM + insets.bottom }]}
+        >
           <Image
             source={require('../../../assets/images/text/2026TUoSF.png')}
             style={{ width: 137, height: 8 }}
             resizeMode="contain"
             accessibilityLabel="2026 The University of Suwon Festival"
           />
-        </View>
-          </View>
         </View>
       </Animated.View>
 
@@ -371,11 +395,11 @@ const styles = StyleSheet.create({
   slogan: { position: 'absolute', left: 50, top: 552 },
   date: { position: 'absolute', left: 50, top: 591 },
 
+  // viewport bottom anchored — bottom 값은 인라인에서 insets.bottom 합산.
   hintWrap: {
     position: 'absolute',
     left: 0,
     right: 0,
-    top: 761,
     alignItems: 'center',
   },
 
@@ -383,7 +407,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    top: 797,
     alignItems: 'center',
   },
 });
