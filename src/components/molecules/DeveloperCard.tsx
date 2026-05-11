@@ -17,9 +17,9 @@
  * viewport 가 행 footprint(385) 보다 작으면 비례 축소. SSR/static 첫 렌더 vw=0
  * 가드 (fallback 1) 로 invisible 회귀 방지.
  */
+import type { Developer } from '@types';
 import React from 'react';
 import { Image, Platform, Text, View, useWindowDimensions } from 'react-native';
-import type { Developer } from '@types';
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -48,7 +48,7 @@ const ROW_TOTAL_WIDTH = CARD_WIDTH + ROW_GAP + PHOTO_SIZE; // 365
 const PHOTO_TOP_CENTER = (CARD_HEIGHT - PHOTO_SIZE) / 2; // 19
 // 좌·우 마진 동일 — row 자체의 left/right edge 가 모든 카드에서 일치하도록.
 // 좌카드/우카드의 차이는 row 안의 카드/사진 위치만 분기 (row 의 horizontal 위치는 동일).
-const SIDE_MARGIN = 20;
+const SIDE_MARGIN = 15;
 const ROW_FOOTPRINT = ROW_TOTAL_WIDTH + SIDE_MARGIN * 2; // 405 — 양쪽 마진 포함
 
 export type DeveloperCardVariant = 'rounded' | 'extended';

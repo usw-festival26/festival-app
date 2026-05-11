@@ -92,7 +92,18 @@ export function InformationContent({
   developers,
 }: InformationContentProps) {
   return (
-    <View style={{ paddingTop: ROOT_PADDING_TOP, position: 'relative', overflow: 'hidden' }}>
+    <View
+      style={{
+        paddingTop: ROOT_PADDING_TOP,
+        // 마지막 GradientBlob (ellipse 71, figma top:1842 + rotate 56.4 +
+        // image inset -30.42%) 의 visual extent 가 마지막 카드(정소윤) 보다
+        // ~370px 더 아래까지. overflow:'hidden' 안에서 잘리지 않도록 root
+        // paddingBottom 충분히 확보.
+        paddingBottom: 360,
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       {/* 장식 GradientBlob — flow 자식 뒤로 깔리도록 가장 먼저 렌더.
           좌표는 Figma 절대 좌표(figma_top) 에서 헤더 105 빼서 root absolute top. */}
       <View pointerEvents="none" style={{ position: 'absolute', top: 586 - HEADER_OFFSET, left: 296 }}>
@@ -159,12 +170,11 @@ export function InformationContent({
       </View>
 
       {/* 개발팀 카드 — 좌/우 교차. 모든 카드 동일 곡률(rounded, 주호연 패턴) 통일.
-          사진은 row 안 vertical center 라 카드 outside 로 튀어나오지 않음. */}
+          사진은 row 안 vertical center 라 카드 outside 로 튀어나오지 않음.
+          마지막 카드(정소윤) 도 동일 marginBottom 24 — root paddingBottom 으로
+          마지막 blob 공간 확보하므로 마지막 카드만 마진 0 으로 둘 필요 없음. */}
       {developers.map((dev, idx) => (
-        <View
-          key={dev.id}
-          style={{ marginBottom: idx === developers.length - 1 ? 0 : 24 }}
-        >
+        <View key={dev.id} style={{ marginBottom: 24 }}>
           <DeveloperCard
             developer={dev}
             side={idx % 2 === 0 ? 'left' : 'right'}
