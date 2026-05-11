@@ -66,8 +66,8 @@ export function DeveloperCard({ developer, side }: DeveloperCardProps) {
         flexDirection: cardOnLeft ? 'row' : 'row-reverse',
         alignItems: 'center',
         alignSelf: cardOnLeft ? 'flex-start' : 'flex-end',
-        marginLeft: cardOnLeft ? 24 : 0,
-        marginRight: cardOnLeft ? 0 : 24,
+        marginLeft: cardOnLeft ? 20 : 0,
+        marginRight: cardOnLeft ? 0 : 17,
       }}
     >
       <View

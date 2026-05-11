@@ -14,10 +14,10 @@ export default function InformationScreen() {
 
   return (
     <BackdropScreenTemplate
-      title="Information"
+      title="About us"
       backdropVariant="information"
       headerBg="#FFFFFF"
-      headerTextColor="#000000"
+      headerTextColor="#001E56"
     >
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <InformationContent
