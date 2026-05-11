@@ -264,19 +264,21 @@ export function SplashContent({ onPress }: SplashContentProps) {
           <DriftBlob key={spec.gradientId} spec={spec} drift={drift} vw={vw} vh={vh} />
         ))}
 
-        {/* Foreground content — flex column 자연 정렬 */}
+        {/* Foreground content — flex column 자연 정렬.
+            정렬 분리: logo 는 가운데, 텍스트 그룹(title/slogan/date) 는
+            Figma 좌표 x:50 의 왼쪽 정렬, hint/credit 는 가운데.
+            부모 alignItems 미지정(=stretch) 으로 자식 width 100% 보장. */}
         <View
           style={{
             flex: 1,
             paddingTop: insets.top,
             paddingBottom: insets.bottom + 24,
-            alignItems: 'center',
           }}
         >
           {/* 위쪽 spacer */}
           <View style={{ flex: 1 }} />
 
-          {/* 중앙 로고 + 텍스트 그룹 */}
+          {/* 중앙 로고 — 가운데 (Figma x:75, width 253 → 캔버스 가운데 근처) */}
           <View style={{ alignItems: 'center' }}>
             <Image
               source={require('../../../assets/images/logo/미드나잇로고_검정.png')}
@@ -284,9 +286,13 @@ export function SplashContent({ onPress }: SplashContentProps) {
               resizeMode="cover"
               accessibilityLabel="미드나잇 로고"
             />
+          </View>
+
+          {/* 텍스트 그룹 — 왼쪽 정렬 (Figma x:50). paddingLeft 50 고정 */}
+          <View style={{ paddingLeft: 50, marginTop: 22 }}>
             <Image
               source={require('../../../assets/images/text/2026수원대대동제.png')}
-              style={{ width: 108, height: 10, marginTop: 22 }}
+              style={{ width: 108, height: 10 }}
               resizeMode="contain"
               accessibilityLabel="2026 수원대학교 대동제"
             />
@@ -307,7 +313,7 @@ export function SplashContent({ onPress }: SplashContentProps) {
           {/* 아래쪽 spacer */}
           <View style={{ flex: 1 }} />
 
-          {/* 하단 hint + credit */}
+          {/* 하단 hint + credit — 가운데 */}
           <View style={{ alignItems: 'center' }}>
             <AppText
               className="text-[12px] leading-[12px] text-center font-pretendard"
