@@ -85,12 +85,16 @@ export function HeroSection() {
         />
       </View>
 
-      {/* 메인 포스터 — 헤더 아래 full-bleed cover. 포스터 영역 탭 시 지도(/booth)
-          로 이동. 화살표/dot 은 zIndex 2 로 위에 있어 자체 onPress 가 우선. */}
+      {/* 메인 포스터 — 헤더 아래 full-bleed contain. 포스터 영역 탭 시 지도(/booth)
+          로 이동. 화살표/dot 은 zIndex 2 로 위에 있어 자체 onPress 가 우선.
+          contain: 포스터 자연 비율(1235×1643 ≈ 0.7517) 유지 — viewport 비율과
+          어긋나도 포스터 콘텐츠(텍스트/USW 로고) 가 잘리지 않음. 빈 영역은
+          backgroundColor #C3EDFF 로 채워 fade gradient + 다음 섹션과 자연 연결. */}
       <Pressable
         onPress={() => router.navigate('/(tabs)/booth' as never)}
         accessibilityRole="link"
         accessibilityLabel="지도로 이동"
+        className="bg-festival-primary-light"
         style={{
           position: 'absolute',
           left: 0,
@@ -104,7 +108,7 @@ export function HeroSection() {
           <Image
             source={currentPoster}
             style={{ width: '100%', height: '100%' }}
-            resizeMode="cover"
+            resizeMode="contain"
             accessibilityLabel="2026 대동제 포스터"
           />
         ) : null}
