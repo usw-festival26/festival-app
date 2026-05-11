@@ -321,12 +321,8 @@ export function BoothMapView({
                 <View style={{ width: sheetWidth, flex: 1 }}>
                   <ScrollView showsVerticalScrollIndicator={false}>
                     <FoodSheetContent
-                      booths={foodBooths}
                       foodPins={foodPins}
                       onItemPress={onCardFocus}
-                      isLoading={isLoading}
-                      error={error}
-                      onRetry={onRetry}
                     />
                     <View className="h-6" />
                   </ScrollView>

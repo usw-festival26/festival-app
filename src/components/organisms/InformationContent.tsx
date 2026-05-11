@@ -9,8 +9,8 @@
  */
 import React from 'react';
 import { Linking, Platform, Text, View } from 'react-native';
-import { GradientBlob } from '../atoms/GradientBlob';
-import { DeveloperCard } from '../molecules';
+import { GradientBlob } from '@components/atoms';
+import { DeveloperCard } from '@components/molecules';
 import type { Developer } from '@types';
 
 interface BlobCardProps {
@@ -96,20 +96,20 @@ export function InformationContent({
   developers,
 }: InformationContentProps) {
   return (
-    <View style={{ paddingTop: 24, position: 'relative', overflow: 'hidden' }}>
+    <View style={{ paddingTop: 18, position: 'relative', overflow: 'hidden' }}>
       {/* 장식 GradientBlob — 카드 뒤로 깔리도록 가장 먼저 렌더.
-          Figma 2304:629 좌표. contentY = figmaY - 99
-          (헤더 105 + paddingTop 24 - About Figma top 123). */}
-      <View pointerEvents="none" style={{ position: 'absolute', top: 487, left: 296 }}>
+          Figma 2304:629 좌표. contentY = figmaY - 93
+          (헤더 105 + paddingTop 18 - figmaY 30 보정 = 93). */}
+      <View pointerEvents="none" style={{ position: 'absolute', top: 493, left: 296 }}>
         <GradientBlob size={154} />
       </View>
-      <View pointerEvents="none" style={{ position: 'absolute', top: 861, left: 0 }}>
+      <View pointerEvents="none" style={{ position: 'absolute', top: 867, left: 0 }}>
         <GradientBlob size={92} rotate={90} reversed />
       </View>
-      <View pointerEvents="none" style={{ position: 'absolute', top: 1258, left: 283 }}>
+      <View pointerEvents="none" style={{ position: 'absolute', top: 1264, left: 283 }}>
         <GradientBlob size={289} />
       </View>
-      <View pointerEvents="none" style={{ position: 'absolute', top: 1743, left: -123 }}>
+      <View pointerEvents="none" style={{ position: 'absolute', top: 1749, left: -123 }}>
         <GradientBlob size={329} rotate={56.4} />
       </View>
 
@@ -126,8 +126,8 @@ export function InformationContent({
         </View>
         <View
           style={{
-            paddingTop: 11,
-            paddingBottom: 40,
+            paddingTop: 7,
+            paddingBottom: 35,
             paddingHorizontal: 24,
             alignItems: 'center',
           }}
@@ -157,7 +157,7 @@ export function InformationContent({
       </BlobCard>
 
       {/* Who We Are? 타이틀 */}
-      <View style={{ alignItems: 'center', marginBottom: 32 }}>
+      <View style={{ alignItems: 'center', marginBottom: 18 }}>
         <Text style={titleStyle}>Who We Are?</Text>
       </View>
 

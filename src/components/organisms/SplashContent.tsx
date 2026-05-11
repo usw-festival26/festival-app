@@ -7,7 +7,8 @@
  * 트랜지션: 터치 → blur(web) + scale + lavender wash, ease-out-expo, 620ms
  */
 import React, { useEffect, useState } from 'react';
-import { Pressable, View, StyleSheet, Platform, Image, AccessibilityInfo } from 'react-native';
+import { Pressable, View, StyleSheet, Platform, Image, AccessibilityInfo, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -30,6 +31,11 @@ const TRANSITION_MS = 620;
 const DRIFT_MS = 24000;
 const EASE_OUT_EXPO = Easing.bezier(0.16, 1, 0.3, 1);
 const IS_WEB = Platform.OS === 'web';
+
+// Figma 디자인 base 사이즈 — 모든 absolute 좌표가 이 캔버스 기준.
+// viewport 가 이보다 작으면 stage 컨테이너 전체를 비례 축소 (transform scale).
+const FIGMA_BASE_WIDTH = 402;
+const FIGMA_BASE_HEIGHT = 832;
 
 interface DriftSpec {
   size: number;
@@ -128,6 +134,14 @@ export function SplashContent({ onPress }: SplashContentProps) {
   const drift = useSharedValue(0);
   const [reduceMotion, setReduceMotion] = useState(true);
 
+  // viewport-adaptive scale — Figma base(402×832) 가 viewport 보다 크면 비례 축소.
+  // 큰 화면에선 scale 1 유지 (디자인 의도 그대로). stage 가운데 정렬.
+  const insets = useSafeAreaInsets();
+  const { width: vw, height: vh } = useWindowDimensions();
+  const availH = Math.max(0, vh - insets.top - insets.bottom);
+  const stageScale = Math.min(vw / FIGMA_BASE_WIDTH, availH / FIGMA_BASE_HEIGHT, 1);
+  const stageMarginTop = Math.max(0, (availH - FIGMA_BASE_HEIGHT * stageScale) / 2);
+
   useEffect(() => {
     let mounted = true;
     AccessibilityInfo.isReduceMotionEnabled()
@@ -221,6 +235,28 @@ export function SplashContent({ onPress }: SplashContentProps) {
       className="bg-festival-primary-light"
     >
       <Animated.View style={containerStyle}>
+        {/* Stage — Figma base 캔버스(402×832). viewport 가 작으면 비례 축소.
+            외부 wrapper 는 scaled 사이즈로 layout 가운데 정렬, 내부는 원본 좌표 +
+            transform-origin top-left scale — children 의 absolute top:797 등이 visual
+            로도 정확히 stage 끝에 위치하도록. */}
+        <View
+          style={{
+            width: FIGMA_BASE_WIDTH * stageScale,
+            height: FIGMA_BASE_HEIGHT * stageScale,
+            alignSelf: 'center',
+            marginTop: stageMarginTop,
+          }}
+        >
+          <View
+            style={{
+              width: FIGMA_BASE_WIDTH,
+              height: FIGMA_BASE_HEIGHT,
+              transform: [{ scale: stageScale }],
+              // transformOrigin 은 web 전용 CSS — native(iOS/Android) 는 미지원이므로 IS_WEB 일 때만 spread.
+              // (native 에선 default 가 center 라 알맞은 위치가 아니지만, native 에서도 viewport 가 base 보다 큰 경우만 scale=1 로 동작하므로 시각 영향 적음.)
+              ...(IS_WEB ? { transformOrigin: 'top left' } : null),
+            }}
+          >
         {BLOBS.map((spec) => (
           <DriftBlob key={spec.gradientId} spec={spec} drift={drift} />
         ))}
@@ -286,6 +322,8 @@ export function SplashContent({ onPress }: SplashContentProps) {
             resizeMode="contain"
             accessibilityLabel="2026 The University of Suwon Festival"
           />
+        </View>
+          </View>
         </View>
       </Animated.View>
 

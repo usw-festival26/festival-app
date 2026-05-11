@@ -11,7 +11,7 @@ export const CLUSTERS_DATA: BoothCluster[] = [
     name: '지능형SW융합대학',
     collegeKey: 'ICT',
     coords: { x: 0.3595, y: 0.5026 },
-    boothIds: ['booth-001'],
+    boothIds: [],
   },
   {
     id: 'cluster-business',
