@@ -44,7 +44,9 @@ export function HeroSection() {
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   // SafeArea top 만큼 ScrollScreenTemplate 가 이미 padding — 그 아래로 한 viewport 차지.
-  const panelHeight = Math.max(0, windowHeight - insets.top);
+  // ⚠️ web SSR/static 첫 렌더 시 windowHeight = 0 → panelHeight 0 → hero invisible.
+  // 0 일 땐 fallback 800 (모바일 일반 viewport) 사용. mount 후 hydrate 되며 실제 값으로 갱신.
+  const panelHeight = windowHeight > 0 ? Math.max(0, windowHeight - insets.top) : 800;
   const posterHeight = Math.max(0, panelHeight - HEADER_HEIGHT);
   const fadeHeight = Math.round(posterHeight * FADE_RATIO);
   const arrowTop = panelHeight - ARROW_FROM_BOTTOM;
