@@ -1,13 +1,29 @@
 /**
  * SplashContent - 스플래시 화면 (Figma 920:3825 ↔ 962:656)
  *
- * 레이아웃: Figma 좌표 그대로 (mobile-content max-width 402px와 일치)
- * Blob: 공용 GradientBlob(grainIntensity='soft') + Reanimated 로 두 포즈 사이 드리프트.
- *   920:3825 (초기) ↔ 962:656 (드리프트 종점) 24초 주기 왕복.
+ * 레이아웃 (flex column, 절대좌표·transform scale 폐기):
+ *  - 위쪽 spacer (flex:1) + 가운데 로고/슬로건 그룹 + 가운데 spacer (flex:1)
+ *    + 하단 hint+credit. paddingTop/Bottom 으로 safe area 보정.
+ *  - blob 3개는 viewport 비율 좌표(vw, vh 대비 %) 로 absolute 배치
+ *    → 어떤 viewport 에서도 비례 시각 분포 유지.
+ *  - root 의 height = 100svh (web). 모바일 브라우저 nav bar 가 보이는 상태의
+ *    minimum viewport 에 항상 fit → hint/credit 잘림 없음. 미지원 브라우저는
+ *    부모 mobile-content > div { height:100% } 으로 자연 fallback.
+ *
+ * Blob drift: 24초 주기 from↔to pose 사이 sin-eased 왕복 (Reanimated 워클릿)
  * 트랜지션: 터치 → blur(web) + scale + lavender wash, ease-out-expo, 620ms
+ * 접근성: AccessibilityInfo.isReduceMotionEnabled true 면 drift 정지
  */
-import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, View, StyleSheet, Platform, Image, AccessibilityInfo, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Pressable,
+  View,
+  StyleSheet,
+  Platform,
+  Image,
+  AccessibilityInfo,
+  useWindowDimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
@@ -32,82 +48,73 @@ const DRIFT_MS = 24000;
 const EASE_OUT_EXPO = Easing.bezier(0.16, 1, 0.3, 1);
 const IS_WEB = Platform.OS === 'web';
 
-// Figma 디자인 base 사이즈 — stage 안 children 의 absolute 좌표가 이 캔버스 기준.
-// viewport 가 이보다 작으면 stage 컨테이너 전체를 비례 축소 (transform scale).
-const FIGMA_BASE_WIDTH = 402;
-const FIGMA_BASE_HEIGHT = 832;
-
-// 트랜지션 종점 상수 — useAnimatedStyle worklet 안에서 IS_WEB 분기를
-// 매 프레임 평가하지 않도록 module-level 로 hoist.
+// 트랜지션 종점 — useAnimatedStyle 워클릿 안에서 IS_WEB 분기 매 프레임 평가 회피.
 const CONTENT_SCALE_END = IS_WEB ? 1.06 : 1.1;
 const WASH_OPACITY_END = IS_WEB ? 0.35 : 0.55;
-const FADE_START = 0.32; // ~200ms / 620ms — opacity fade 시작 지점
+const FADE_START = 0.32; // ~200ms / 620ms
 
-// Web 한정: splash root 의 height 를 100svh (smallest viewport height) 로 강제.
-// 모바일 브라우저의 nav bar / address bar 가 보이는 상태의 minimum viewport 에
-// 항상 맞춰 layout 됨 — useWindowDimensions().height 가 dvh/lvh 를 반환해도
-// root 의 실제 height 는 svh 로 고정되어 stage 가운데 정렬 + hint 노출이
-// viewport 변동에 무관하게 일관됨. iOS Safari 15.4+ / Android Chrome 108+
-// 미지원 브라우저에선 무시되어 부모(mobile-content > div) 의 height:100% 로 fallback.
+// Web 한정 root height = 100svh (smallest viewport height).
+// 모바일 브라우저 nav/address bar 가 보이는 상태의 minimum viewport 에 root 가
+// 항상 fit → 그 안의 모든 자식이 visible 안 보장. iOS Safari 15.4+ /
+// Android Chrome 108+ 미지원 브라우저는 무시되어 부모의 height:100% 로 자연 fallback.
 const ROOT_WEB_STYLE = IS_WEB
   ? ({ height: '100svh' as unknown as number, minHeight: '100svh' as unknown as number })
   : null;
 
+// Figma 디자인 base — blob 좌표/사이즈 환산 기준.
+const FIGMA_W = 402;
+const FIGMA_H = 832;
+
 interface DriftSpec {
-  size: number;
+  /** vw 대비 blob 사이즈 비율 */
+  sizeRatio: number;
   gradientId: string;
   reversed?: boolean;
-  fromLeft: number;
-  fromTop: number;
+  /** from pose: viewport (vw, vh) 대비 left/top 비율 + rotate(deg) */
+  fromXRatio: number;
+  fromYRatio: number;
   fromRotate: number;
-  toLeft: number;
-  toTop: number;
+  /** to pose */
+  toXRatio: number;
+  toYRatio: number;
   toRotate: number;
 }
 
-// 포즈 비교: 920:3825 (from) ↔ 962:656 (to).
-// Figma 좌표를 center-of-circle 기준으로 환산해 size/2 를 빼 top-left 로 저장.
-// from: Figma 920:3825 의 각 노드 최외곽 rect.
-// to: Figma 962:656 의 flex-centered 컨테이너에서 원 중심 좌표를 추출.
+// Figma 920:3825 (from) ↔ 962:656 (to) 의 blob 위치/사이즈를 viewport 비율로 환산.
+// 사이즈는 vw 기준 (vw 가 작아지면 blob 도 비례 축소). 위치는 vw, vh 각각 비율.
 const BLOBS: DriftSpec[] = [
-  // Ellipse 68 (154) — 920:5031 ↔ 962:659.
-  // from: left:271, top:-29, rotate 0
-  // to: center (30, 181), rotate -167.65° → left: -47, top: 104
+  // Ellipse 68 (size 154) — 우상단
   {
-    size: 154,
+    sizeRatio: 154 / FIGMA_W,
     gradientId: 'splash-68',
-    fromLeft: 271,
-    fromTop: -29,
+    fromXRatio: 271 / FIGMA_W,
+    fromYRatio: -29 / FIGMA_H,
     fromRotate: 0,
-    toLeft: -47,
-    toTop: 104,
+    toXRatio: -47 / FIGMA_W,
+    toYRatio: 104 / FIGMA_H,
     toRotate: -167.65,
   },
-  // Ellipse 69 (92) — 920:5033 ↔ 962:661. reversed 그라디언트.
-  // from: container(left:-28,top:314,size:92) + rotate 90° → center (18, 360), left:-28, top:314
-  // to: center (381.74, 504.74), rotate -117.93° → left: 336, top: 459
+  // Ellipse 69 (size 92) — 좌중간 (반전 그라디언트)
   {
-    size: 92,
+    sizeRatio: 92 / FIGMA_W,
     gradientId: 'splash-69',
     reversed: true,
-    fromLeft: -28,
-    fromTop: 314,
+    fromXRatio: -28 / FIGMA_W,
+    fromYRatio: 314 / FIGMA_H,
     fromRotate: 90,
-    toLeft: 336,
-    toTop: 459,
+    toXRatio: 336 / FIGMA_W,
+    toYRatio: 459 / FIGMA_H,
     toRotate: -117.93,
   },
-  // Ellipse 70 (289) — 920:5032 ↔ 962:660.
-  // from: left:201, top:709, rotate 0
-  // to: center (29.65, 615.65), rotate -90.46° → left: -115, top: 471
+  // Ellipse 70 (size 289) — 하단
   {
-    size: 289,
+    sizeRatio: 289 / FIGMA_W,
     gradientId: 'splash-70',
-    fromLeft: 201,
-    fromTop: 709,
+    fromXRatio: 201 / FIGMA_W,
+    fromYRatio: 709 / FIGMA_H,
     fromRotate: 0,
-    toLeft: -115,
-    toTop: 471,
+    toXRatio: -115 / FIGMA_W,
+    toYRatio: 471 / FIGMA_H,
     toRotate: -90.46,
   },
 ];
@@ -115,19 +122,27 @@ const BLOBS: DriftSpec[] = [
 interface DriftBlobProps {
   spec: DriftSpec;
   drift: SharedValue<number>;
+  vw: number;
+  vh: number;
 }
 
-function DriftBlob({ spec, drift }: DriftBlobProps) {
+function DriftBlob({ spec, drift, vw, vh }: DriftBlobProps) {
+  const size = vw * spec.sizeRatio;
+  const fromLeft = vw * spec.fromXRatio;
+  const fromTop = vh * spec.fromYRatio;
+  const toLeft = vw * spec.toXRatio;
+  const toTop = vh * spec.toYRatio;
+
   const animatedStyle = useAnimatedStyle(() => {
-    const left = interpolate(drift.value, [0, 1], [spec.fromLeft, spec.toLeft]);
-    const top = interpolate(drift.value, [0, 1], [spec.fromTop, spec.toTop]);
+    const left = interpolate(drift.value, [0, 1], [fromLeft, toLeft]);
+    const top = interpolate(drift.value, [0, 1], [fromTop, toTop]);
     const rotate = interpolate(drift.value, [0, 1], [spec.fromRotate, spec.toRotate]);
     return {
       position: 'absolute',
       left,
       top,
-      width: spec.size,
-      height: spec.size,
+      width: size,
+      height: size,
       transform: [{ rotate: `${rotate}deg` }],
     };
   });
@@ -135,7 +150,7 @@ function DriftBlob({ spec, drift }: DriftBlobProps) {
   return (
     <Animated.View pointerEvents="none" style={animatedStyle}>
       <GradientBlob
-        size={spec.size}
+        size={size}
         gradientId={spec.gradientId}
         reversed={spec.reversed}
         grainIntensity="soft"
@@ -149,37 +164,8 @@ export function SplashContent({ onPress }: SplashContentProps) {
   const pressed = useSharedValue(0);
   const drift = useSharedValue(0);
   const [reduceMotion, setReduceMotion] = useState(true);
-
-  // viewport-adaptive scale — Figma base(402×832) 가 viewport 보다 크면 비례 축소.
-  // stage 는 가운데 정렬, hint/credit 는 stage 안 absolute(top:761/797) 로 stage
-  // scale 에 자동 따라감. root 의 height 가 web 에서 100svh 로 강제되므로
-  // (= visible area 의 minimum) stage 는 항상 visible 안에 fit → hint/credit
-  // 잘림 없음.
-  //
-  // ⚠️ web SSR/static 첫 렌더에선 useWindowDimensions 가 0 을 반환할 수 있어
-  // scale=0 → 콘텐츠 invisible 이슈. effectiveH 가 양수일 때만 scale 계산, 아니면 1.
-  //
-  // rootH 는 onLayout 으로 측정한 실제 root 의 height. svh 가 적용된 web 에선
-  // 정확한 visible 사이즈를 반환 → useWindowDimensions 의 dvh/lvh 부정확성 회피.
-  // 첫 paint 에는 rootH=0 이므로 vh fallback.
   const insets = useSafeAreaInsets();
   const { width: vw, height: vh } = useWindowDimensions();
-  const [rootH, setRootH] = useState(0);
-  const onRootLayout = (e: LayoutChangeEvent) => {
-    const h = e.nativeEvent.layout.height;
-    if (h > 0 && h !== rootH) setRootH(h);
-  };
-  const { stageScale, stageMarginTop } = useMemo(() => {
-    const effectiveH = rootH > 0 ? rootH : vh;
-    const availH = Math.max(0, effectiveH - insets.top - insets.bottom);
-    const scale =
-      vw > 0 && availH > 0
-        ? Math.min(vw / FIGMA_BASE_WIDTH, availH / FIGMA_BASE_HEIGHT, 1)
-        : 1;
-    const stageH = FIGMA_BASE_HEIGHT * scale;
-    const marginTop = insets.top + Math.max(0, (availH - stageH) / 2);
-    return { stageScale: scale, stageMarginTop: marginTop };
-  }, [vw, vh, insets.top, insets.bottom, rootH]);
 
   useEffect(() => {
     let mounted = true;
@@ -212,7 +198,6 @@ export function SplashContent({ onPress }: SplashContentProps) {
     };
   }, [reduceMotion, drift]);
 
-  // Content layer: scale up + delayed fade
   const containerStyle = useAnimatedStyle(() => {
     const p = progress.value;
     const fade = p <= FADE_START ? 1 : 1 - (p - FADE_START) / (1 - FADE_START);
@@ -225,7 +210,6 @@ export function SplashContent({ onPress }: SplashContentProps) {
     };
   });
 
-  // Lavender wash
   const washStyle = useAnimatedStyle(() => {
     const p = progress.value;
     return {
@@ -234,7 +218,6 @@ export function SplashContent({ onPress }: SplashContentProps) {
     };
   });
 
-  // Web-only blur layer
   const blurStyle = useAnimatedStyle(() => {
     const px = progress.value * 24;
     return {
@@ -265,102 +248,74 @@ export function SplashContent({ onPress }: SplashContentProps) {
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      onLayout={onRootLayout}
       style={[styles.root, ROOT_WEB_STYLE]}
       className="bg-festival-primary-light"
     >
       <Animated.View style={containerStyle}>
-        {/* Stage — Figma base 캔버스(402×832). viewport 가 작으면 비례 축소.
-            외부 wrapper 는 scaled 사이즈로 가운데 정렬 (MIDNIGHT 로고가
-            viewport center 근처에). 내부는 원본 좌표 + transform-origin top-left
-            scale 로 children 의 absolute top 이 비례 보존됨. hint/credit 는 stage
-            안 absolute top:761/797 — root 가 100svh 로 visible area 에 fit
-            보장이라 잘리지 않음. */}
+        {/* Background blob layer — viewport 전체 absolute */}
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          {BLOBS.map((spec) => (
+            <DriftBlob key={spec.gradientId} spec={spec} drift={drift} vw={vw} vh={vh} />
+          ))}
+        </View>
+
+        {/* Foreground content — flex column 자연 정렬 */}
         <View
           style={{
-            width: FIGMA_BASE_WIDTH * stageScale,
-            height: FIGMA_BASE_HEIGHT * stageScale,
-            alignSelf: 'center',
-            marginTop: stageMarginTop,
+            flex: 1,
+            paddingTop: insets.top,
+            paddingBottom: insets.bottom + 24,
+            alignItems: 'center',
           }}
         >
-          <View
-            style={{
-              width: FIGMA_BASE_WIDTH,
-              height: FIGMA_BASE_HEIGHT,
-              transform: [{ scale: stageScale }],
-              // transformOrigin 은 web 전용 CSS — native(iOS/Android) 는 미지원이므로 IS_WEB 일 때만 spread.
-              // (native 에선 default 가 center 라 알맞은 위치가 아니지만, native 에서도 viewport 가 base 보다 큰 경우만 scale=1 로 동작하므로 시각 영향 적음.)
-              ...(IS_WEB ? { transformOrigin: 'top left' } : null),
-            }}
-          >
-        {BLOBS.map((spec) => (
-          <DriftBlob key={spec.gradientId} spec={spec} drift={drift} />
-        ))}
+          {/* 위쪽 spacer */}
+          <View style={{ flex: 1 }} />
 
-        {/* 미드나잇 로고 — Figma 2139:746 / 2182:808 (x:75, y:275, 253×238).
-            검정 변형 PNG 를 cover + opacity 0.9 로 채움. */}
-        <View pointerEvents="none" style={styles.logoWrap}>
-          <Image
-            source={require('../../../assets/images/logo/미드나잇로고_검정.png')}
-            style={{ width: '100%', height: '100%', opacity: 0.9 }}
-            resizeMode="cover"
-            accessibilityLabel="미드나잇 로고"
-          />
-        </View>
+          {/* 중앙 로고 + 텍스트 그룹 */}
+          <View style={{ alignItems: 'center' }}>
+            <Image
+              source={require('../../../assets/images/logo/미드나잇로고_검정.png')}
+              style={{ width: 253, height: 238, opacity: 0.9 }}
+              resizeMode="cover"
+              accessibilityLabel="미드나잇 로고"
+            />
+            <Image
+              source={require('../../../assets/images/text/2026수원대대동제.png')}
+              style={{ width: 108, height: 10, marginTop: 22 }}
+              resizeMode="contain"
+              accessibilityLabel="2026 수원대학교 대동제"
+            />
+            <Image
+              source={require('../../../assets/images/text/짙은밤,가장빛나는순간.png')}
+              style={{ width: 284, height: 26, marginTop: 7 }}
+              resizeMode="contain"
+              accessibilityLabel=":짙은 밤, 가장 빛나는 순간"
+            />
+            <Image
+              source={require('../../../assets/images/text/날짜.png')}
+              style={{ width: 68, height: 9, marginTop: 13 }}
+              resizeMode="contain"
+              accessibilityLabel="05.14-05.15"
+            />
+          </View>
 
-        {/* 축제명 라벨 — Figma 2185:1536 (x:50, y:535, 108×10).
-            Figma 에서 outline 된 텍스트라 폰트 메타가 없어 export PNG 를 그대로 사용. */}
-        <View pointerEvents="none" style={styles.titleLabel}>
-          <Image
-            source={require('../../../assets/images/text/2026수원대대동제.png')}
-            style={{ width: 108, height: 10 }}
-            resizeMode="contain"
-            accessibilityLabel="2026 수원대학교 대동제"
-          />
-        </View>
+          {/* 아래쪽 spacer */}
+          <View style={{ flex: 1 }} />
 
-        {/* 메인 슬로건 — Figma 2185:1523 (x:50, y:552, 284×26). PNG export. */}
-        <View pointerEvents="none" style={styles.slogan}>
-          <Image
-            source={require('../../../assets/images/text/짙은밤,가장빛나는순간.png')}
-            style={{ width: 284, height: 26 }}
-            resizeMode="contain"
-            accessibilityLabel=":짙은 밤, 가장 빛나는 순간"
-          />
-        </View>
-
-        {/* 날짜 — Figma 2185:1582 (x:50, y:591, 68×9). PNG export. */}
-        <View pointerEvents="none" style={styles.date}>
-          <Image
-            source={require('../../../assets/images/text/날짜.png')}
-            style={{ width: 68, height: 9 }}
-            resizeMode="contain"
-            accessibilityLabel="05.14-05.15"
-          />
-        </View>
-
-        {/* 터치 안내 — Figma 2139:745 (y:761, color #046 = #004466).
-            stage 안 absolute 라 stage scale 따라 자동 위치. root 가 100svh 라
-            visible 안 fit 보장. leading-[12px] 로 baseline 패딩 제거. */}
-        <View pointerEvents="none" style={styles.hintWrap}>
-          <AppText
-            className="text-[12px] leading-[12px] text-center font-pretendard"
-            style={{ color: '#004466' }}
-          >
-            화면을 터치해주세요
-          </AppText>
-        </View>
-
-        {/* 영문 푸터 — Figma 2185:1549 (x:133 center, y:797, 137×8). */}
-        <View pointerEvents="none" style={styles.creditWrap}>
-          <Image
-            source={require('../../../assets/images/text/2026TUoSF.png')}
-            style={{ width: 137, height: 8 }}
-            resizeMode="contain"
-            accessibilityLabel="2026 The University of Suwon Festival"
-          />
-        </View>
+          {/* 하단 hint + credit */}
+          <View style={{ alignItems: 'center' }}>
+            <AppText
+              className="text-[12px] leading-[12px] text-center font-pretendard"
+              style={{ color: '#004466' }}
+            >
+              화면을 터치해주세요
+            </AppText>
+            <Image
+              source={require('../../../assets/images/text/2026TUoSF.png')}
+              style={{ width: 137, height: 8, marginTop: 24 }}
+              resizeMode="contain"
+              accessibilityLabel="2026 The University of Suwon Festival"
+            />
           </View>
         </View>
       </Animated.View>
@@ -385,32 +340,4 @@ export function SplashContent({ onPress }: SplashContentProps) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, overflow: 'hidden' },
-
-  logoWrap: {
-    position: 'absolute',
-    left: 75,
-    top: 275,
-    width: 253,
-    height: 238,
-  },
-
-  titleLabel: { position: 'absolute', left: 50, top: 535 },
-  slogan: { position: 'absolute', left: 50, top: 552 },
-  date: { position: 'absolute', left: 50, top: 591 },
-
-  hintWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 761,
-    alignItems: 'center',
-  },
-
-  creditWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 797,
-    alignItems: 'center',
-  },
 });
