@@ -9,9 +9,11 @@
  * 별도 미정의).
  */
 import React, { useMemo } from 'react';
-import { View, Text, Pressable, Platform } from 'react-native';
+import { View, Text, Pressable, Platform, Image } from 'react-native';
 import { FOOD_TRUCK_VENDORS, LOTTE_DRINKS, ALCOHOLS } from '@data';
 import type { FoodSheetContentProps, BulletProps, MapCoords } from '@types';
+
+const SECTION_BAR = require('../../../assets/images/components/Vector 656.png');
 
 const ROBOTO_BLACK = Platform.select({ web: 'Roboto, sans-serif', default: 'Roboto-Black' });
 const PRETENDARD_BOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Bold' });
@@ -46,7 +48,7 @@ function Bullet({ label, onPress }: BulletProps) {
   );
 }
 
-/** 섹션 제목 + 그 아래 짧은 가로 바 (Figma vector655/656, 57×1). */
+/** 섹션 제목 + 그 아래 짧은 가로 바 (Figma vector655/656 export PNG, 57×1). */
 function SectionHeader({ title }: { title: string }) {
   return (
     <View className="items-center">
@@ -56,7 +58,12 @@ function SectionHeader({ title }: { title: string }) {
       >
         {title}
       </Text>
-      <View className="w-[57px] h-px bg-black/40 mt-[8px]" />
+      <Image
+        source={SECTION_BAR}
+        style={{ width: 57, height: 1, marginTop: 8 }}
+        resizeMode="contain"
+        accessibilityLabel=""
+      />
     </View>
   );
 }
