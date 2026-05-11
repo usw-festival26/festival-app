@@ -46,9 +46,10 @@ const ROW_GAP = 14;
 const ROW_TOTAL_WIDTH = CARD_WIDTH + ROW_GAP + PHOTO_SIZE; // 365
 // 사진을 row 안에서 vertical center 로 두는 좌표.
 const PHOTO_TOP_CENTER = (CARD_HEIGHT - PHOTO_SIZE) / 2; // 19
-const SIDE_MARGIN_LEFT = 20;
-const SIDE_MARGIN_RIGHT = 17;
-const ROW_FOOTPRINT = ROW_TOTAL_WIDTH + Math.max(SIDE_MARGIN_LEFT, SIDE_MARGIN_RIGHT);
+// 좌·우 마진 동일 — row 자체의 left/right edge 가 모든 카드에서 일치하도록.
+// 좌카드/우카드의 차이는 row 안의 카드/사진 위치만 분기 (row 의 horizontal 위치는 동일).
+const SIDE_MARGIN = 20;
+const ROW_FOOTPRINT = ROW_TOTAL_WIDTH + SIDE_MARGIN * 2; // 405 — 양쪽 마진 포함
 
 export type DeveloperCardVariant = 'rounded' | 'extended';
 
@@ -87,8 +88,7 @@ export function DeveloperCard({ developer, side, variant = 'rounded' }: Develope
   const cardScale = vw > 0 ? Math.min(vw / ROW_FOOTPRINT, 1) : 1;
   const scaledRowWidth = ROW_TOTAL_WIDTH * cardScale;
   const scaledRowHeight = CARD_HEIGHT * cardScale;
-  const scaledMarginLeft = (cardOnLeft ? SIDE_MARGIN_LEFT : 0) * cardScale;
-  const scaledMarginRight = (cardOnLeft ? 0 : SIDE_MARGIN_RIGHT) * cardScale;
+  const scaledSideMargin = SIDE_MARGIN * cardScale;
 
   const cardRadii = getCardRadii(variant, cardOnLeft);
 
@@ -97,9 +97,11 @@ export function DeveloperCard({ developer, side, variant = 'rounded' }: Develope
       style={{
         width: scaledRowWidth,
         height: scaledRowHeight,
-        alignSelf: cardOnLeft ? 'flex-start' : 'flex-end',
-        marginLeft: scaledMarginLeft,
-        marginRight: scaledMarginRight,
+        // 좌·우 마진 동일 → 모든 카드 row 의 left/right edge 일치.
+        // alignSelf 제거: 좌카드/우카드 모두 동일한 horizontal 위치, 안의
+        // 카드/사진만 absolute right/left 로 좌우 분기.
+        marginLeft: scaledSideMargin,
+        marginRight: scaledSideMargin,
       }}
     >
       {/* 내부는 unscaled 365×143 캔버스. transform: scale 로 viewport 적응. */}
