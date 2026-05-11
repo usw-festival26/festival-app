@@ -2,26 +2,26 @@
  * InformationContent - Information 화면 본문 (Figma 2304:629)
  *
  * 구조 (flex column 자연 흐름):
- *   About 카드 → "Who We Are?" 타이틀 → 개발팀 7명 카드 (좌/우 교차) → 한마디 카드
+ *   About 카드 → "Who We Are?" 타이틀 → 개발팀 7명 카드 (좌/우 교차)
  *
  * 곡률 patterns (Figma 그대로):
  *   - About 카드: 107.5 / 107.5 / 107.5 / 10
  *   - 카드 1·2 (주호연·남주연):  71.5 / 71.5 / 10 / 71.5  (DeveloperCard variant='rounded')
  *   - 카드 3~7 (최민서·최재령·안혜선·김회윤·정소윤): 114 / 71.5 / 10 / 114 (variant='extended')
  *
- * GradientBlob 4개는 카드와 분리된 absolute layer. 헤더 105px 보정 후
- * (figma_top - 105) 으로 root 의 absolute top 산출.
+ * 카드 row height 167 (사진이 카드 bottom 보다 24 아래로 overflow), 카드 사이
+ * marginBottom 24 → 시각 gap = 24 (Figma 의도 그대로).
+ *
+ * GradientBlob 4개는 카드와 분리된 absolute layer. 헤더 105 + paddingTop 18
+ * 보정 후 root 의 absolute top 산출.
  *
  * About 본문은 segments(text+weight) 로 받아 weight 별 fontFamily 분기.
  * 인스타그램/사이트는 인라인 Pressable — Linking 가드 후 openURL.
- *
- * "한마디" 카드는 백엔드 미정. onGuestbookSubmit prop 미전달 시 GuestbookForm
- * 내부 console.log + 입력 초기화 fallback.
  */
 import React from 'react';
 import { Linking, Platform, Text, View } from 'react-native';
 import { GradientBlob } from '@components/atoms';
-import { DeveloperCard, GuestbookForm } from '@components/molecules';
+import { DeveloperCard } from '@components/molecules';
 import type { Developer } from '@types';
 import type { AboutBodySegment } from '@hooks';
 
@@ -83,11 +83,6 @@ export interface InformationContentProps {
   instagramUrl: string;
   siteUrl: string;
   developers: Developer[];
-  /**
-   * "한마디" 카드 제출 콜백. 미전달 시 GuestbookForm 내부 placeholder 동작
-   * (console.log + 입력 초기화). 백엔드 endpoint 정해지면 부모에서 연결.
-   */
-  onGuestbookSubmit?: (message: string) => void | Promise<void>;
 }
 
 export function InformationContent({
@@ -95,7 +90,6 @@ export function InformationContent({
   instagramUrl,
   siteUrl,
   developers,
-  onGuestbookSubmit,
 }: InformationContentProps) {
   return (
     <View style={{ paddingTop: ROOT_PADDING_TOP, position: 'relative', overflow: 'hidden' }}>
@@ -165,9 +159,14 @@ export function InformationContent({
       </View>
 
       {/* 개발팀 카드 — 좌/우 교차 + 인덱스별 곡률 variant.
-          Figma 카드 1·2 (주호연·남주연) 만 rounded, 3~7 은 extended. */}
+          Figma 카드 1·2 (주호연·남주연) 만 rounded, 3~7 은 extended.
+          row 자체에 사진 24 overflow 가 포함돼 있어 marginBottom 24 만 추가하면
+          Figma 의 row-to-row 24 gap 과 시각 일치. 마지막 카드는 마진 0. */}
       {developers.map((dev, idx) => (
-        <View key={dev.id} style={{ marginBottom: 48 }}>
+        <View
+          key={dev.id}
+          style={{ marginBottom: idx === developers.length - 1 ? 0 : 24 }}
+        >
           <DeveloperCard
             developer={dev}
             side={idx % 2 === 0 ? 'left' : 'right'}
@@ -175,9 +174,6 @@ export function InformationContent({
           />
         </View>
       ))}
-
-      {/* 한마디 카드 — 백엔드 미정 placeholder */}
-      <GuestbookForm onSubmit={onGuestbookSubmit} />
     </View>
   );
 }

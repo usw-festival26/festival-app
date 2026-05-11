@@ -19,17 +19,12 @@ export default function InformationScreen() {
       headerBg="#FFFFFF"
       headerTextColor="#001E56"
     >
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <InformationContent
           aboutSegments={aboutSegments}
           instagramUrl={instagramUrl}
           siteUrl={siteUrl}
           developers={developers}
-          // 백엔드 endpoint 정해지면 여기서 useMutation 으로 연결.
-          // 현재는 prop 미전달 → GuestbookForm 의 console.log 로 fallback.
         />
       </ScrollView>
     </BackdropScreenTemplate>
