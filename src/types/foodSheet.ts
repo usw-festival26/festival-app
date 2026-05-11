@@ -12,15 +12,6 @@ export interface FoodSheetContentProps {
   /** 단일 푸드 핀 — 푸드트럭 항목 탭 시 이 좌표로 줌인. */
   foodPins?: FoodPin[];
   onItemPress?: (coords: MapCoords) => void;
-  /**
-   * 드링크 섹션 y 좌표(부모 ScrollView contentContainer 기준)가 측정되면
-   * 부모에 알림. 부모는 이 y 로 scrollTo 호출.
-   */
-  onDrinkLayout?: (y: number) => void;
-  /**
-   * 드링크 섹션으로 스크롤 요청. 푸드트럭 헤더 옆 "드링크" quick link 클릭 시.
-   */
-  onScrollToDrink?: () => void;
 }
 
 export interface BulletProps {

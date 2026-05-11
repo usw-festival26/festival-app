@@ -1,17 +1,15 @@
 /**
  * FoodSheetContent — F&B 시트 (Figma 2185:1226)
  *
- * 헤더 "F&B" + 부제 + 푸드트럭 15개 2단 + (NEW) "드링크" 통합 sub-header +
- * 롯데칠성 7개 + 주류 3개 2단.
- *
+ * 헤더 "F&B" + 부제 + 푸드트럭 섹션 + "드링크" 통합 sub-header + 롯데칠성/주류 2단.
+ * 푸드트럭/드링크 섹션 제목 아래에 짧은 가로 바 (Figma vector655/656, 57×1).
  * 푸드트럭 항목 탭 → 단일 푸드핀 좌표로 지도 줌인.
- * 푸드트럭 헤더 옆 "드링크 ↓" quick link → 부모 ScrollView 가 드링크 섹션으로 자동 스크롤.
  *
- * 스타일링: NativeWind className 우선, fontFamily 만 inline (NativeWind tailwind
- * config 에 Pretendard variant 토큰이 별도로 없어 platform-specific 폰트 이름 inline).
+ * 스타일링: NativeWind className 우선, fontFamily 만 inline (Pretendard variant 토큰
+ * 별도 미정의).
  */
 import React, { useMemo } from 'react';
-import { View, Text, Pressable, Platform, type LayoutChangeEvent } from 'react-native';
+import { View, Text, Pressable, Platform } from 'react-native';
 import { FOOD_TRUCK_VENDORS, LOTTE_DRINKS, ALCOHOLS } from '@data';
 import type { FoodSheetContentProps, BulletProps, MapCoords } from '@types';
 
@@ -48,21 +46,30 @@ function Bullet({ label, onPress }: BulletProps) {
   );
 }
 
+/** 섹션 제목 + 그 아래 짧은 가로 바 (Figma vector655/656, 57×1). */
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <View className="items-center">
+      <Text
+        className="text-[17px] text-black font-bold"
+        style={{ fontFamily: PRETENDARD_BOLD }}
+      >
+        {title}
+      </Text>
+      <View className="w-[57px] h-px bg-black/40 mt-[8px]" />
+    </View>
+  );
+}
+
 export function FoodSheetContent({
   foodPins,
   onItemPress,
-  onDrinkLayout,
-  onScrollToDrink,
 }: FoodSheetContentProps) {
   const truckCoords = useMemo<MapCoords | undefined>(() => {
     return foodPins?.[0]?.coords;
   }, [foodPins]);
 
   const handleTruckPress = truckCoords && onItemPress ? () => onItemPress(truckCoords) : undefined;
-
-  const handleDrinkSectionLayout = (e: LayoutChangeEvent) => {
-    onDrinkLayout?.(e.nativeEvent.layout.y);
-  };
 
   return (
     <View>
@@ -81,32 +88,10 @@ export function FoodSheetContent({
         </Text>
       </View>
 
-      {/* 푸드트럭 헤더 — 가운데 "푸드트럭" + 우측 "드링크 ↓" quick scroll link.
-          quick link 누르면 부모 ScrollView 가 드링크 섹션 y 로 scroll. */}
-      <View className="mt-[30px] px-[24px] flex-row items-center justify-center">
-        <Text
-          className="text-[17px] text-black font-bold"
-          style={{ fontFamily: PRETENDARD_BOLD }}
-        >
-          푸드트럭
-        </Text>
-        {onScrollToDrink ? (
-          <Pressable
-            onPress={onScrollToDrink}
-            accessibilityRole="button"
-            accessibilityLabel="드링크 섹션으로 이동"
-            className="absolute right-[24px] py-[4px] px-[10px] active:opacity-60"
-          >
-            <Text
-              className="text-[13px] text-[#002466] font-medium"
-              style={{ fontFamily: PRETENDARD_MEDIUM }}
-            >
-              드링크 ↓
-            </Text>
-          </Pressable>
-        ) : null}
+      {/* 푸드트럭 섹션 */}
+      <View className="mt-[30px]">
+        <SectionHeader title="푸드트럭" />
       </View>
-
       <View className="mt-[14px] px-[24px] flex-row relative">
         <View className="flex-1 px-[16px]">
           {FOOD_TRUCKS_LEFT.map((name) => (
@@ -121,18 +106,9 @@ export function FoodSheetContent({
         </View>
       </View>
 
-      {/* 드링크 통합 sub-header (Figma 2603:751, top:909). 롯데칠성 + 주류 묶음.
-          이 View 의 onLayout 으로 y 좌표를 부모에 알려줌 → quick link scroll 타깃. */}
-      <View
-        className="items-center mt-[40px]"
-        onLayout={handleDrinkSectionLayout}
-      >
-        <Text
-          className="text-[17px] text-black font-bold"
-          style={{ fontFamily: PRETENDARD_BOLD }}
-        >
-          드링크
-        </Text>
+      {/* 드링크 통합 sub-header (Figma 2603:751) — 롯데칠성 + 주류 묶음 */}
+      <View className="mt-[40px]">
+        <SectionHeader title="드링크" />
       </View>
 
       <View className="mt-[14px] px-[24px] flex-row relative">

@@ -13,7 +13,7 @@
 import { DragHandle } from '@atoms/DragHandle';
 import { Colors } from '@constants/colors';
 import { MapCanvas, type AnyPin } from '@organisms/MapCanvas';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   Animated,
   GestureResponderEvent,
@@ -122,13 +122,6 @@ export function BoothMapView({
   const swipeStartX = useRef(0);
   const swipeStartY = useRef(0);
   const swipeDragX = useRef(new Animated.Value(0)).current;
-
-  // F&B 시트 ScrollView ref + 드링크 섹션 y 좌표 (FoodSheetContent 가 onLayout 으로 알려줌)
-  const foodScrollRef = useRef<ScrollView>(null);
-  const [drinkSectionY, setDrinkSectionY] = useState(0);
-  const handleScrollToDrink = useCallback(() => {
-    foodScrollRef.current?.scrollTo({ y: drinkSectionY, animated: true });
-  }, [drinkSectionY]);
 
   // cluster 핀 라벨 lookup — booth/foodBooth 합쳐서 id → Booth
   const boothById = useMemo(() => {
@@ -349,13 +342,8 @@ export function BoothMapView({
                 </View>
 
                 <View style={{ width: sheetWidth, flex: 1 }}>
-                  <ScrollView ref={foodScrollRef} showsVerticalScrollIndicator={false}>
-                    <FoodSheetContent
-                      foodPins={foodPins}
-                      onItemPress={onCardFocus}
-                      onDrinkLayout={setDrinkSectionY}
-                      onScrollToDrink={handleScrollToDrink}
-                    />
+                  <ScrollView showsVerticalScrollIndicator={false}>
+                    <FoodSheetContent foodPins={foodPins} onItemPress={onCardFocus} />
                     <View className="h-6" />
                   </ScrollView>
                 </View>
