@@ -10,7 +10,7 @@ import { InformationContent } from '../../src/components/organisms/InformationCo
 import { useInformation } from '../../src/hooks/useInformation';
 
 export default function InformationScreen() {
-  const { aboutBody, instagramUrl, siteUrl, developers } = useInformation();
+  const { aboutSegments, instagramUrl, siteUrl, developers } = useInformation();
 
   return (
     <BackdropScreenTemplate
@@ -21,7 +21,7 @@ export default function InformationScreen() {
     >
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <InformationContent
-          aboutBody={aboutBody}
+          aboutSegments={aboutSegments}
           instagramUrl={instagramUrl}
           siteUrl={siteUrl}
           developers={developers}

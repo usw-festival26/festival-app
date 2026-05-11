@@ -9,12 +9,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        // 'Pretendard-Regular' = expo-font(useFonts) 가 self-host 한 family name.
-        // 한글 환경(특히 노트북/Windows, Pretendard 미설치) 에서 jsdelivr CDN 의
-        // 'Pretendard Variable' 가 로드 실패해도 self-host 폰트로 한글 보장.
-        sans: ['Roboto', 'Pretendard-Regular', 'Pretendard Variable', 'Pretendard', 'sans-serif'],
+        sans: ['Roboto', 'Pretendard Variable', 'Pretendard', 'sans-serif'],
         roboto: ['Roboto', 'sans-serif'],
-        pretendard: ['Pretendard-Regular', 'Pretendard Variable', 'Pretendard', 'sans-serif'],
+        pretendard: ['Pretendard Variable', 'Pretendard', 'sans-serif'],
       },
       colors: {
         festival: {

@@ -24,3 +24,4 @@ export { MapCategoryChips, type MapCategoryChipsProps, type MapChipKey } from '.
 export { MapPin, MAP_PIN_DIMENSIONS, type MapPinProps } from './MapPin';
 export { GoodsCarouselCard, type GoodsCarouselCardProps } from './GoodsCarouselCard';
 export { DeveloperCard, type DeveloperCardProps } from './DeveloperCard';
+export { GuestbookForm, type GuestbookFormProps } from './GuestbookForm';

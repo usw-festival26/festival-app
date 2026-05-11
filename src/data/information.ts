@@ -37,6 +37,8 @@ export const LIKELION_SITE_URL = 'https://usw-likelion.kr/';
 /**
  * About 카드 본문. 마지막 두 줄(인스타그램·사이트) 은 InformationContent 에서
  * 인라인 Pressable 로 분리 렌더되므로 여기 문자열에는 포함하지 않는다.
+ * @deprecated ABOUT_BODY_SEGMENTS 사용 — Figma 디자인의 weight 강조 (SemiBold)
+ *             를 위해 segment 배열로 분리.
  */
 export const ABOUT_BODY = `LIKELION USW 14th
 내 아이디어를 내 손으로, 멋쟁이사자처럼
@@ -58,6 +60,42 @@ export const ABOUT_BODY = `LIKELION USW 14th
 우리 캠퍼스에 필요한 IT 솔루션을 고민하고 실천합니다.
 상상을 현실로 바꾸는 힘,
 수원대학교 멋쟁이사자처럼 14기입니다.`;
+
+/**
+ * About 카드 본문 segments — Figma 2304:629 의 weight 강조 그대로 반영.
+ * 'semibold' segment 가 Pretendard-SemiBold (600) 로, 나머지는 Regular (400) 로
+ * 렌더된다. \n 은 줄바꿈 그대로.
+ */
+export const ABOUT_BODY_SEGMENTS: ReadonlyArray<{
+  text: string;
+  weight: 'regular' | 'semibold';
+}> = [
+  { text: 'LIKELION USW 14th\n내 아이디어를 내 손으로, 멋쟁이사자처럼\n\n', weight: 'semibold' },
+  {
+    text:
+      '상상만 하던 아이디어를 실제 서비스로 구현하는 곳\n' +
+      '수원대학교 멋쟁이사자처럼 14기입니다.\n\n' +
+      '멋쟁이사자처럼은 2013년 서울대학교에서 시작하여,\n' +
+      '현재 전국 80여개 대학, 4,000명 이상의 대학생이 참여하는\n',
+    weight: 'regular',
+  },
+  { text: '국내 최대 규모의 IT 창업 동아리', weight: 'semibold' },
+  {
+    text:
+      '입니다. \n' +
+      '기술을 통한 아이디어 실현을 목표로, 비전공자도 함께하는\n' +
+      '열린 커뮤니티를 운영하고 있습니다.\n\n' +
+      '우리는 책 속의 코드가 아닌, 우리 학교 학우들의 스마트폰 안에서\n' +
+      '실제로 움직이는 서비스를 만듭니다.\n' +
+      '이번 2026 대동제 공식 사이트는 수원대 멋사 학우들이\n' +
+      '기획부터 개발까지 모든 과정에 직접 참여하여 빌딩하였습니다.\n' +
+      '전국 80여 개 대학과 연계된 탄탄한 기술력을 바탕으로,\n' +
+      '우리 캠퍼스에 필요한 IT 솔루션을 고민하고 실천합니다.\n' +
+      '상상을 현실로 바꾸는 힘,\n' +
+      '수원대학교 멋쟁이사자처럼 14기입니다.',
+    weight: 'regular',
+  },
+];
 
 export const DEVELOPERS: Developer[] = [
   {

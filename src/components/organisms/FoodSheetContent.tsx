@@ -1,17 +1,19 @@
 /**
  * FoodSheetContent — F&B 시트 (Figma 2185:1226)
  *
- * 헤더 "F&B" + 부제 + 푸드트럭 15개 2단 불릿 리스트 + 롯데칠성 7개 + 주류 3개.
- * 푸드트럭 항목 탭 → 단일 푸드핀 좌표로 지도 줌인. 음료/주류는 비인터랙티브.
+ * 헤더 "F&B" + 부제 + 푸드트럭 섹션 + "드링크" 통합 sub-header + 롯데칠성/주류 2단.
+ * 푸드트럭/드링크 섹션 제목 아래에 짧은 가로 바 (Figma vector655/656, 57×1).
+ * 푸드트럭 항목 탭 → 단일 푸드핀 좌표로 지도 줌인.
  *
- * 스타일링: NativeWind className 우선, fontFamily 만 inline style (NativeWind
- * tailwind config 에 Pretendard variant 토큰이 별도로 없어 platform-specific
- * font family name 을 inline 으로 적용).
+ * 스타일링: NativeWind className 우선, fontFamily 만 inline (Pretendard variant 토큰
+ * 별도 미정의).
  */
+import { ALCOHOLS, FOOD_TRUCK_VENDORS, LOTTE_DRINKS } from '@data';
+import type { BulletProps, FoodSheetContentProps, MapCoords } from '@types';
 import React, { useMemo } from 'react';
-import { View, Text, Pressable, Platform } from 'react-native';
-import { FOOD_TRUCK_VENDORS, LOTTE_DRINKS, ALCOHOLS } from '@data';
-import type { FoodSheetContentProps, BulletProps, MapCoords } from '@types';
+import { Image, Platform, Pressable, Text, View } from 'react-native';
+
+const SECTION_BAR = require('../../../assets/images/components/Vector 656.png');
 
 const ROBOTO_BLACK = Platform.select({ web: 'Roboto, sans-serif', default: 'Roboto-Black' });
 const PRETENDARD_BOLD = Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-Bold' });
@@ -46,7 +48,30 @@ function Bullet({ label, onPress }: BulletProps) {
   );
 }
 
-export function FoodSheetContent({ foodPins, onItemPress }: FoodSheetContentProps) {
+/** 섹션 제목 + 그 아래 짧은 가로 바 (Figma vector655/656 export PNG, 57×1). */
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <View className="items-center">
+      <Text
+        className="text-[17px] text-black font-bold"
+        style={{ fontFamily: PRETENDARD_BOLD }}
+      >
+        {title}
+      </Text>
+      <Image
+        source={SECTION_BAR}
+        style={{ width: 100, height: 3, marginTop: 8 }}
+        resizeMode="contain"
+        accessibilityLabel=""
+      />
+    </View>
+  );
+}
+
+export function FoodSheetContent({
+  foodPins,
+  onItemPress,
+}: FoodSheetContentProps) {
   const truckCoords = useMemo<MapCoords | undefined>(() => {
     return foodPins?.[0]?.coords;
   }, [foodPins]);
@@ -70,13 +95,9 @@ export function FoodSheetContent({ foodPins, onItemPress }: FoodSheetContentProp
         </Text>
       </View>
 
-      <View className="items-center mt-[30px]">
-        <Text
-          className="text-[17px] text-black font-bold"
-          style={{ fontFamily: PRETENDARD_BOLD }}
-        >
-          푸드트럭
-        </Text>
+      {/* 푸드트럭 섹션 */}
+      <View className="mt-[30px]">
+        <SectionHeader title="푸드트럭" />
       </View>
       <View className="mt-[14px] px-[24px] flex-row relative">
         <View className="flex-1 px-[16px]">
@@ -92,7 +113,12 @@ export function FoodSheetContent({ foodPins, onItemPress }: FoodSheetContentProp
         </View>
       </View>
 
-      <View className="mt-[36px] px-[24px] flex-row relative">
+      {/* 드링크 통합 sub-header (Figma 2603:751) — 롯데칠성 + 주류 묶음 */}
+      <View className="mt-[40px]">
+        <SectionHeader title="드링크" />
+      </View>
+
+      <View className="mt-[14px] px-[24px] flex-row relative">
         <View className="flex-1 px-[16px]">
           <Text
             className="text-[17px] text-black font-bold mb-[10px]"
