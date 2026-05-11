@@ -127,11 +127,15 @@ interface DriftBlobProps {
 }
 
 function DriftBlob({ spec, drift, vw, vh }: DriftBlobProps) {
-  const size = vw * spec.sizeRatio;
-  const fromLeft = vw * spec.fromXRatio;
-  const fromTop = vh * spec.fromYRatio;
-  const toLeft = vw * spec.toXRatio;
-  const toTop = vh * spec.toYRatio;
+  // useWindowDimensions 가 web SSR/static 첫 렌더에서 0 을 반환할 수 있어
+  // size=0 / left=0 / top=0 으로 blob 이 안 그려지는 회귀 방지. Figma base 로 fallback.
+  const effectiveVw = vw > 0 ? vw : FIGMA_W;
+  const effectiveVh = vh > 0 ? vh : FIGMA_H;
+  const size = effectiveVw * spec.sizeRatio;
+  const fromLeft = effectiveVw * spec.fromXRatio;
+  const fromTop = effectiveVh * spec.fromYRatio;
+  const toLeft = effectiveVw * spec.toXRatio;
+  const toTop = effectiveVh * spec.toYRatio;
 
   const animatedStyle = useAnimatedStyle(() => {
     const left = interpolate(drift.value, [0, 1], [fromLeft, toLeft]);
@@ -252,12 +256,13 @@ export function SplashContent({ onPress }: SplashContentProps) {
       className="bg-festival-primary-light"
     >
       <Animated.View style={containerStyle}>
-        {/* Background blob layer — viewport 전체 absolute */}
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          {BLOBS.map((spec) => (
-            <DriftBlob key={spec.gradientId} spec={spec} drift={drift} vw={vw} vh={vh} />
-          ))}
-        </View>
+        {/* Background blobs — containerStyle 의 직접 absolute 자식.
+            wrapper 두지 않는 이유: 일부 RN Web 환경에서 StyleSheet.absoluteFill
+            wrapper 가 0x0 으로 잡히며 안의 absolute 자식이 잘못 anchor 되는
+            현상 회피. flex sibling (foreground) 과 stacking 자연 분리. */}
+        {BLOBS.map((spec) => (
+          <DriftBlob key={spec.gradientId} spec={spec} drift={drift} vw={vw} vh={vh} />
+        ))}
 
         {/* Foreground content — flex column 자연 정렬 */}
         <View
