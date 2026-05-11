@@ -78,7 +78,13 @@ export interface BoothMapViewProps {
 const CATEGORIES: SheetCategory[] = ['booth', 'food', 'facility', 'event'];
 const COLLAPSED_HEIGHT = 48;
 const EXPANDED_RATIO = 0.55;
-const SWIPE_THRESHOLD = 40;
+// 카테고리 가로 swipe 인정 임계값. 너무 작으면(<=40) 카드 탭 시 손가락 미세
+// 드리프트가 swipe 로 오인되어 activeCategory 가 식·편의로 점프하는 회피 사고
+// 발생 (예: 부스 카드 탭 → food 핀이 잠깐 노출). 60 으로 상향 + horizontal
+// dominance 가드로 중첩 차단.
+const SWIPE_THRESHOLD = 60;
+/** swipe 로 인정하기 위한 가로/세로 비율. 가로가 세로보다 1.5배 이상일 때만 swipe. */
+const SWIPE_AXIS_RATIO = 1.5;
 
 export function BoothMapView({
   expanded,
@@ -191,6 +197,15 @@ export function BoothMapView({
     swipeDragX.setValue(0);
   };
 
+  // responder 자체는 명백한 horizontal swipe 일 때만 가져옴. 이걸 안 하면
+  // 부모 View 가 모든 move 를 가로채 자식 Pressable/ScrollView 의 탭/세로
+  // 스크롤이 swipe 로 오인된다.
+  const onContentMoveShouldSetResponder = (e: GestureResponderEvent) => {
+    const dx = e.nativeEvent.pageX - swipeStartX.current;
+    const dy = e.nativeEvent.pageY - swipeStartY.current;
+    return Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * SWIPE_AXIS_RATIO;
+  };
+
   const onContentTouchMove = (e: GestureResponderEvent) => {
     const dx = e.nativeEvent.pageX - swipeStartX.current;
     const dy = e.nativeEvent.pageY - swipeStartY.current;
@@ -205,7 +220,8 @@ export function BoothMapView({
 
     swipeDragX.setValue(0);
 
-    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
+    if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+    if (Math.abs(dx) < Math.abs(dy) * SWIPE_AXIS_RATIO) return;
 
     if (dx < 0 && currentPageIndex < CATEGORIES.length - 1) {
       onCategoryChange(CATEGORIES[currentPageIndex + 1]);
@@ -288,11 +304,18 @@ export function BoothMapView({
             <View
               className="flex-1"
               style={{ overflow: 'hidden' }}
-              onStartShouldSetResponder={() => true}
-              onMoveShouldSetResponder={() => true}
-              onResponderStart={onContentTouchStart}
+              // Start: 좌표만 캡처. responder 는 가져가지 않으므로 자식 Pressable
+              // 이 정상적으로 onPress 를 받음. Capture variant 를 쓰면 자식보다
+              // 먼저 hit 받지만, 우리는 시작 좌표 저장만 필요해서 일반 start 로 충분.
+              onStartShouldSetResponder={() => false}
+              onStartShouldSetResponderCapture={(e) => {
+                onContentTouchStart(e);
+                return false;
+              }}
+              onMoveShouldSetResponder={onContentMoveShouldSetResponder}
               onResponderMove={onContentTouchMove}
               onResponderRelease={onContentTouchEnd}
+              onResponderTerminate={onContentTouchEnd}
             >
               <Animated.View
                 style={{
