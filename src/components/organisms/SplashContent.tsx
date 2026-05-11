@@ -6,7 +6,7 @@
  *   920:3825 (초기) ↔ 962:656 (드리프트 종점) 24초 주기 왕복.
  * 트랜지션: 터치 → blur(web) + scale + lavender wash, ease-out-expo, 620ms
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, View, StyleSheet, Platform, Image, AccessibilityInfo, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -36,6 +36,12 @@ const IS_WEB = Platform.OS === 'web';
 // viewport 가 이보다 작으면 stage 컨테이너 전체를 비례 축소 (transform scale).
 const FIGMA_BASE_WIDTH = 402;
 const FIGMA_BASE_HEIGHT = 832;
+
+// 트랜지션 종점 상수 — useAnimatedStyle worklet 안에서 IS_WEB 분기를
+// 매 프레임 평가하지 않도록 module-level 로 hoist.
+const CONTENT_SCALE_END = IS_WEB ? 1.06 : 1.1;
+const WASH_OPACITY_END = IS_WEB ? 0.35 : 0.55;
+const FADE_START = 0.32; // ~200ms / 620ms — opacity fade 시작 지점
 
 interface DriftSpec {
   size: number;
@@ -140,12 +146,15 @@ export function SplashContent({ onPress }: SplashContentProps) {
   // scale=0 → 콘텐츠 invisible 이슈. vw/availH 가 양수일 때만 scale 계산, 아니면 1.
   const insets = useSafeAreaInsets();
   const { width: vw, height: vh } = useWindowDimensions();
-  const availH = Math.max(0, vh - insets.top - insets.bottom);
-  const stageScale =
-    vw > 0 && availH > 0
-      ? Math.min(vw / FIGMA_BASE_WIDTH, availH / FIGMA_BASE_HEIGHT, 1)
-      : 1;
-  const stageMarginTop = Math.max(0, (availH - FIGMA_BASE_HEIGHT * stageScale) / 2);
+  const { stageScale, stageMarginTop } = useMemo(() => {
+    const availH = Math.max(0, vh - insets.top - insets.bottom);
+    const scale =
+      vw > 0 && availH > 0
+        ? Math.min(vw / FIGMA_BASE_WIDTH, availH / FIGMA_BASE_HEIGHT, 1)
+        : 1;
+    const marginTop = Math.max(0, (availH - FIGMA_BASE_HEIGHT * scale) / 2);
+    return { stageScale: scale, stageMarginTop: marginTop };
+  }, [vw, vh, insets.top, insets.bottom]);
 
   useEffect(() => {
     let mounted = true;
@@ -180,14 +189,9 @@ export function SplashContent({ onPress }: SplashContentProps) {
 
   // Content layer: scale up + delayed fade
   const containerStyle = useAnimatedStyle(() => {
-    const fadeStart = 0.32; // ~200ms / 620ms
-    const fade =
-      progress.value <= fadeStart
-        ? 1
-        : 1 - (progress.value - fadeStart) / (1 - fadeStart);
-    const scale = IS_WEB
-      ? interpolate(progress.value, [0, 1], [1, 1.06])
-      : interpolate(progress.value, [0, 1], [1, 1.1]);
+    const p = progress.value;
+    const fade = p <= FADE_START ? 1 : 1 - (p - FADE_START) / (1 - FADE_START);
+    const scale = interpolate(p, [0, 1], [1, CONTENT_SCALE_END]);
     const pressScale = 1 - pressed.value * 0.015;
     return {
       flex: 1,
@@ -198,10 +202,10 @@ export function SplashContent({ onPress }: SplashContentProps) {
 
   // Lavender wash
   const washStyle = useAnimatedStyle(() => {
-    const target = IS_WEB ? 0.35 : 0.55;
+    const p = progress.value;
     return {
-      opacity: progress.value * target,
-      transform: [{ translateY: -8 * progress.value }],
+      opacity: p * WASH_OPACITY_END,
+      transform: [{ translateY: -8 * p }],
     };
   });
 
@@ -309,10 +313,12 @@ export function SplashContent({ onPress }: SplashContentProps) {
         </View>
 
         {/* 터치 안내 — Figma 2139:745 (y:761, color #046 = #004466).
-            이건 outline 안 된 실제 텍스트라 그대로 둠 (폰트 정보 보유). */}
+            이건 outline 안 된 실제 텍스트라 그대로 둠 (폰트 정보 보유).
+            leading-[12px] 로 line-height 를 font-size 와 일치시켜 baseline
+            여유 패딩으로 글자가 wrapper 아래로 밀려 보이는 현상 제거. */}
         <View pointerEvents="none" style={styles.hintWrap}>
           <AppText
-            className="text-[12px] text-center font-pretendard"
+            className="text-[12px] leading-[12px] text-center font-pretendard"
             style={{ color: '#004466' }}
           >
             화면을 터치해주세요
