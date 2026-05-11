@@ -1,17 +1,23 @@
 /**
  * InformationContent - Information 화면 본문 (Figma 2304:629)
  *
- * 구조: About blob 카드 + "Who We Are?" 타이틀 + 개발팀 7명 카드 (좌-우 교차).
+ * 구조: About blob 카드 + "Who We Are?" 타이틀 + 개발팀 7명 카드 (좌-우 교차)
+ *      + "한마디" 입력 카드.
  * 장식 GradientBlob 들은 카드 뒤가 아니라 위에 덮인다 (Figma 와 동일).
  *
- * About 카드 본문은 동아리 소개 멀티라인 + 인스타그램/사이트 인라인 링크.
- * Linking.canOpenURL 가드 후 openURL — IG 앱 미설치/외부 차단 시 silent noop.
+ * About 카드 본문은 segments 배열로 받아 weight 별로 fontFamily 분기.
+ * Figma 의 SemiBold 강조 (LIKELION USW 14th / 국내 최대 규모의 IT 창업 동아리 등) 보존.
+ * 마지막에 인스타그램/사이트 인라인 링크 — Linking.canOpenURL 가드 후 openURL.
+ *
+ * "한마디" 카드는 백엔드 미정 상태의 placeholder. onGuestbookSubmit prop 미전달 시
+ * 로컬 처리만 — API endpoint 정해지면 prop 으로 연결.
  */
 import React from 'react';
 import { Linking, Platform, Text, View } from 'react-native';
 import { GradientBlob } from '@components/atoms';
-import { DeveloperCard } from '@components/molecules';
+import { DeveloperCard, GuestbookForm } from '@components/molecules';
 import type { Developer } from '@types';
+import type { AboutBodySegment } from '@hooks';
 
 interface BlobCardProps {
   width: number;
@@ -67,6 +73,12 @@ const bodyStyle = {
   letterSpacing: -0.3,
 };
 
+// SemiBold 강조용 — segment.weight === 'semibold' 인 부분에만 override 적용.
+const bodySemiboldStyle = {
+  fontFamily: Platform.select({ web: 'Pretendard Variable', default: 'Pretendard-SemiBold' }),
+  fontWeight: '600' as const,
+};
+
 const linkStyle = {
   color: '#0068FF',
   textDecorationLine: 'underline' as const,
@@ -83,17 +95,24 @@ async function openExternal(url: string) {
 }
 
 export interface InformationContentProps {
-  aboutBody: string;
+  /** Figma 의 weight 강조 그대로 반영하는 segment 배열 */
+  aboutSegments: ReadonlyArray<AboutBodySegment>;
   instagramUrl: string;
   siteUrl: string;
   developers: Developer[];
+  /**
+   * "한마디" 카드 제출 콜백. 미전달 시 GuestbookForm 의 default 동작
+   * (console.log + 입력 초기화) 만. 백엔드 endpoint 정해지면 부모에서 연결.
+   */
+  onGuestbookSubmit?: (message: string) => void | Promise<void>;
 }
 
 export function InformationContent({
-  aboutBody,
+  aboutSegments,
   instagramUrl,
   siteUrl,
   developers,
+  onGuestbookSubmit,
 }: InformationContentProps) {
   return (
     <View style={{ paddingTop: 18, position: 'relative', overflow: 'hidden' }}>
@@ -133,7 +152,11 @@ export function InformationContent({
           }}
         >
           <Text style={[bodyStyle, { width: 320 }]}>
-            {aboutBody}
+            {aboutSegments.map((seg, i) => (
+              <Text key={i} style={seg.weight === 'semibold' ? bodySemiboldStyle : undefined}>
+                {seg.text}
+              </Text>
+            ))}
             {'\n\n인스타그램: '}
             <Text
               style={linkStyle}
@@ -163,10 +186,13 @@ export function InformationContent({
 
       {/* 개발팀 카드 — 좌/우 교차 */}
       {developers.map((dev, idx) => (
-        <View key={dev.id} style={{ marginBottom: idx === developers.length - 1 ? 0 : 48 }}>
+        <View key={dev.id} style={{ marginBottom: 48 }}>
           <DeveloperCard developer={dev} side={idx % 2 === 0 ? 'left' : 'right'} />
         </View>
       ))}
+
+      {/* 한마디 — 백엔드 미정 placeholder. onGuestbookSubmit 으로 endpoint 연결 */}
+      <GuestbookForm onSubmit={onGuestbookSubmit} />
     </View>
   );
 }

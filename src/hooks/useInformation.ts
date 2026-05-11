@@ -12,6 +12,7 @@
  */
 import {
   ABOUT_BODY,
+  ABOUT_BODY_SEGMENTS,
   DEVELOPERS,
   INFORMATION_DATA,
   LIKELION_INSTAGRAM_URL,
@@ -19,8 +20,12 @@ import {
 } from '@data';
 import type { Developer, InformationSection } from '@types';
 
+export type AboutBodySegment = { text: string; weight: 'regular' | 'semibold' };
+
 export interface UseInformationResult {
+  /** @deprecated aboutSegments 사용 — Figma weight 강조 반영용 */
   aboutBody: string;
+  aboutSegments: ReadonlyArray<AboutBodySegment>;
   instagramUrl: string;
   siteUrl: string;
   developers: Developer[];
@@ -35,6 +40,7 @@ export interface UseInformationResult {
 export function useInformation(): UseInformationResult {
   return {
     aboutBody: ABOUT_BODY,
+    aboutSegments: ABOUT_BODY_SEGMENTS,
     instagramUrl: LIKELION_INSTAGRAM_URL,
     siteUrl: LIKELION_SITE_URL,
     developers: DEVELOPERS,

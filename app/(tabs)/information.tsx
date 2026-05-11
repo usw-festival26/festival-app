@@ -10,7 +10,7 @@ import { InformationContent } from '../../src/components/organisms/InformationCo
 import { useInformation } from '../../src/hooks/useInformation';
 
 export default function InformationScreen() {
-  const { aboutBody, instagramUrl, siteUrl, developers } = useInformation();
+  const { aboutSegments, instagramUrl, siteUrl, developers } = useInformation();
 
   return (
     <BackdropScreenTemplate
@@ -19,12 +19,17 @@ export default function InformationScreen() {
       headerBg="#FFFFFF"
       headerTextColor="#001E56"
     >
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <InformationContent
-          aboutBody={aboutBody}
+          aboutSegments={aboutSegments}
           instagramUrl={instagramUrl}
           siteUrl={siteUrl}
           developers={developers}
+          // 백엔드 endpoint 정해지면 여기서 useMutation 으로 연결.
+          // 현재는 prop 미전달 → GuestbookForm 의 console.log 로 fallback.
         />
       </ScrollView>
     </BackdropScreenTemplate>
