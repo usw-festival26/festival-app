@@ -42,7 +42,7 @@ export const CLUSTERS_DATA: BoothCluster[] = [
     category: 'cluster',
     name: '디자인앤아트대학',
     collegeKey: 'DESIGN',
-    coords: { x: 0.6302, y: 0.6221 },
+    coords: { x: 0.6362, y: 0.6374 },
     boothIds: [],
   },
   {
@@ -50,7 +50,7 @@ export const CLUSTERS_DATA: BoothCluster[] = [
     category: 'cluster',
     name: '라이프케어사이언스대학',
     collegeKey: 'LIFE',
-    coords: { x: 0.5698, y: 0.6911 },
+    coords: { x: 0.5278, y: 0.7048 },
     boothIds: [],
   },
   {
