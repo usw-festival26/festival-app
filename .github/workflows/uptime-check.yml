@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  TARGET_URL: https://usw-festival.site
+  TARGET_URL: https://usw-festival.site/nonexistent-test-path
 
 jobs:
   check:
